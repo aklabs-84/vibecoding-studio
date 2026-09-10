@@ -4,7 +4,7 @@
  */
 (function (global) {
   const STORAGE_KEY = 'vcs_studio_data';
-  const CODECANVAS_URL = '../CodeCanvas/index.html';
+  const CODECANVAS_URL = 'https://code-canvas-fawn.vercel.app';
 
   function load() {
     try {
