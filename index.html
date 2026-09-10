@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바이브코딩 스튜디오</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0f1117;
+    color: #e8e8ec;
+    padding: 60px 20px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 2rem; margin-bottom: 8px; text-align: center; }
+  .sub { color: #9a9aa8; text-align: center; margin-bottom: 48px; }
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: #171a23;
+    border: 1px solid #2a2e3a;
+    border-radius: 14px;
+    padding: 20px 22px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .15s, transform .15s;
+  }
+  .step:hover { border-color: #6366f1; transform: translateY(-2px); }
+  .step.done { border-color: #22c55e; }
+  .num {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: #2a2e3a;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; flex-shrink: 0;
+  }
+  .step.done .num { background: #22c55e; color: #06120a; }
+  .step-body { flex: 1; }
+  .step-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 2px; }
+  .step-desc { color: #9a9aa8; font-size: 0.85rem; }
+  .badge {
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #2a2e3a;
+    color: #9a9aa8;
+  }
+  .badge.optional { background: #3a2e1a; color: #eab308; }
+  .badge.done { background: #14361f; color: #4ade80; }
+  .reset-row { text-align: center; margin-top: 40px; }
+  .reset-btn {
+    background: none; border: none; color: #6b6b78;
+    font-size: 0.8rem; cursor: pointer; text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎮 바이브코딩 스튜디오</h1>
+  <p class="sub">기획 시뮬레이션부터 코드 구현까지, 한 번에 이어지는 바이브 코딩 수업</p>
+
+  <div class="steps" id="steps"></div>
+
+  <div class="reset-row">
+    <button class="reset-btn" onclick="resetProgress()">진행 상황 초기화</button>
+  </div>
+</div>
+
+<script src="shared/bridge.js"></script>
+<script>
+  const data = StudioBridge.load();
+
+  const stepDefs = [
+    {
+      href: '1-simulation.html',
+      title: '1단계: 기획 시뮬레이션 (선택)',
+      desc: '몬스터 스타트업 게임으로 기획의 기본 개념을 익혀요.',
+      done: !!data.simulationPRD,
+      optional: true,
+    },
+    {
+      href: '2-planner.html',
+      title: '2단계: 기획하기',
+      desc: '문제정의 → 페르소나 → 기능 → 화면구성 → 앱정보 순서로 기획서를 작성해요.',
+      done: !!data.plannerText,
+    },
+    {
+      href: '3-result.html',
+      title: '3단계: PRD 결과 확인',
+      desc: '완성된 기획서를 확인하고 AI 코딩 프롬프트를 생성해요.',
+      done: false,
+    },
+    {
+      href: '../CodeCanvas/index.html',
+      title: '4단계: 코드 작성 & 실행',
+      desc: 'CodeCanvas에서 코드를 작성하고 바로 실행/공유해요.',
+      done: false,
+    },
+  ];
+
+  const stepsEl = document.getElementById('steps');
+  stepsEl.innerHTML = stepDefs.map((s, i) => `
+    <a class="step ${s.done ? 'done' : ''}" href="${s.href}">
+      <div class="num">${s.done ? '✓' : i + 1}</div>
+      <div class="step-body">
+        <div class="step-title">${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+      </div>
+      ${s.optional ? '<span class="badge optional">선택</span>' : (s.done ? '<span class="badge done">완료</span>' : '')}
+    </a>
+  `).join('');
+
+  function resetProgress() {
+    if (confirm('지금까지의 진행 상황을 모두 초기화할까요?')) {
+      StudioBridge.clear();
+      location.reload();
+    }
+  }
+</script>
+</body>
+</html>

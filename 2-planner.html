@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바이브 코딩 — 앱 기획서 작성</title>
+<link href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@300;500;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ee;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: #e0dbd0;
+  --text: #1a1814;
+  --text-muted: #8a8070;
+  --accent: #2d5be3;
+  --accent-light: #e8edfb;
+  --accent2: #e8442a;
+  --accent3: #1a9e6e;
+  --ink: #1a1814;
+  --step1: #2d5be3;
+  --step2: #9b2de8;
+  --step3: #e8442a;
+  --step4: #1a9e6e;
+  --step5: #e87d2d;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  min-height: 100vh;
+}
+
+/* NOISE TEXTURE */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 48px 24px 120px;
+  position: relative;
+  z-index: 1;
+}
+
+/* HEADER */
+.top-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.top-label::before {
+  content: '';
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+}
+
+h1 {
+  font-family: 'Gmarket Sans', sans-serif;
+  font-size: clamp(26px, 4.5vw, 42px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.header-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+/* PROGRESS */
+.progress-bar {
+  display: flex;
+  gap: 0;
+  margin-bottom: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+}
+
+.prog-step {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-right: 1.5px solid var(--border);
+  transition: all 0.3s;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.prog-step:last-child { border-right: none; }
+.prog-step .step-num {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 2px;
+  font-family: 'Gmarket Sans', sans-serif;
+}
+.prog-step:hover:not(.active) { background: var(--accent-light); color: var(--accent); }
+.prog-step.done { background: var(--surface2); color: var(--text-muted); }
+.prog-step.done .step-num { color: var(--accent3); }
+.prog-step.active { color: #fff; }
+.prog-step[data-step="1"].active { background: var(--step1); }
+.prog-step[data-step="2"].active { background: var(--step2); }
+.prog-step[data-step="3"].active { background: var(--step3); }
+.prog-step[data-step="4"].active { background: var(--step4); }
+.prog-step[data-step="5"].active { background: var(--step5); }
+
+/* STEP PANELS */
+.step-panel {
+  display: none;
+  animation: slideIn 0.35s ease both;
+}
+.step-panel.active { display: block; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.step-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  color: #fff;
+}
+.step1 .step-icon { background: var(--step1); }
+.step2 .step-icon { background: var(--step2); }
+.step3 .step-icon { background: var(--step3); }
+.step4 .step-icon { background: var(--step4); }
+.step5 .step-icon { background: var(--step5); }
+
+.step-title-wrap {}
+.step-num-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.step1 .step-num-label { color: var(--step1); }
+.step2 .step-num-label { color: var(--step2); }
+.step3 .step-num-label { color: var(--step3); }
+.step4 .step-num-label { color: var(--step4); }
+.step5 .step-num-label { color: var(--step5); }
+
+.step-title {
+  font-family: 'Gmarket Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.step-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.6;
+}
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hint-box {
+  background: var(--accent-light);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--accent);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+/* INPUTS */
+textarea, input[type="text"] {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  line-height: 1.7;
+}
+textarea:focus, input[type="text"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(45,91,227,0.1);
+}
+textarea::placeholder, input::placeholder { color: var(--text-muted); }
+
+.char-count {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+/* SELECT OPTIONS */
+.select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sel-option {
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.sel-option:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.sel-option.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+/* USER PERSONA */
+.persona-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* FEATURE LIST */
+.feature-list { display: flex; flex-direction: column; gap: 8px; }
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.feature-item.dragging { opacity: 0.4; }
+.feature-item.drag-over { border-color: var(--accent2); }
+.feature-item input[type="text"] {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  box-shadow: none;
+}
+.feature-item input[type="text"]:focus {
+  box-shadow: none;
+  border: none;
+}
+.drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  font-size: 14px;
+  flex-shrink: 0;
+  letter-spacing: -1px;
+}
+.drag-handle:active { cursor: grabbing; }
+.feature-priority {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.pri-must { background: #fde8e8; color: var(--accent2); }
+.pri-should { background: #e8f4fd; color: var(--accent); }
+.pri-nice { background: #e8f7f0; color: var(--accent3); }
+
+.add-feature-btn {
+  padding: 10px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.add-feature-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* SCREEN SKETCHER */
+.screens-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.screen-card {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface2);
+}
+.screen-top {
+  background: var(--surface);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.screen-dots { display: flex; gap: 4px; }
+.screen-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+.screen-body { padding: 12px; }
+.screen-body textarea {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  padding: 0;
+  min-height: 80px;
+  resize: none;
+  box-shadow: none;
+}
+.screen-body textarea:focus { box-shadow: none; border: none; }
+.screen-label-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 0;
+  outline: none;
+}
+
+/* FLOW PREVIEW */
+.flow-preview-card {
+  margin-top: 16px;
+  padding: 20px;
+  border: 1.5px dashed var(--border);
+  border-radius: 14px;
+  background: var(--surface2);
+}
+.flow-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--step4);
+  margin-bottom: 16px;
+}
+.flow-preview-track {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 8px;
+}
+.flow-preview-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.flow-step-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 260px;
+}
+.flow-step-box.first {
+  background: var(--step4);
+  border-color: var(--step4);
+  color: #fff;
+}
+.flow-arrow {
+  flex-shrink: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.plan-doc .flow-preview-card { background: var(--surface2); }
+
+/* NAVIGATION */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.btn-back {
+  padding: 12px 24px;
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.btn-back:hover { border-color: var(--text); color: var(--text); }
+
+.btn-next {
+  padding: 13px 32px;
+  border-radius: 100px;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Noto Sans KR', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.step1 .btn-next { background: var(--step1); }
+.step2 .btn-next { background: var(--step2); }
+.step3 .btn-next { background: var(--step3); }
+.step4 .btn-next { background: var(--step4); }
+.step5 .btn-next { background: var(--step5); }
+.btn-next:hover { opacity: 0.85; transform: translateX(3px); }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* RESULT PAGE */
+.result-panel {
+  display: none;
+  animation: slideIn 0.4s ease both;
+}
+.result-panel.active { display: block; }
+
+.result-header {
+  text-align: center;
+  padding: 40px 0 32px;
+}
+.result-trophy { font-size: 56px; margin-bottom: 16px; }
+.result-title {
+  font-family: 'Gmarket Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.result-sub { font-size: 14px; color: var(--text-muted); }
+
+.plan-doc {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.plan-doc-header {
+  background: var(--ink);
+  color: #fff;
+  padding: 24px 32px;
+}
+.plan-doc-header .doc-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+.plan-doc-header .doc-app-name {
+  font-family: 'Gmarket Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+}
+.plan-doc-header .doc-tagline {
+  font-size: 13px;
+  opacity: 0.65;
+  margin-top: 6px;
+}
+
+.plan-section {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+}
+.plan-section:last-child { border-bottom: none; }
+
+.plan-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.plan-field { }
+.plan-field-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.plan-field-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.plan-feature-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.plan-feature-row:last-child { border-bottom: none; }
+
+.result-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 13px 28px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Noto Sans KR', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.action-primary {
+  background: var(--ink);
+  color: #fff;
+  border: none;
+}
+.action-primary:hover { opacity: 0.85; }
+.action-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+.action-secondary:hover { border-color: var(--text); }
+
+/* VALIDATION */
+.error-msg {
+  font-size: 12px;
+  color: var(--accent2);
+  margin-top: 6px;
+  display: none;
+}
+.error-msg.show { display: block; }
+
+/* TAGS */
+.tag-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag {
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tag:hover, .tag.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+@media (max-width: 600px) {
+  .persona-row { grid-template-columns: 1fr; }
+  .screens-grid { grid-template-columns: 1fr; }
+  .plan-row { grid-template-columns: 1fr; }
+  .prog-step { font-size: 9px; padding: 8px 4px; }
+  .prog-step .step-num { font-size: 13px; }
+}
+</style>
+<script src="shared/bridge.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="top-label">Vibe Coding</div>
+  <h1>앱 기획서<br>직접 써보기</h1>
+  <p class="header-desc">
+    5단계를 따라가면 나만의 앱 기획서가 완성돼요.<br>
+    각 단계에서 질문에 답하다 보면 아이디어가 구체적인 계획이 됩니다.
+  </p>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <div class="prog-step active" data-step="1"><span class="step-num">①</span>문제 정의</div>
+    <div class="prog-step" data-step="2"><span class="step-num">②</span>사용자</div>
+    <div class="prog-step" data-step="3"><span class="step-num">③</span>기능 설계</div>
+    <div class="prog-step" data-step="4"><span class="step-num">④</span>화면 구성</div>
+    <div class="prog-step" data-step="5"><span class="step-num">⑤</span>앱 이름</div>
+  </div>
+
+  <!-- ═══ STEP 1: 문제 정의 ═══ -->
+  <div class="step-panel step1 active" id="step1">
+    <div class="step-header">
+      <div class="step-icon">🔍</div>
+      <div class="step-title-wrap">
+        <div class="step-num-label">Step 01 · 문제 정의</div>
+        <div class="step-title">어떤 문제를 해결하고 싶나요?</div>
+        <div class="step-desc">좋은 앱은 명확한 문제에서 시작해요. 내가 직접 겪거나 주변에서 본 불편함을 써보세요.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎯 해결하려는 문제</div>
+      <div class="hint-box">💡 "~할 때 ~해서 불편하다" 형식으로 써보세요.<br>예) "시험 기간에 폰을 자꾸 보게 돼서 공부에 집중하기 어렵다"</div>
+      <textarea id="problem_desc" rows="4" placeholder="내가 해결하고 싶은 문제를 구체적으로 써보세요..."></textarea>
+      <div class="char-count"><span id="pd_count">0</span> / 200자</div>
+      <div class="error-msg" id="err_problem">문제를 입력해주세요!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📂 문제 카테고리</div>
+      <div class="select-grid" id="cat_select">
+        <div class="sel-option" data-val="스마트폰 과사용">📱 스마트폰 과사용</div>
+        <div class="sel-option" data-val="감정·정신건강">💬 감정·정신건강</div>
+        <div class="sel-option" data-val="환경·쓰레기">🗑️ 환경·쓰레기</div>
+        <div class="sel-option" data-val="학교폭력·디지털 폭력">🛡️ 학교폭력·디지털 폭력</div>
+        <div class="sel-option" data-val="개인정보·프라이버시">🔐 개인정보·프라이버시</div>
+        <div class="sel-option" data-val="기타">✏️ 직접 입력</div>
+      </div>
+      <input type="text" id="cat_custom" placeholder="직접 입력..." style="margin-top:10px;display:none">
+      <div class="error-msg" id="err_cat">카테고리를 선택해주세요!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💬 이 문제를 한 문장으로</div>
+      <div class="hint-box">💡 "나는 [누구]를 위해 [어떤 문제]를 해결하는 앱을 만들겠다"<br>예) "나는 시험 기간 고등학생을 위해 폰 과사용 문제를 해결하는 앱을 만들겠다"</div>
+      <textarea id="one_liner" rows="2" placeholder="나는 ____를 위해 ____문제를 해결하는 앱을 만들겠다"></textarea>
+      <div class="char-count"><span id="ol_count">0</span> / 100자</div>
+      <div class="error-msg" id="err_oneliner">한 문장 정의를 입력해주세요!</div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="btn-next" onclick="goStep(2)">다음: 사용자 정의하기 →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2: 사용자 ═══ -->
+  <div class="step-panel step2" id="step2">
+    <div class="step-header">
+      <div class="step-icon">👤</div>
+      <div class="step-title-wrap">
+        <div class="step-num-label">Step 02 · 사용자 정의</div>
+        <div class="step-title">누가 이 앱을 쓸까요?</div>
+        <div class="step-desc">사용자를 구체적으로 그릴수록 더 좋은 앱이 나와요. 내 앱을 쓸 사람을 상상해보세요.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎭 주요 사용자 (페르소나)</div>
+      <div class="hint-box">💡 실제로 있을 것 같은 구체적인 사람을 상상해보세요.<br>예) "시험이 2주 남은 고2 민준이. 유튜브 알고리즘에 자꾸 빠져든다."</div>
+      <div class="persona-row">
+        <div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:600">이름 (가상)</div>
+          <input type="text" id="persona_name" placeholder="예) 민준, 지아, 서연...">
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:600">학년</div>
+          <input type="text" id="persona_grade" placeholder="예) 중2, 고1...">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:600">이 사람이 겪는 상황</div>
+        <textarea id="persona_situation" rows="3" placeholder="예) 매일 밤 폰을 보다가 잠을 늦게 자고, 다음날 수업에 집중을 못 한다..."></textarea>
+      </div>
+      <div class="error-msg" id="err_persona">사용자 정보를 입력해주세요!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">😤 사용자가 가장 힘든 순간은?</div>
+      <div class="hint-box">💡 앱이 정확히 이 순간을 해결해야 해요.</div>
+      <textarea id="pain_point" rows="3" placeholder="예) 공부 시작하려고 폰 들었다가 1시간이 지나버린 순간..."></textarea>
+      <div class="error-msg" id="err_pain">불편한 순간을 입력해주세요!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✅ 앱을 쓴 후 어떻게 바뀌길 원하나요?</div>
+      <div class="hint-box">💡 성공한 결과를 상상해보세요.</div>
+      <div class="tag-wrap" id="outcome_tags">
+        <div class="tag" data-val="시간을 더 효율적으로 쓴다">⏰ 시간 효율</div>
+        <div class="tag" data-val="감정이 더 안정된다">😌 감정 안정</div>
+        <div class="tag" data-val="주변 사람들과 더 잘 소통한다">💬 소통 개선</div>
+        <div class="tag" data-val="문제를 인식하고 행동이 바뀐다">🔄 행동 변화</div>
+        <div class="tag" data-val="안전하다고 느낀다">🛡️ 안전감</div>
+        <div class="tag" data-val="정보를 더 잘 알게 된다">📚 정보 습득</div>
+      </div>
+      <input type="text" id="outcome_custom" placeholder="또는 직접 써도 돼요..." style="margin-top:10px">
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(1)">← 이전</button>
+      <button class="btn-next" onclick="goStep(3)">다음: 기능 설계하기 →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3: 기능 설계 ═══ -->
+  <div class="step-panel step3" id="step3">
+    <div class="step-header">
+      <div class="step-icon">⚙️</div>
+      <div class="step-title-wrap">
+        <div class="step-num-label">Step 03 · 기능 설계</div>
+        <div class="step-title">어떤 기능이 필요할까요?</div>
+        <div class="step-desc">앱에 들어갈 기능을 중요도 순으로 정리해보세요. 처음엔 적을수록 좋아요!</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 기능 목록</div>
+      <div class="hint-box" style="border-color:var(--accent2);background:#fdf0ee;color:var(--accent2)">
+        🔴 <strong>Must Have</strong> — 이게 없으면 앱이 아님 &nbsp;|&nbsp;
+        🔵 <strong>Should Have</strong> — 있으면 좋음 &nbsp;|&nbsp;
+        🟢 <strong>Nice to Have</strong> — 나중에 추가 가능
+      </div>
+      <div class="feature-list" id="feature_list">
+        <div class="feature-item" draggable="true">
+          <span class="drag-handle">⠿</span>
+          <span class="feature-priority pri-must">🔴 Must</span>
+          <input type="text" placeholder="핵심 기능을 써보세요... 예) 오늘 스크린타임 입력하기" data-priority="Must Have">
+        </div>
+        <div class="feature-item" draggable="true">
+          <span class="drag-handle">⠿</span>
+          <span class="feature-priority pri-should">🔵 Should</span>
+          <input type="text" placeholder="있으면 좋을 기능... 예) 주간 통계 그래프" data-priority="Should Have">
+        </div>
+        <div class="feature-item" draggable="true">
+          <span class="drag-handle">⠿</span>
+          <span class="feature-priority pri-nice">🟢 Nice</span>
+          <input type="text" placeholder="나중에 추가할 기능... 예) 친구와 비교하기" data-priority="Nice to Have">
+        </div>
+      </div>
+      <button class="add-feature-btn" onclick="addFeature()" style="margin-top:8px">+ 기능 추가하기</button>
+      <div class="error-msg" id="err_feature">최소 한 가지 핵심 기능을 입력해주세요!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚫 넣지 않을 기능</div>
+      <div class="hint-box">💡 처음부터 너무 많이 만들려다 실패해요. 이번 버전에서 하지 않을 것도 정해보세요.</div>
+      <textarea id="not_features" rows="3" placeholder="예) SNS 공유 기능은 이번엔 안 만든다. 로그인도 일단 없앤다..."></textarea>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(2)">← 이전</button>
+      <button class="btn-next" onclick="goStep(4)">다음: 화면 구성하기 →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: 화면 구성 ═══ -->
+  <div class="step-panel step4" id="step4">
+    <div class="step-header">
+      <div class="step-icon">📱</div>
+      <div class="step-title-wrap">
+        <div class="step-num-label">Step 04 · 화면 구성</div>
+        <div class="step-title">어떤 화면들이 필요할까요?</div>
+        <div class="step-desc">앱에 들어갈 주요 화면을 글로 스케치해보세요. 실제 개발 전 설계도예요.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🖼️ 주요 화면 구성</div>
+      <div class="hint-box" style="border-color:var(--accent3);background:#e8f7f0;color:var(--accent3)">
+        💡 각 화면에 어떤 버튼, 텍스트, 기능이 있는지 간단히 써보세요.
+      </div>
+      <div class="screens-grid" id="screens_grid">
+        <div class="screen-card">
+          <div class="screen-top">
+            <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+            <input class="screen-label-input" placeholder="화면 이름 (예: 홈)" value="홈 화면">
+          </div>
+          <div class="screen-body">
+            <textarea placeholder="이 화면에 있는 것들&#10;예) 오늘 사용 시간 표시&#10;기록하기 버튼&#10;주간 그래프"></textarea>
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-top">
+            <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+            <input class="screen-label-input" placeholder="화면 이름" value="입력 화면">
+          </div>
+          <div class="screen-body">
+            <textarea placeholder="이 화면에 있는 것들&#10;예) 시간 입력 창&#10;앱 이름 선택&#10;저장 버튼"></textarea>
+          </div>
+        </div>
+        <div class="screen-card">
+          <div class="screen-top">
+            <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+            <input class="screen-label-input" placeholder="화면 이름" value="통계 화면">
+          </div>
+          <div class="screen-body">
+            <textarea placeholder="이 화면에 있는 것들&#10;예) 주간 막대그래프&#10;총 사용 시간&#10;가장 많이 쓴 앱"></textarea>
+          </div>
+        </div>
+      </div>
+      <button class="add-feature-btn" onclick="addScreen()" style="margin-top:12px">+ 화면 추가하기</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 화면 이동 흐름</div>
+      <div class="hint-box" style="border-color:var(--accent3);background:#e8f7f0;color:var(--accent3)">
+        💡 사용자가 앱을 켜서 끄기까지 어떤 순서로 화면을 보게 되나요?
+      </div>
+      <textarea id="flow_desc" rows="3" placeholder="예) 홈 화면 → 기록하기 버튼 클릭 → 입력 화면 → 저장 → 홈 화면으로 돌아오기..." oninput="renderFlowPreview()"></textarea>
+      <div class="flow-preview-card">
+        <div class="flow-preview-title">⊙ 실시간 로직 미리보기</div>
+        <div class="flow-preview-track" id="flow_preview_track">
+          <div class="flow-preview-empty">위에 화면 이동 흐름을 "→"로 구분해서 입력하면, 여기에 순서도로 크게 보여줘요.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(3)">← 이전</button>
+      <button class="btn-next" onclick="goStep(5)">다음: 앱 이름 짓기 →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 5: 앱 이름 ═══ -->
+  <div class="step-panel step5" id="step5">
+    <div class="step-header">
+      <div class="step-icon">✨</div>
+      <div class="step-title-wrap">
+        <div class="step-num-label">Step 05 · 마무리</div>
+        <div class="step-title">앱 이름을 지어볼까요?</div>
+        <div class="step-desc">좋은 이름은 앱이 뭘 하는지 바로 느껴지게 해요.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 앱 이름 아이디어 (1~3개)</div>
+      <div class="hint-box">💡 짧고 기억에 남는 이름이 좋아요. 한글, 영어 모두 괜찮아요.<br>예) "폰멈춰", "FocusLog", "하루한컷"</div>
+      <input type="text" id="app_name1" placeholder="첫 번째 후보 이름..." style="margin-bottom:8px">
+      <input type="text" id="app_name2" placeholder="두 번째 후보 이름 (선택)..." style="margin-bottom:8px">
+      <input type="text" id="app_name3" placeholder="세 번째 후보 이름 (선택)...">
+      <div class="error-msg" id="err_appname">앱 이름을 최소 하나 입력해주세요!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📣 앱 소개 한 줄</div>
+      <div class="hint-box">💡 앱스토어에 올린다면 뭐라고 쓸 건가요?</div>
+      <input type="text" id="app_tagline" placeholder="예) 하루 5분으로 내 폰 습관을 바꾸는 스크린타임 기록 앱">
+      <div class="error-msg" id="err_tagline">앱 소개를 입력해주세요!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🤔 만들면서 예상되는 어려운 점</div>
+      <div class="hint-box">💡 미리 생각해두면 막혔을 때 덜 당황해요.</div>
+      <textarea id="challenges" rows="3" placeholder="예) 데이터를 저장하는 방법을 모른다, 그래프를 어떻게 그릴지 모른다..."></textarea>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep(4)">← 이전</button>
+      <button class="btn-next" onclick="generateResult()">🎉 기획서 완성하기!</button>
+    </div>
+  </div>
+
+  <!-- ═══ RESULT ═══ -->
+  <div class="result-panel" id="result">
+    <div class="result-header">
+      <div class="result-trophy">🎉</div>
+      <div class="result-title">기획서 완성!</div>
+      <div class="result-sub">이제 이 기획서를 바탕으로 바이브 코딩을 시작할 수 있어요.</div>
+    </div>
+
+    <div class="plan-doc" id="plan_doc">
+      <!-- JS로 채워짐 -->
+    </div>
+
+    <div class="result-actions">
+      <button class="action-btn action-primary" onclick="location.href='3-result.html'">다음 단계: PRD 확인하고 코딩 시작하기 →</button>
+      <button class="action-btn action-secondary" onclick="printPlan()">🖨️ 기획서 출력하기</button>
+      <button class="action-btn action-secondary" id="copy_btn" onclick="copyPlanText(this)">📋 텍스트로 복사하기</button>
+      <button class="action-btn action-secondary" onclick="resetAll()">↩ 처음부터 다시</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentStep = 1;
+let selectedCat = '';
+let selectedOutcomes = [];
+let featureCount = 3;
+let lastPlanData = null;
+
+// ── PROGRESS BAR CLICK NAVIGATION ──
+document.querySelectorAll('.prog-step').forEach(el => {
+  el.addEventListener('click', () => goStep(parseInt(el.dataset.step)));
+});
+
+// ── FLOW PREVIEW ──
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function getFlowStepsFromText(text) {
+  return text.split(/→|->/).map(s => s.trim()).filter(Boolean);
+}
+
+function buildFlowHTML(steps) {
+  return steps.map((s, i) => {
+    const box = `<div class="flow-step-box${i === 0 ? ' first' : ''}">${escapeHtml(s)}</div>`;
+    return i === 0 ? box : `<div class="flow-arrow">→</div>${box}`;
+  }).join('');
+}
+
+function renderFlowPreview() {
+  const track = document.getElementById('flow_preview_track');
+  if (!track) return;
+  const steps = getFlowStepsFromText(document.getElementById('flow_desc').value);
+  track.innerHTML = steps.length
+    ? buildFlowHTML(steps)
+    : '<div class="flow-preview-empty">위에 화면 이동 흐름을 "→"로 구분해서 입력하면, 여기에 순서도로 크게 보여줘요.</div>';
+}
+
+// ── STEP NAVIGATION ──
+function goStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
+
+  document.querySelector(`#step${currentStep}`)?.classList.remove('active');
+  document.querySelector(`#result`)?.classList.remove('active');
+  document.querySelectorAll('.prog-step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (sn === n) s.classList.add('active');
+    else if (sn < n) s.classList.add('done');
+  });
+
+  currentStep = n;
+  const panel = document.getElementById(`step${n}`);
+  if (panel) panel.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── VALIDATION ──
+function validateStep(n) {
+  let ok = true;
+
+  if (n === 1) {
+    const pd = document.getElementById('problem_desc').value.trim();
+    const ol = document.getElementById('one_liner').value.trim();
+    if (!pd) { show('err_problem'); ok = false; } else hide('err_problem');
+    if (!selectedCat) { show('err_cat'); ok = false; } else hide('err_cat');
+    if (!ol) { show('err_oneliner'); ok = false; } else hide('err_oneliner');
+  }
+  if (n === 2) {
+    const name = document.getElementById('persona_name').value.trim();
+    const sit = document.getElementById('persona_situation').value.trim();
+    const pain = document.getElementById('pain_point').value.trim();
+    if (!name || !sit) { show('err_persona'); ok = false; } else hide('err_persona');
+    if (!pain) { show('err_pain'); ok = false; } else hide('err_pain');
+  }
+  if (n === 3) {
+    const inputs = document.querySelectorAll('#feature_list input[type="text"]');
+    let anyFilled = false;
+    inputs.forEach(i => { if (i.value.trim()) anyFilled = true; });
+    if (!anyFilled) { show('err_feature'); ok = false; } else hide('err_feature');
+  }
+  if (n === 5) {
+    const name1 = document.getElementById('app_name1').value.trim();
+    const tagline = document.getElementById('app_tagline').value.trim();
+    if (!name1) { show('err_appname'); ok = false; } else hide('err_appname');
+    if (!tagline) { show('err_tagline'); ok = false; } else hide('err_tagline');
+  }
+  return ok;
+}
+
+function show(id) { document.getElementById(id)?.classList.add('show'); }
+function hide(id) { document.getElementById(id)?.classList.remove('show'); }
+
+// ── CAT SELECT ──
+document.querySelectorAll('#cat_select .sel-option').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('#cat_select .sel-option').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCat = el.dataset.val;
+    const customInput = document.getElementById('cat_custom');
+    if (selectedCat === '기타') customInput.style.display = 'block';
+    else { customInput.style.display = 'none'; customInput.value = ''; }
+  });
+});
+
+// ── OUTCOME TAGS ──
+document.querySelectorAll('#outcome_tags .tag').forEach(tag => {
+  tag.addEventListener('click', () => {
+    tag.classList.toggle('selected');
+    const val = tag.dataset.val;
+    if (tag.classList.contains('selected')) selectedOutcomes.push(val);
+    else selectedOutcomes = selectedOutcomes.filter(v => v !== val);
+  });
+});
+
+// ── CHAR COUNTS ──
+document.getElementById('problem_desc').addEventListener('input', function() {
+  document.getElementById('pd_count').textContent = this.value.length;
+});
+document.getElementById('one_liner').addEventListener('input', function() {
+  document.getElementById('ol_count').textContent = this.value.length;
+});
+
+// ── ADD FEATURE ──
+function addFeature() {
+  featureCount++;
+  const list = document.getElementById('feature_list');
+  const priorities = ['Must Have', 'Should Have', 'Nice to Have'];
+  const labels = [
+    { cls: 'pri-must', text: '🔴 Must' },
+    { cls: 'pri-should', text: '🔵 Should' },
+    { cls: 'pri-nice', text: '🟢 Nice' }
+  ];
+  const idx = Math.min(featureCount - 1, 2);
+  const div = document.createElement('div');
+  div.className = 'feature-item';
+  div.draggable = true;
+  div.innerHTML = `
+    <span class="drag-handle">⠿</span>
+    <span class="feature-priority ${labels[idx].cls}">${labels[idx].text}</span>
+    <input type="text" placeholder="기능을 입력하세요..." data-priority="${priorities[idx]}">
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:0 4px">×</button>
+  `;
+  list.appendChild(div);
+}
+
+// ── FEATURE PRIORITY CYCLE ──
+const PRIORITY_CYCLE = [
+  { value: 'Must Have', cls: 'pri-must', text: '🔴 Must' },
+  { value: 'Should Have', cls: 'pri-should', text: '🔵 Should' },
+  { value: 'Nice to Have', cls: 'pri-nice', text: '🟢 Nice' }
+];
+
+document.getElementById('feature_list').addEventListener('click', e => {
+  const badge = e.target.closest('.feature-priority');
+  if (!badge) return;
+  const input = badge.closest('.feature-item').querySelector('input[type="text"]');
+  const idx = PRIORITY_CYCLE.findIndex(p => p.value === (input.dataset.priority || 'Must Have'));
+  const next = PRIORITY_CYCLE[(idx + 1) % PRIORITY_CYCLE.length];
+  input.dataset.priority = next.value;
+  badge.className = `feature-priority ${next.cls}`;
+  badge.textContent = next.text;
+});
+
+// ── FEATURE DRAG REORDER ──
+(() => {
+  const list = document.getElementById('feature_list');
+  let draggedItem = null;
+
+  list.addEventListener('dragstart', e => {
+    const item = e.target.closest('.feature-item');
+    if (!item) return;
+    draggedItem = item;
+    item.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  list.addEventListener('dragover', e => {
+    if (!draggedItem) return;
+    e.preventDefault();
+    const item = e.target.closest('.feature-item');
+    if (!item || item === draggedItem) return;
+    const rect = item.getBoundingClientRect();
+    const isAfter = e.clientY > rect.top + rect.height / 2;
+    if (isAfter) item.after(draggedItem);
+    else item.before(draggedItem);
+  });
+
+  list.addEventListener('dragend', () => {
+    if (draggedItem) draggedItem.classList.remove('dragging');
+    draggedItem = null;
+  });
+})();
+
+// ── ADD SCREEN ──
+function addScreen() {
+  const grid = document.getElementById('screens_grid');
+  const div = document.createElement('div');
+  div.className = 'screen-card';
+  div.innerHTML = `
+    <div class="screen-top">
+      <div class="screen-dots"><div class="screen-dot"></div><div class="screen-dot"></div><div class="screen-dot"></div></div>
+      <input class="screen-label-input" placeholder="화면 이름">
+      <button onclick="this.closest('.screen-card').remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:auto">×</button>
+    </div>
+    <div class="screen-body">
+      <textarea placeholder="이 화면에 있는 것들"></textarea>
+    </div>
+  `;
+  grid.appendChild(div);
+}
+
+// ── GENERATE RESULT ──
+function generateResult() {
+  if (!validateStep(5)) return;
+
+  // Collect data
+  const data = {
+    problem: document.getElementById('problem_desc').value.trim(),
+    category: selectedCat === '기타'
+      ? document.getElementById('cat_custom').value.trim() || '기타'
+      : selectedCat,
+    oneliner: document.getElementById('one_liner').value.trim(),
+    persona_name: document.getElementById('persona_name').value.trim(),
+    persona_grade: document.getElementById('persona_grade').value.trim(),
+    persona_situation: document.getElementById('persona_situation').value.trim(),
+    pain_point: document.getElementById('pain_point').value.trim(),
+    outcomes: selectedOutcomes.concat(
+      document.getElementById('outcome_custom').value.trim()
+        ? [document.getElementById('outcome_custom').value.trim()] : []
+    ),
+    features: [],
+    not_features: document.getElementById('not_features').value.trim(),
+    screens: [],
+    flow: document.getElementById('flow_desc').value.trim(),
+    app_name1: document.getElementById('app_name1').value.trim(),
+    app_name2: document.getElementById('app_name2').value.trim(),
+    app_name3: document.getElementById('app_name3').value.trim(),
+    tagline: document.getElementById('app_tagline').value.trim(),
+    challenges: document.getElementById('challenges').value.trim(),
+  };
+
+  document.querySelectorAll('#feature_list .feature-item input[type="text"]').forEach(inp => {
+    if (inp.value.trim()) data.features.push({ name: inp.value.trim(), priority: inp.dataset.priority || 'Must Have' });
+  });
+
+  document.querySelectorAll('#screens_grid .screen-card').forEach(card => {
+    const name = card.querySelector('.screen-label-input')?.value.trim() || '화면';
+    const content = card.querySelector('textarea')?.value.trim() || '';
+    if (name || content) data.screens.push({ name, content });
+  });
+
+  // Build doc
+  const doc = document.getElementById('plan_doc');
+  const priBadge = p => {
+    if (p === 'Must Have') return '<span style="background:#fde8e8;color:#e8442a;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px">🔴 Must</span>';
+    if (p === 'Should Have') return '<span style="background:#e8edfb;color:#2d5be3;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px">🔵 Should</span>';
+    return '<span style="background:#e8f7f0;color:#1a9e6e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px">🟢 Nice</span>';
+  };
+
+  const appNames = [data.app_name1, data.app_name2, data.app_name3].filter(Boolean).join(' / ');
+  const today = new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+
+  doc.innerHTML = `
+    <div class="plan-doc-header">
+      <div class="doc-label">App Planning Document · ${today}</div>
+      <div class="doc-app-name">${appNames}</div>
+      <div class="doc-tagline">${data.tagline}</div>
+    </div>
+
+    <div class="plan-section">
+      <div class="plan-section-title">🔍 문제 정의</div>
+      <div class="plan-row">
+        <div class="plan-field">
+          <div class="plan-field-label">카테고리</div>
+          <div class="plan-field-value">${data.category}</div>
+        </div>
+        <div class="plan-field">
+          <div class="plan-field-label">핵심 문장</div>
+          <div class="plan-field-value">${data.oneliner}</div>
+        </div>
+      </div>
+      <div class="plan-field">
+        <div class="plan-field-label">문제 상세 설명</div>
+        <div class="plan-field-value">${data.problem}</div>
+      </div>
+    </div>
+
+    <div class="plan-section">
+      <div class="plan-section-title">👤 사용자 (페르소나)</div>
+      <div class="plan-row">
+        <div class="plan-field">
+          <div class="plan-field-label">이름 / 학년</div>
+          <div class="plan-field-value">${data.persona_name} · ${data.persona_grade}</div>
+        </div>
+        <div class="plan-field">
+          <div class="plan-field-label">원하는 변화</div>
+          <div class="plan-field-value">${data.outcomes.length ? data.outcomes.join(', ') : '—'}</div>
+        </div>
+      </div>
+      <div class="plan-field" style="margin-bottom:10px">
+        <div class="plan-field-label">사용자 상황</div>
+        <div class="plan-field-value">${data.persona_situation}</div>
+      </div>
+      <div class="plan-field">
+        <div class="plan-field-label">가장 힘든 순간</div>
+        <div class="plan-field-value">${data.pain_point}</div>
+      </div>
+    </div>
+
+    <div class="plan-section">
+      <div class="plan-section-title">⚙️ 기능 목록</div>
+      ${data.features.map(f => `
+        <div class="plan-feature-row">
+          ${priBadge(f.priority)}
+          <span style="font-size:14px;margin-left:4px">${f.name}</span>
+        </div>
+      `).join('')}
+      ${data.not_features ? `
+        <div style="margin-top:12px;padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:12.5px;color:var(--text-muted)">
+          <strong style="color:var(--text)">이번 버전에서 안 만들 것:</strong> ${data.not_features}
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="plan-section">
+      <div class="plan-section-title">📱 화면 구성</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+        ${data.screens.map(s => `
+          <div style="background:var(--surface2);border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+            <div style="background:var(--ink);color:#fff;padding:8px 12px;font-size:11px;font-weight:700">${s.name}</div>
+            <div style="padding:10px 12px;font-size:12px;color:var(--text-muted);line-height:1.6;white-space:pre-line">${s.content || '—'}</div>
+          </div>
+        `).join('')}
+      </div>
+      ${data.flow ? `
+        <div class="flow-preview-card" style="margin-top:14px">
+          <div class="flow-preview-title">⊙ 화면 이동 흐름</div>
+          <div class="flow-preview-track">${buildFlowHTML(getFlowStepsFromText(data.flow))}</div>
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="plan-section">
+      <div class="plan-section-title">✨ 앱 정보</div>
+      <div class="plan-row">
+        <div class="plan-field">
+          <div class="plan-field-label">앱 이름 후보</div>
+          <div class="plan-field-value" style="font-family:'Gmarket Sans',sans-serif;font-size:18px">${appNames}</div>
+        </div>
+        <div class="plan-field">
+          <div class="plan-field-label">예상 어려운 점</div>
+          <div class="plan-field-value">${data.challenges || '—'}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  lastPlanData = data;
+
+  if (window.StudioBridge) {
+    StudioBridge.save({
+      appName: data.app_name1 || data.oneliner || '',
+      plannerData: data,
+      plannerText: buildPlanText(data),
+    });
+  }
+
+  // Show result
+  document.querySelector(`#step5`)?.classList.remove('active');
+  document.querySelectorAll('.prog-step').forEach(s => s.classList.add('done'));
+  document.getElementById('result').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function printPlan() {
+  window.print();
+}
+
+function buildPlanText(data) {
+  const appNames = [data.app_name1, data.app_name2, data.app_name3].filter(Boolean).join(' / ');
+  const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const priLabel = p => {
+    if (p === 'Must Have') return '🔴 Must';
+    if (p === 'Should Have') return '🔵 Should';
+    return '🟢 Nice';
+  };
+
+  const lines = [];
+  lines.push(`App Planning Document · ${today}`);
+  if (appNames) lines.push(appNames);
+  if (data.tagline) lines.push(data.tagline);
+
+  lines.push('', '🔍 문제 정의');
+  lines.push(`- 카테고리: ${data.category || '—'}`);
+  lines.push(`- 핵심 문장: ${data.oneliner || '—'}`);
+  lines.push(`- 문제 상세 설명: ${data.problem || '—'}`);
+
+  lines.push('', '👤 사용자 (페르소나)');
+  lines.push(`- 이름 / 학년: ${data.persona_name || '—'} · ${data.persona_grade || '—'}`);
+  lines.push(`- 원하는 변화: ${data.outcomes.length ? data.outcomes.join(', ') : '—'}`);
+  lines.push(`- 사용자 상황: ${data.persona_situation || '—'}`);
+  lines.push(`- 가장 힘든 순간: ${data.pain_point || '—'}`);
+
+  lines.push('', '⚙️ 기능 목록');
+  if (data.features.length) {
+    data.features.forEach(f => lines.push(`- [${priLabel(f.priority)}] ${f.name}`));
+  } else {
+    lines.push('- —');
+  }
+  if (data.not_features) lines.push(`- 이번 버전에서 안 만들 것: ${data.not_features}`);
+
+  lines.push('', '📱 화면 구성');
+  if (data.screens.length) {
+    data.screens.forEach(s => lines.push(`- ${s.name}: ${s.content || '—'}`));
+  } else {
+    lines.push('- —');
+  }
+  if (data.flow) {
+    lines.push(`- 화면 이동 흐름: ${getFlowStepsFromText(data.flow).join(' → ')}`);
+  }
+
+  lines.push('', '✨ 앱 정보');
+  lines.push(`- 앱 이름 후보: ${appNames || '—'}`);
+  lines.push(`- 예상 어려운 점: ${data.challenges || '—'}`);
+
+  return lines.join('\n');
+}
+
+function fallbackCopyText(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  return ok;
+}
+
+function copyPlanText(btnEl) {
+  if (!lastPlanData) return;
+  const text = buildPlanText(lastPlanData);
+  const btn = btnEl || document.getElementById('copy_btn');
+  const original = btn.dataset.originalText || btn.innerHTML;
+  btn.dataset.originalText = original;
+
+  const showResult = (ok) => {
+    btn.innerHTML = ok ? '✅ 복사 완료!' : '❌ 복사 실패';
+    setTimeout(() => { btn.innerHTML = original; }, 1800);
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => showResult(true)).catch(() => showResult(fallbackCopyText(text)));
+  } else {
+    showResult(fallbackCopyText(text));
+  }
+}
+
+function resetAll() {
+  if (!confirm('처음부터 다시 시작할까요? 입력한 내용이 모두 지워져요.')) return;
+  location.reload();
+}
+</script>
+
+<style>
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { background: white; }
+  body::before { display: none; }
+  .wrap { max-width: 100%; }
+  .wrap > *:not(.result-panel) { display: none !important; }
+  .result-panel { display: block !important; }
+  .result-header, .result-actions { display: none; }
+  .plan-doc { border: 1px solid #ccc; box-shadow: none; }
+  .flow-preview-card { break-inside: avoid; padding: 18px; }
+  .flow-preview-title { font-size: 16px; }
+  .flow-step-box { font-size: 17px !important; padding: 16px 22px !important; max-width: 320px; }
+  .flow-arrow { font-size: 22px !important; }
+}
+</style>
+</body>
+</html>

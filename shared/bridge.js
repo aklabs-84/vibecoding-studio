@@ -1,0 +1,87 @@
+/**
+ * 바이브코딩 스튜디오 - 단계 간 데이터 브릿지
+ * localStorage 키: "vcs_studio_data"
+ */
+(function (global) {
+  const STORAGE_KEY = 'vcs_studio_data';
+  const CODECANVAS_URL = '../CodeCanvas/index.html';
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function save(patch) {
+    const current = load();
+    const next = Object.assign({}, current, patch, { updatedAt: new Date().toISOString() });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    return next;
+  }
+
+  function clear() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  function buildCodePrompt(data) {
+    const lines = [];
+    lines.push('아래 기획서(PRD)를 바탕으로 실행 가능한 단일 HTML 파일(HTML/CSS/JS 포함)을 만들어줘.');
+    lines.push('');
+    if (data.simulationPRD) {
+      lines.push('[기획 시뮬레이션 결과]');
+      lines.push(data.simulationPRD);
+      lines.push('');
+    }
+    if (data.plannerText) {
+      lines.push('[상세 기획서]');
+      lines.push(data.plannerText);
+      lines.push('');
+    }
+    lines.push('요구사항:');
+    lines.push('- 하나의 HTML 파일 안에 <style>과 <script>를 포함해서 작성');
+    lines.push('- 위 기획서의 핵심 기능(MVP)을 실제로 동작하게 구현');
+    lines.push('- 별도 서버 없이 바로 브라우저에서 실행 가능하도록 작성');
+    return lines.join('\n');
+  }
+
+  function sendToCodeCanvas(prdText, title) {
+    const data = load();
+    const html = [
+      '<!DOCTYPE html>',
+      '<html lang="ko">',
+      '<head>',
+      '<meta charset="UTF-8">',
+      '<title>' + (title || '새 프로젝트') + '</title>',
+      '<!--',
+      prdText || '',
+      '-->',
+      '</head>',
+      '<body>',
+      '  <h1>Hello, ' + (title || 'CodeCanvas') + '!</h1>',
+      '</body>',
+      '</html>',
+    ].join('\n');
+
+    const project = {
+      id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id_' + Date.now()),
+      title: title || (data.appName || '새 프로젝트'),
+      code: {
+        html: html,
+        css: 'body {\n  font-family: sans-serif;\n  padding: 40px;\n}',
+        js: 'console.log("Hello, CodeCanvas!");',
+      },
+      isPublic: false,
+      shareId: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem('codecanvas_current_project', JSON.stringify(project));
+    window.open(CODECANVAS_URL, '_blank');
+  }
+
+  global.StudioBridge = { load, save, clear, buildCodePrompt, sendToCodeCanvas, CODECANVAS_URL };
+})(window);

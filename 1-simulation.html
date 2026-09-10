@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Startup: Dungeon Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });</script>
+    <script src="shared/bridge.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0d0221;
+            --monster-purple: #2a0845;
+            --monster-green: #00ff41;
+            --monster-red: #ff004c;
+            --border-pixel: 4px solid #fff;
+            --font-pixel: 'Press Start 2P', cursive;
+            --text-main: #fff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; image-rendering: pixelated; }
+        
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-pixel);
+            overflow-x: hidden;
+            min-height: 100vh;
+            width: 100vw;
+            line-height: 1.6;
+            font-size: 18px;
+            padding-top: 80px;
+        }
+
+        nav {
+            background: #000;
+            min-height: 80px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 110000;
+            border-bottom: 4px solid var(--monster-purple);
+            padding: 10px 40px;
+        }
+        .nav-left .sheet-title { color: var(--monster-green); font-size: 1rem; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        
+        .nav-links { 
+            display: none; 
+            position: fixed; top: 80px; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 30px; z-index: 109999; padding: 40px;
+        }
+        .nav-links.active { display: flex; }
+        
+        @media (min-width: 1024px) {
+            .nav-links { 
+                display: flex; position: static; background: none; 
+                flex-direction: row; padding: 0; gap: 25px; 
+            }
+        }
+
+        .nav-link { color: #888; text-decoration: none; font-size: 1.2rem; transition: color 0.2s; }
+        @media (min-width: 1024px) { .nav-link { font-size: 1rem; } }
+        .nav-link:hover, .nav-link.active { color: var(--monster-red); }
+        
+        .menu-toggle { 
+            display: block; color: var(--monster-green); font-size: 1.5rem; 
+            background: none; border: none; cursor: pointer; outline: none;
+        }
+        @media (min-width: 1024px) { .menu-toggle { display: none; } }
+
+        .sound-toggle { color: var(--monster-green); cursor: pointer; font-size: 1.2rem; background: none; border: none; outline: none; }
+
+        .pixel-border {
+            border: 4px solid #fff;
+            box-shadow: -4px 0 0 0 #000, 4px 0 0 0 #000, 0 -4px 0 0 #000, 0 4px 0 0 #000, inset -4px -4px 0 0 #555;
+            background: #000;
+        }
+
+        /* Modal Popup - Top Priority */
+        #modal-wrap {
+            position: fixed; inset: 0; z-index: 2000000; background: rgba(0,0,0,0.9);
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-box { 
+            width: 100%; max-width: 600px; padding: 30px; border: 6px solid var(--monster-green); 
+            background: #000; text-align: center; box-shadow: 0 0 50px rgba(0,255,65,0.3);
+        }
+        .modal-text { font-size: 1.2rem; color: #fff; margin-bottom: 30px; line-height: 1.8; }
+        .modal-btns { display: flex; gap: 15px; flex-direction: column; }
+        @media (min-width: 480px) { .modal-btns { flex-direction: row; } }
+        .btn-modal { 
+            flex: 1; padding: 15px; font-family: var(--font-pixel); cursor: pointer; border: 4px solid #fff;
+            font-size: 1rem;
+        }
+        .btn-modal.yes { background: var(--monster-green); color: #000; }
+        .btn-modal.no { background: var(--monster-purple); color: #fff; }
+
+        /* Overlays (Intro & Phase Cutscenes) */
+        .overlay-wrap {
+            position: fixed; inset: 0; background: #000; z-index: 100000;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; text-align: center; cursor: pointer;
+        }
+        .overlay-box { width: 100%; max-width: 1000px; padding: 30px; border: 6px solid var(--monster-green); background: #000; }
+        .overlay-text { font-size: 0.9rem; color: #fff; margin-bottom: 25px; line-height: 1.8; min-height: 120px; display: flex; align-items: center; justify-content: center; text-align: left; }
+        @media (min-width: 768px) {
+            .overlay-box { padding: 60px; }
+            .overlay-text { font-size: 1.2rem; min-height: 180px; }
+        }
+        .click-hint { font-size: 0.7rem; color: var(--monster-green); animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Setup */
+        #setup-wrap {
+            position: fixed; inset: 0; top: 80px; z-index: 50000;
+            background: var(--bg-dark); padding: 20px; overflow-y: auto;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .setup-inner { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 30px; z-index: 10; }
+        .setup-header { text-align: center; }
+        .setup-header h1 { font-size: 1.8rem; color: var(--monster-red); text-shadow: 4px 4px #000; margin-bottom: 15px; animation: titlePulse 2s ease-in-out infinite; }
+        @media (min-width: 768px) { .setup-header h1 { font-size: 3.5rem; } }
+        .bento-card { padding: 25px; border: 6px solid #fff; background: #111; }
+        input { 
+            width: 100%; background: #000; border: 4px solid var(--monster-green); padding: 20px; 
+            color: #fff; font-family: var(--font-pixel); font-size: 1.2rem; outline: none; margin-bottom: 30px;
+            box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+        input:focus {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+        .input-label {
+            display: block;
+            font-size: 1rem;
+            color: var(--monster-green);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px #000;
+        }
+        .custom-input-box {
+            margin-top: 40px;
+            padding: 20px;
+            border: 4px dashed var(--monster-red);
+            background: rgba(255, 0, 76, 0.05);
+        }
+        .custom-input-box label {
+            color: var(--monster-red) !important;
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .btn-start { width: 100%; padding: 20px; background: var(--monster-red); color: #fff; font-family: var(--font-pixel); border: 6px solid #fff; cursor: pointer; font-size: 1rem; }
+        @media (min-width: 768px) { .btn-start { font-size: 1.6rem; padding: 30px; } }
+
+        .title-char { position: absolute; z-index: 1; animation: float 3s ease-in-out infinite; opacity: 0.3; pointer-events: none; }
+        @media (min-width: 1024px) { .title-char { opacity: 1; } }
+        
+        .char-overlord { top: 10%; right: 5%; width: 150px; }
+        .char-aiden { bottom: 10%; left: 2%; width: 120px; }
+        .char-orc { bottom: 15%; right: 2%; width: 100px; }
+        .char-skel { top: 15%; left: 5%; width: 100px; }
+        @media (min-width: 1200px) {
+            .char-overlord { width: 250px; }
+            .char-aiden { width: 200px; }
+            .char-orc { width: 150px; }
+            .char-skel { width: 150px; }
+        }
+
+        /* Main Game Layout */
+        #main-container {
+            display: none; min-height: calc(100vh - 80px); padding: 15px;
+            grid-template-columns: 1fr; gap: 20px;
+        }
+        @media (min-width: 1024px) {
+            #main-container { grid-template-columns: 1fr 400px; height: calc(100vh - 80px); overflow: hidden; }
+        }
+        #main-container.active { display: grid; }
+
+        .workspace { 
+            border: 6px solid #fff; background: #000; 
+            padding: 15px; display: flex; flex-direction: column; overflow: hidden; 
+        }
+        .ws-header { flex-shrink: 0; margin-bottom: 15px; border-bottom: 4px solid #222; padding-bottom: 10px; }
+        .ws-title { font-size: 1.6rem; color: var(--monster-red); }
+        .ws-desc { font-size: 1.1rem; color: #ccc; margin-top: 10px; }
+        
+        #form-area { flex: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; }
+        
+        .nav-steps { flex-shrink: 0; display: flex; gap: 5px; margin-bottom: 20px; }
+        .n-step { flex: 1; height: 10px; background: #222; border: 2px solid #444; }
+        .n-step.active { background: var(--monster-green); }
+        .n-step.done { background: var(--monster-red); }
+
+        .sidebar { display: flex; flex-direction: column; gap: 15px; }
+        @media (min-width: 1024px) { .sidebar { overflow: hidden; } }
+
+        .action-bar { flex-shrink: 0; display: flex; gap: 15px; border-top: 4px solid #222; padding-top: 15px; }
+        .btn-game { 
+            flex: 1; padding: 20px; font-family: var(--font-pixel); font-size: 1rem; cursor: pointer;
+            border: 4px solid #fff; box-shadow: 2px 2px 0 0 #000; transition: all 0.1s;
+        }
+        .btn-game.prev { background: var(--monster-purple); color: #fff; }
+        .btn-game.next { background: var(--monster-green); color: #000; }
+
+        .options-container { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 30px; }
+        .option-card { 
+            padding: 25px; border: 4px solid #444; background: #111; cursor: pointer; transition: all 0.2s;
+            font-size: 1.2rem; line-height: 1.4; color: #fff; font-family: var(--font-pixel);
+            width: 100%; text-align: left; display: block;
+        }
+        .option-card:hover { border-color: var(--monster-green); background: #0d1a0d; }
+        .option-card.selected { border-color: var(--monster-green); background: #1a331a; box-shadow: inset 0 0 10px var(--monster-green); }
+
+        #dialogue-area {
+            flex: 1; display: flex; flex-direction: column; gap: 15px; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .aiden-portrait {
+            height: 150px; width: 100%; border: 6px solid var(--monster-green);
+            background: #000; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .aiden-portrait img { height: 90%; width: auto; }
+        .dialogue-box {
+            flex: 1; border: 6px solid var(--monster-green); background: rgba(0,0,0,0.9);
+            padding: 20px; position: relative; overflow-y: auto;
+        }
+        .dialogue-name { font-size: 1.1rem; color: var(--monster-green); margin-bottom: 10px; border-bottom: 2px solid #333; display: inline-block; }
+        .dialogue-content { font-size: 1.2rem; line-height: 1.6; color: #fff; }
+
+        .metric-bar { height: 20px; background: #222; border: 2px solid #444; margin-top: 10px; }
+        .metric-fill { height: 100%; background: var(--monster-green); width: 0%; transition: width 0.3s; }
+
+        #result-wrap {
+            position: fixed; inset: 0; z-index: 200000; background: var(--bg-dark);
+            display: none; flex-direction: column; align-items: center; padding: 60px; overflow-y: auto;
+        }
+        #result-wrap.active { display: flex; }
+        .result-container { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 30px; }
+        .prd-box { 
+            background: #000; border: 6px solid #fff; padding: 40px; 
+            text-align: left; font-family: 'Courier New', Courier, monospace; 
+            color: var(--monster-green); line-height: 1.4; white-space: pre-wrap; font-size: 1rem;
+        }
+        .lesson-summary {
+            background: #111; border: 4px solid var(--monster-purple); padding: 30px;
+            color: #ccc; font-size: 0.8rem; line-height: 1.8;
+        }
+        .lesson-summary h3 { color: var(--monster-green); margin-bottom: 15px; font-size: 1rem; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .btn-copy { margin-top: 20px; padding: 15px 30px; background: var(--monster-green); color: #000; font-family: var(--font-pixel); border: 4px solid #fff; cursor: pointer; }
+
+        .hidden { display: none !important; }
+        .transparent-target { opacity: 0; transition: opacity 0.2s; }
+    </style>
+</head>
+<body>
+
+    <!-- Modal - Highest Z-Index -->
+    <div id="modal-wrap">
+        <div class="modal-box pixel-border">
+            <div class="modal-text" id="modal-content">작전 보고: 이 기획을 최종 승인하시겠습니까?</div>
+            <div class="modal-btns">
+                <button class="btn-modal yes" id="modal-yes">YES</button>
+                <button class="btn-modal no" onclick="closeModal()">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-left">
+            <span class="sheet-title">바이브코딩 시뮬레이션: 마왕군 스타트업</span>
+        </div>
+        <div class="nav-right">
+            <div class="nav-links" id="nav-links">
+                <a href="../../index.html" class="nav-link">홈</a>
+                <a href="vibecoding.html" class="nav-link">시뮬레이션</a>
+                <a href="../04_gas_crud/gas_hub.html" class="nav-link">GAS</a>
+                <a href="../app_planner.html" class="nav-link">앱 플래너</a>
+                <a href="monster_startup_guide.html" class="nav-link" style="color:var(--monster-green);">게임 가이드</a>
+                <a href="../tutorial_hub.html" class="nav-link">학습 가이드</a>
+            </div>
+            <button class="sound-toggle" onclick="event.stopPropagation(); toggleBGM()" id="sound-btn">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <audio id="bgm-player" src="assets/Sunrise_at_the_Castle_Gate.mp3" loop></audio>
+
+    <div id="narrative-wrap" class="overlay-wrap" onclick="handleNarrativeClick()">
+        <div class="overlay-box">
+            <div id="narrative-img-wrap" style="height: 300px; margin-bottom: 35px; display: flex; justify-content: center;">
+                <img id="narrative-img" src="" class="transparent-target" style="height: 100%; object-fit: contain;">
+            </div>
+            <div class="overlay-text" id="narrative-text">...</div>
+            <div class="click-hint">CLICK TO PROCEED</div>
+        </div>
+    </div>
+
+    <div id="setup-wrap">
+        <img src="assets/angry_overlord_pixel_1777947150969.png" class="title-char char-overlord transparent-target">
+        <img src="assets/monster_ai_secretary_1777946372077.png" class="title-char char-aiden transparent-target">
+        <img src="assets/orc_pixel_member_1777946394304.png" class="title-char char-orc transparent-target">
+        <img src="assets/skeleton_pixel_member_1777946415693.png" class="title-char char-skel transparent-target">
+        <div class="setup-inner">
+            <div class="setup-header">
+                <h1>MONSTER STARTUP</h1>
+                <p>사악한 천재 기획팀이여, 부대 명칭을 정하라!</p>
+            </div>
+            <div class="pixel-border bento-card">
+                <label class="input-label">SQUAD NAME (부대 명칭)</label>
+                <input type="text" id="team-name" placeholder="부대 이름을 입력하세요...">
+                <div style="display:flex; gap:15px;">
+                    <button class="btn-start" style="flex:1;" onclick="startMission()">MISSION START!</button>
+                    <button class="btn-start" style="flex:1; background:var(--monster-purple);" onclick="location.href='monster_startup_guide.html'">GUIDE SLIDE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-container">
+        <div class="workspace">
+            <div class="nav-steps">
+                <div class="n-step" id="step-1"></div><div class="n-step" id="step-2"></div><div class="n-step" id="step-3"></div>
+                <div class="n-step" id="step-4"></div><div class="n-step" id="step-5"></div><div class="n-step" id="step-6"></div>
+            </div>
+            <div class="ws-header">
+                <h2 class="ws-title" id="ws-title">QUEST START</h2>
+                <p class="ws-desc" id="ws-desc">...</p>
+            </div>
+            <div id="form-area"></div>
+            <div class="action-bar">
+                <button class="btn-game prev" onclick="prevStep()">PREV</button>
+                <button class="btn-game next" onclick="nextStep()">NEXT PHASE</button>
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="pixel-border" style="padding:20px;">
+                <div style="font-size:0.9rem; color:var(--monster-green);">MISSION PROGRESS</div>
+                <div class="metric-bar"><div class="metric-fill" id="f-logic"></div></div>
+                <div style="font-size:0.9rem; color:var(--monster-red); margin-top:15px;">TEAM CONSENSUS</div>
+                <div class="metric-bar"><div class="metric-fill" id="f-comm"></div></div>
+            </div>
+            <div id="dialogue-area">
+                <div class="aiden-portrait"><img src="assets/monster_ai_secretary_1777946372077.png" class="transparent-target" id="aiden-portrait-img"></div>
+                <div class="dialogue-box">
+                    <div class="dialogue-name">AIDEN</div>
+                    <div class="dialogue-content" id="dialogue-text">...</div>
+                    <div class="next-indicator">▼</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-wrap">
+        <h1 style="color:var(--monster-red); font-size:3rem; margin-bottom:20px;">MISSION COMPLETE</h1>
+        <div style="color:var(--monster-green); font-size:1.5rem; margin-bottom:20px;">SYNERGY SCORE: <span id="final-score">99</span></div>
+        <div class="result-container">
+            <div id="mermaid-result" style="width:100%;"></div>
+            <div class="prd-box" id="final-prd">...</div>
+            <div class="lesson-summary">
+                <h3>VIBE CODING: PLANNING MASTER GUIDE</h3>
+                <p><strong>1. Persona (타겟):</strong> 누구를 위한 앱인지 정의하는 것은 모든 기획의 시작입니다. 사용자의 지능, 환경, 불편함을 구체화할수록 기능은 날카로워집니다.</p>
+                <p><strong>2. Pain Point (문제):</strong> 기술이 아닌 '고통'에서 시작하십시오. 사용자가 가장 아파하는 부분을 긁어줄 때 비로소 앱은 필수품이 됩니다.</p>
+                <p><strong>3. MVP (핵심 기능):</strong> 모든 기능을 다 넣으려는 욕심은 기획의 적입니다. 가장 본질적인 기능 3가지만으로 승부를 보는 것이 스타트업의 핵심입니다.</p>
+                <p><strong>4. UX/UI (경험):</strong> 디자인은 아름다움 이전에 '도구'입니다. 사용자가 생각하지 않고도 목표를 달성할 수 있는 직관적인 흐름을 설계하십시오.</p>
+            </div>
+            <button class="btn-copy" onclick="copyPRD()">COPY EVIL PLAN + GUIDE</button>
+            <button class="btn-start" style="margin-top:20px; background:var(--monster-green);" onclick="location.href='2-planner.html'">다음 단계: 기획서 작성하기 →</button>
+            <button class="btn-start" style="margin-top:12px;" onclick="location.reload()">REBOOT SYSTEM</button>
+        </div>
+    </div>
+
+    <script>
+        const PHASES = [
+            { 
+                title: 'QUEST 01: PROBLEM', 
+                desc: '던전이 직면한 가장 심각한 문제를 선택하십시오.', 
+                preStory: ["금고가 텅 비었다니! 용사들의 공략 유출로 우리 던전이 관광지가 되어버렸군.", "마왕님께 보고할 치명적인 위기를 선택하게. 팀원들과 현재 상황을 논의해보게나."],
+                preImage: 'assets/bankrupt_dungeon_pixel_1777947106918.png',
+                postStory: ["좋아, 위기 상황이 공유되었군. 마왕님께서 분노로 번개를 내리치기 시작하셨네.", "이제 이 난관을 극복할 앱의 컨셉을 잡아야 할 때일세."],
+                postImage: 'assets/angry_overlord_pixel_1777947150969.png',
+                options: ["용사들의 유튜브 공략 유출로 인한 함정 무력화", "부하 몬스터들의 기강 해이와 통제 불능 상태 발생", "던전 내부 보물 도난으로 인한 파산 위기", "마왕군의 디지털 전환(DX) 실패로 인한 구식 관리 시스템"],
+                lesson: '문제 정의는 기획의 80%일세. 해결해야 할 "불편함"이 명확해야 앱의 가치가 빛나는 법이지.'
+            },
+            { 
+                title: 'QUEST 02: CONCEPT', 
+                desc: '문제를 해결할 앱의 명칭과 핵심 컨셉을 정하십시오.', 
+                preStory: ["문제를 정했으니 이제 해결책을 구상할 때군. 어떤 미친 아이디어로 던전을 디지털화할 것인가?", "우리의 비전을 한 줄로 정의해보세. 가장 사악한 놈으로 말이야."],
+                preImage: 'assets/cool_architect_pixel_1777947168739.png',
+                postStory: ["컨셉이 확정되었군! 기획팀의 창의성에 AIDEN도 감탄했네.", "하지만 이 앱을 누가 쓰게 될지가 더 중요하지. 저기 멍청한 오크들을 보게."],
+                postImage: 'assets/orc_pixel_member_1777946394304.png',
+                options: [
+                    "용사 지옥 (Hero Hell): 실시간 용사 추적 및 자동 함정 매칭 시스템",
+                    "몬스터 잡스 (Monster Jobs): 몬스터 전용 성과급 기반 던전 관리 플랫폼",
+                    "트레저 금고 (Treasure Safe): 블록체인 기반 던전 보물 보안 관리 솔루션",
+                    "에이든 OS (AIDEN OS): AI 비서 AIDEN 통합 던전 운영 OS"
+                ],
+                lesson: '컨셉은 앱의 정체성일세. 이름만 들어도 어떤 사악한 기능을 할지 떠올릴 수 있어야 하네.'
+            },
+            { 
+                title: 'QUEST 03: TARGET', 
+                desc: '이 앱을 주로 사용할 몬스터 계층을 선택하십시오.', 
+                preStory: ["이 앱을 주로 사용하게 될 '불쌍한 영혼'들을 골라보게.", "오크용은 단순해야 하고, 스켈레톤용은 정교해야 하겠지?"],
+                preImage: 'assets/orc_pixel_member_1777946394304.png',
+                postStory: ["타겟이 정해졌으니 무기고를 열 시간일세.", "그들에게 가장 필요한 '필살기'를 장착해줘야겠어."],
+                postImage: 'assets/monster_strike_pixel_1777947136443.png',
+                options: ["현장 근로 중심의 저지능 오크/고블린 경비부대", "중앙 제어실의 엘리트 스켈레톤 마법사단", "던전 내부에서 가사 노동을 전담하는 슬라임군", "마왕님께 직접 보고를 올리는 고위 간부진"],
+                lesson: '사용자를 모르면 기획은 고블린에게 지도를 주는 것과 같네. 타겟의 수준에 맞는 설계가 필수적이지.'
+            },
+            { 
+                title: 'QUEST 04: FEATURES', 
+                desc: '가장 핵심적인 사악한 기능을 선택하십시오.', 
+                preStory: ["무기고로 가자! 용사들을 멘붕에 빠뜨릴 극악무도한 기능을 장착할 시간이다.", "딱 3가지만 고른다면 무엇이 되겠나?"],
+                preImage: 'assets/monster_strike_pixel_1777947136443.png',
+                postStory: ["기능이 완벽해! 용사들의 비명이 벌써부터 들리는군.", "하지만 디자인이 후지면 마왕님께 욕먹겠지. 디자인실로 이동하세."],
+                postImage: 'assets/cool_architect_pixel_1777947168739.png',
+                options: ["가짜 보물상자 폭발 및 용사 멘탈 붕괴 알림", "몬스터 연장 근무 강제 배정 및 GPS 감시 기능", "용사 장비 자동 분해 및 마왕군 자금 환수 시스템", "침입자 급수별 맞춤형 함정 원격 발동 패널"],
+                lesson: '핵심 기능(MVP)에 집중하게. 너무 많은 기능은 오히려 앱을 멍청하게 만든다네.'
+            },
+            { 
+                title: 'QUEST 05: UI DESIGN', 
+                desc: '인터페이스의 디자인 테마를 결정하십시오.', 
+                preStory: ["디자인실에 도착했네. 기획의 화룡점정을 찍을 차례군.", "피 냄새 진동하는 세련된 UI를 골라보라고."],
+                preImage: 'assets/cool_architect_pixel_1777947168739.png',
+                postStory: ["아름답군! 이 정도면 마왕님께서도 기뻐하실 거야.", "자, 마지막으로 이 기획을 어떻게 세상에 배포할지 정해야 하네."],
+                postImage: 'assets/angry_overlord_pixel_1777947150969.png',
+                options: ["피빛 빨강과 암흑색 중심의 공포 테마", "가독성을 극대화한 독성 초록색 네온 테마", "마법 서판 느낌의 고전적이고 권위적인 테마", "간결함과 효율을 중시한 미니멀리즘 다크 테마"],
+                lesson: 'UI는 사용자와의 대화 수단일세. 몬스터들의 특성을 고려한 색상과 아이콘이 기획의 완성도를 높이지.'
+            },
+            { 
+                title: 'QUEST 06: FINAL PROTOCOL', 
+                desc: '최종 기획안을 승인하십시오.', 
+                preStory: ["드디어 옥좌 앞이군. 이 기획서가 마왕군을 다시 세계 최강으로 만들 수 있을까?", "결정의 시간일세. 팀의 운명을 걸고 선택하게."],
+                preImage: 'assets/angry_overlord_pixel_1777947150969.png',
+                postStory: ["축하하네! 기획이 완성되었어! 이제 세상을 지배할 일만 남았군.", "마왕님께서 당신의 기획서를 아주 흡족해하고 계시네."],
+                postImage: 'assets/cool_architect_pixel_1777947168739.png',
+                options: ["마왕님께 즉시 보고 및 전 던전 배포", "베타 테스트를 거쳐 소수 정예 던전부터 적용", "비밀 프로젝트로 부쳐 경쟁 마왕군에 역정보 흘리기"],
+                lesson: '마무리는 설득일세. 당신의 기획이 왜 세계 정복의 지름길인지 다시 한번 각인시키게!'
+            }
+        ];
+
+        const S = {
+            phase: 0, teamName: '', data: {}, 
+            narrativeQueue: [], narrativeStep: 0, showingLesson: false, currentScore: 0,
+            typingTimer: null, dialogueTimer: null,
+            introSequence: [
+                { text: "서기 666년... 던전 산업은 유례없는 대공황에 직면했다.", img: 'assets/bankrupt_dungeon_pixel_1777947106918.png' },
+                { text: "용사들은 유튜브 공략을 보며 우리 집을 안방처럼 드나들고 있지.", img: 'assets/hero_knight_pixel_1777947119473.png' },
+                { text: "부하 몬스터들은 사기를 잃고 흩어지는데, 마왕님은 번개를 내리치신다!", img: 'assets/angry_overlord_pixel_1777947150969.png' },
+                { text: "이대로는 안 된다. 우리에겐 혁신적인 '디지털 전환'이 필요하다.", img: 'assets/cool_architect_pixel_1777947168739.png' },
+                { text: "사악한 천재 기획팀이여, 당신들의 손으로 '스마트 던전' 앱을 탄생시켜라!", img: 'assets/cool_architect_pixel_1777947168739.png' }
+            ]
+        };
+
+        function updateNarrativeText(text) {
+            const target = document.getElementById('narrative-text'); 
+            target.innerHTML = ''; 
+            if (S.typingTimer) clearTimeout(S.typingTimer);
+            let i = 0;
+            function type() { 
+                if (i < text.length) { 
+                    target.innerHTML += text.charAt(i); 
+                    i++; 
+                    S.typingTimer = setTimeout(type, 30); 
+                } 
+            }
+            type();
+        }
+
+        async function cleanImage(src) {
+            return new Promise((resolve) => {
+                const tempImg = new Image(); tempImg.crossOrigin = "anonymous"; tempImg.src = src;
+                tempImg.onload = () => {
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    canvas.width = tempImg.naturalWidth; canvas.height = tempImg.naturalHeight; ctx.drawImage(tempImg, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) { if (data[i] > 230 && data[i+1] > 230 && data[i+2] > 230) data[i+3] = 0; }
+                    ctx.putImageData(imageData, 0, 0); resolve(canvas.toDataURL());
+                };
+                tempImg.onerror = () => resolve(src);
+            });
+        }
+
+        function showNarrative(items, onFinish) {
+            S.narrativeQueue = items; S.narrativeStep = 0; S.onNarrativeFinish = onFinish;
+            document.getElementById('narrative-wrap').style.display = 'flex';
+            processNarrativeStep();
+        }
+
+        async function processNarrativeStep() {
+            const item = S.narrativeQueue[S.narrativeStep];
+            if (!item) { document.getElementById('narrative-wrap').style.display = 'none'; if(S.onNarrativeFinish) S.onNarrativeFinish(); return; }
+            const imgEl = document.getElementById('narrative-img');
+            const cleanData = await cleanImage(typeof item === 'string' ? S.lastImg : item.img);
+            if (item.img) S.lastImg = item.img;
+            imgEl.src = cleanData; imgEl.style.opacity = '1';
+            updateNarrativeText(typeof item === 'string' ? item : item.text);
+        }
+
+        function handleNarrativeClick() { S.narrativeStep++; processNarrativeStep(); }
+
+        function startMission() {
+            const t = document.getElementById('team-name').value;
+            if(!t) return alert('부대 명칭을 입력하라!');
+            S.teamName = t;
+            document.getElementById('setup-wrap').style.display = 'none';
+            document.getElementById('main-container').classList.add('active');
+            S.phase = 1;
+            const p = PHASES[0];
+            showNarrative(p.preStory.map(text => ({ text, img: p.preImage })), () => updateStepUI());
+        }
+
+        function updateStepUI() {
+            const p = PHASES[S.phase - 1];
+            document.getElementById('ws-title').innerText = p.title;
+            document.getElementById('ws-desc').innerText = p.desc;
+            for(let i=1; i<=6; i++) { const el = document.getElementById(`step-${i}`); if(el) el.className = 'n-step' + (i===S.phase ? ' active' : (i<S.phase ? ' done' : '')); }
+            renderOptions(); updateDialogue("팀원들과 상의하여 최적의 사악한 작전을 결정하게나.");
+            updateMetrics();
+        }
+
+        function selectOption(idx, val) {
+            const wrap = document.getElementById('modal-wrap');
+            const content = document.getElementById('modal-content');
+            content.innerText = `${idx + 1}번 작전: "${val}"\n\n이 기획을 최종 승인하시겠습니까?`;
+            wrap.style.display = 'flex';
+            document.getElementById('modal-yes').onclick = (e) => {
+                e.stopPropagation();
+                S.data[S.phase] = val;
+                if (S.phase === 2) { const namePart = val.split(":")[0].split("(")[0].trim(); S.data.appName = namePart; }
+                wrap.style.display = 'none';
+                renderOptions();
+                updateDialogue(`오! ${idx + 1}번 작전을 선택했군. "${val}"... 팀원 전원이 합의했으니 즉시 추진하겠네.`);
+                updateMetrics();
+            };
+        }
+
+        function closeModal() { document.getElementById('modal-wrap').style.display = 'none'; }
+
+        function renderOptions() {
+            const area = document.getElementById('form-area'); area.innerHTML = '';
+            const p = PHASES[S.phase - 1];
+            
+            if (S.phase === 2) {
+                const nameWrapper = document.createElement('div');
+                nameWrapper.style.marginBottom = '30px';
+                nameWrapper.innerHTML = `<label class="input-label">APP NAME (앱 명칭을 정해주세요)</label><input type="text" id="app-name-input" placeholder="여기에 앱 이름을 입력..." oninput="S.data.appName=this.value" value="${S.data.appName || ''}">`;
+                area.appendChild(nameWrapper);
+            }
+
+            const container = document.createElement('div'); container.className = 'options-container';
+            p.options.forEach((opt, idx) => {
+                const card = document.createElement('button');
+                card.className = `option-card pixel-border ${S.data[S.phase] === opt ? 'selected' : ''}`;
+                card.innerHTML = `${idx+1}. ${opt}`;
+                card.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    selectOption(idx, opt); 
+                };
+                container.appendChild(card);
+            });
+            area.appendChild(container);
+            
+            // 직접 입력 섹션 강화
+            const customWrapper = document.createElement('div');
+            customWrapper.className = 'custom-input-box pixel-border';
+            customWrapper.innerHTML = `
+                <label class="input-label" style="color:var(--monster-red);">⌨️ DIRECT ENTRY (원하는 내용을 직접 입력하세요)</label>
+                <input type="text" placeholder="선택지에 없는 사악한 아이디어를 직접 입력..." oninput="S.data[S.phase]=this.value" value="${S.data[S.phase] || ''}">
+                <p style="font-size:0.7rem; color:#888; margin-top:-20px;">* 입력창을 클릭하여 키보드로 내용을 작성하세요.</p>
+            `;
+            area.appendChild(customWrapper);
+        }
+
+        function updateMetrics() {
+            const progress = (S.phase / 6) * 100;
+            document.getElementById('f-logic').style.width = progress + '%';
+            document.getElementById('f-comm').style.width = (S.data[S.phase] ? 100 : 0) + '%';
+            S.currentScore = Math.floor(progress);
+        }
+
+        function nextStep() {
+            if (S.phase === 2 && !S.data.appName) return alert("앱 이름을 먼저 정해야 하네!");
+            if (!S.data[S.phase]) return alert("작전을 결정해야 하네!");
+            const p = PHASES[S.phase - 1];
+            if (!S.showingLesson) {
+                updateDialogue(`[레슨] ${p.lesson}`);
+                S.showingLesson = true;
+                document.querySelector('.btn-game.next').innerText = "CONFIRM & MOVE";
+            } else {
+                S.showingLesson = false;
+                document.querySelector('.btn-game.next').innerText = "NEXT PHASE";
+                showNarrative(p.postStory.map(text => ({ text, img: p.postImage })), () => {
+                    if(S.phase < 6) { S.phase++; const nextP = PHASES[S.phase-1]; showNarrative(nextP.preStory.map(text => ({ text, img: nextP.preImage })), () => updateStepUI()); }
+                    else finishMission();
+                });
+            }
+        }
+
+        function prevStep() { if(S.phase > 1) { S.showingLesson = false; S.phase--; updateStepUI(); } }
+
+        function finishMission() {
+            document.getElementById('main-container').style.display = 'none';
+            document.getElementById('result-wrap').style.display = 'flex';
+            document.getElementById('final-score').innerText = S.currentScore;
+            const prd = `[마왕군 기획서 - PRD]\n\n부대명: ${S.teamName}\n앱 명칭: ${S.data.appName}\n문제 정의: ${S.data[1]}\n핵심 컨셉: ${S.data[2]}\n타겟 분석: ${S.data[3]}\n핵심 기능: ${S.data[4]}\n디자인 테마: ${S.data[5]}\n최종 전략: ${S.data[6]}\n\n------------------------------\n[VIBE CODING PLANNING GUIDE]\n1. Persona: 누구를 위한 앱인지 명확히 하라.\n2. Pain Point: 사용자의 고통에서 해결책을 찾아라.\n3. MVP: 가장 본질적인 핵심 기능에 집중하라.\n4. UI/UX: 직관적인 도구로서의 디자인을 완성하라.\n------------------------------\n시너지 점수: ${S.currentScore}%`;
+            document.getElementById('final-prd').innerText = prd;
+            document.getElementById('mermaid-result').innerHTML = `<div style="background:#000; padding:20px;">graph LR\n  A[${S.teamName}] --> B[${S.data.appName}]</div>`;
+            mermaid.contentLoaded();
+
+            if (window.StudioBridge) {
+                StudioBridge.save({
+                    teamName: S.teamName,
+                    appName: S.data.appName,
+                    simulationScore: S.currentScore,
+                    simulationPRD: prd,
+                });
+            }
+        }
+
+        function copyPRD() { navigator.clipboard.writeText(document.getElementById('final-prd').innerText).then(() => alert('복사되었습니다!')); }
+
+        function toggleBGM() {
+            const bgm = document.getElementById('bgm-player'); const btn = document.getElementById('sound-btn');
+            if (bgm.volume > 0) { bgm.volume = 0; btn.innerHTML = '<i class="fas fa-volume-mute"></i>'; }
+            else { bgm.volume = 1; if (bgm.paused) bgm.play(); btn.innerHTML = '<i class="fas fa-volume-up"></i>'; }
+        }
+
+        function toggleMenu() {
+            const links = document.getElementById('nav-links');
+            links.classList.toggle('active');
+        }
+
+        function updateDialogue(text) {
+            const target = document.getElementById('dialogue-text'); 
+            target.innerHTML = ''; 
+            if (S.dialogueTimer) clearTimeout(S.dialogueTimer);
+            let i = 0;
+            function type() { 
+                if (i < text.length) { 
+                    target.innerHTML += text.charAt(i); 
+                    i++; 
+                    S.dialogueTimer = setTimeout(type, 30); 
+                } 
+            }
+            type();
+        }
+
+        function makeTransparent(img) {
+            if (img.dataset.processed || !img.src) return;
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            const run = () => {
+                try {
+                    img.dataset.processed = "true"; canvas.width = img.naturalWidth; canvas.height = img.naturalHeight; ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) { if (data[i] > 230 && data[i+1] > 230 && data[i+2] > 230) data[i+3] = 0; }
+                    ctx.putImageData(imageData, 0, 0); img.src = canvas.toDataURL(); img.style.opacity = '1';
+                } catch(e) {}
+            };
+            if (img.complete) run(); else img.onload = run;
+        }
+
+        window.onload = async () => {
+            const bgm = document.getElementById('bgm-player');
+            document.addEventListener('click', () => { if(bgm.paused) bgm.play().catch(()=>{}); }, {once: true});
+            showNarrative(S.introSequence, () => { document.getElementById('setup-wrap').style.display = 'flex'; });
+            
+            // Initial processing
+            document.querySelectorAll('.transparent-target').forEach(makeTransparent);
+        };
+
+        // Optimized image processing using MutationObserver
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) {
+                        if (node.classList.contains('transparent-target')) makeTransparent(node);
+                        node.querySelectorAll('.transparent-target').forEach(makeTransparent);
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+    /* Notion Feedback System (Secure Version) */
+    const NOTION_CONFIG = {
+        apiEndpoint: '/api/feedback',
+        appName: 'Monster Startup'
+    };
+
+    function toggleFeedbackModal() {
+        const modal = document.getElementById('feedback-modal');
+        modal.classList.toggle('hidden-stage-feedback');
+    }
+
+    async function submitFeedback() {
+        const content = document.getElementById('feedback-content').value.trim();
+        const btn = document.getElementById('feedback-submit-btn');
+
+        if (!content) {
+            alert('보고 내용을 입력하십시오!');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = 'REPORTING...';
+
+        try {
+            const response = await fetch(NOTION_CONFIG.apiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: content,
+                    appName: NOTION_CONFIG.appName
+                })
+            });
+
+            if (response.ok) {
+                alert('기획 보고가 성공적으로 전송되었습니다! 마왕님께서 흡족해하십니다.');
+                document.getElementById('feedback-content').value = '';
+                toggleFeedbackModal();
+            } else {
+                const error = await response.json();
+                alert('보고 실패: ' + (error.message || '시스템 오류'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('오류 발생: 서버리스 함수가 작동하지 않거나 배포 환경이 아닐 수 있습니다.');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = '작전 보고 전송하기';
+        }
+    }
+</script>
+
+<style>
+    /* Feedback UI Styles (Monster Startup Theme) */
+    .hidden-stage-feedback { display: none !important; }
+    
+    .feedback-fab {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #000;
+        color: var(--monster-green);
+        padding: 15px 25px;
+        border: 4px solid var(--monster-green);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        box-shadow: 8px 8px 0 var(--monster-purple);
+        z-index: 120000;
+        transition: all 0.2s;
+        font-family: var(--font-pixel);
+    }
+    .feedback-fab:hover {
+        transform: translate(-4px, -4px);
+        box-shadow: 12px 12px 0 var(--monster-purple);
+        color: #fff;
+        border-color: #fff;
+    }
+    .feedback-fab i { font-size: 1.2rem; }
+    .feedback-fab span { font-size: 0.7rem; font-weight: 400; }
+
+    #feedback-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 200000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(13, 2, 33, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .feedback-modal-content {
+        background: #000;
+        border: 6px solid var(--monster-green);
+        width: 100%;
+        max-width: 500px;
+        padding: 40px;
+        box-shadow: 0 0 50px rgba(0, 255, 65, 0.2);
+        position: relative;
+    }
+
+    .feedback-header h3 {
+        font-family: var(--font-pixel);
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: var(--monster-green);
+        text-shadow: 3px 3px 0 var(--monster-purple);
+    }
+
+    .feedback-header p { font-size: 0.8rem; color: #888; margin-bottom: 30px; line-height: 1.6; }
+
+    .feedback-body textarea {
+        width: 100%;
+        height: 200px;
+        background: #0d1117;
+        border: 4px solid #333;
+        padding: 20px;
+        color: #fff;
+        font-family: var(--font-pixel);
+        font-size: 0.8rem;
+        resize: none;
+        margin-bottom: 25px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .feedback-body textarea:focus {
+        border-color: var(--monster-green);
+    }
+
+    .feedback-submit-btn {
+        width: 100%;
+        padding: 20px;
+        background: var(--monster-green);
+        color: #000;
+        border: 4px solid #fff;
+        font-weight: 800;
+        font-size: 0.9rem;
+        font-family: var(--font-pixel);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .feedback-submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 255, 65, 0.3); }
+    .feedback-submit-btn:active { transform: translateY(0); }
+    
+    .feedback-footer { font-size: 0.6rem; color: #555; text-align: center; margin-top: 25px; line-height: 1.8; }
+</style>
+
+<!-- Feedback FAB -->
+<div class="feedback-fab" onclick="toggleFeedbackModal()">
+    <i class="fas fa-terminal"></i>
+    <span>REPORT BUG</span>
+</div>
+
+<!-- Feedback Modal -->
+<div id="feedback-modal" class="hidden-stage-feedback">
+    <div class="feedback-modal-content pixel-border">
+        <div class="feedback-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h3>MISSION LOG</h3>
+                <p>앱 기획 개선안이나 발견된 오류를 마왕군 사령부에 보고하십시오.</p>
+            </div>
+            <button onclick="toggleFeedbackModal()" style="background:none; border:none; color:var(--monster-red); cursor:pointer; font-size:32px;">×</button>
+        </div>
+        <div class="feedback-body">
+            <textarea id="feedback-content" placeholder="예: 몬스터 관리 기능에 이런 옵션이 추가되면 좋겠습니다!"></textarea>
+            <button id="feedback-submit-btn" class="feedback-submit-btn" onclick="submitFeedback()">작전 보고 전송하기</button>
+        </div>
+        <p class="feedback-footer">
+            귀하의 보고서는 암호화되어 노션 데이터베이스로 즉시 전송됩니다.<br>공로가 인정되면 마왕님께 특별 하사품을 받을 수 있습니다.
+        </p>
+    </div>
+</div>
+</body>
+</html>
