@@ -83,5 +83,20 @@
     window.open(CODECANVAS_URL, '_blank');
   }
 
-  global.StudioBridge = { load, save, clear, buildCodePrompt, sendToCodeCanvas, CODECANVAS_URL };
+  // 학생 결과물을 ClassLog에 제출한다. 키는 /api/submit(서버) 안에만 있고
+  // 여기서는 그냥 같은 origin의 프록시를 호출한다.
+  async function submitResult(params) {
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw new Error((data && (data.error || data.message)) || `제출 실패 (${res.status})`);
+    }
+    return data;
+  }
+
+  global.StudioBridge = { load, save, clear, buildCodePrompt, sendToCodeCanvas, submitResult, CODECANVAS_URL };
 })(window);
