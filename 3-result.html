@@ -119,7 +119,7 @@
   }
 
   async function submitToClassLog() {
-    const title = data.appName || (data.plannerData && data.plannerData.app_name1) || '새 프로젝트';
+    const title = data.appName || (data.plannerData && data.plannerData.app_name1) || StudioBridge.defaultTitle(data);
     submitStatus.textContent = '제출 중...';
     try {
       await StudioBridge.submitResult({
@@ -140,7 +140,7 @@
   }
 
   function startInCodeCanvas() {
-    const title = data.appName || (data.plannerData && data.plannerData.app_name1) || '새 프로젝트';
+    const title = data.appName || (data.plannerData && data.plannerData.app_name1) || StudioBridge.defaultTitle(data);
     StudioBridge.sendToCodeCanvas(prompt, title);
   }
 </script>

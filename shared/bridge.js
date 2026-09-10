@@ -60,27 +60,33 @@
     return lines.join('\n');
   }
 
+  // 학생이 앱 이름을 정하지 않은 경우("새 프로젝트" 같은 의미 없는 값 대신) 학생 이름으로 기본 제목을 만든다.
+  function defaultTitle(data) {
+    return data.studentName ? `${data.studentName}의 프로젝트` : '새 프로젝트';
+  }
+
   function sendToCodeCanvas(prdText, title) {
     const data = load();
+    const resolvedTitle = title || data.appName || defaultTitle(data);
     const html = [
       '<!DOCTYPE html>',
       '<html lang="ko">',
       '<head>',
       '<meta charset="UTF-8">',
-      '<title>' + (title || '새 프로젝트') + '</title>',
+      '<title>' + resolvedTitle + '</title>',
       '<!--',
       prdText || '',
       '-->',
       '</head>',
       '<body>',
-      '  <h1>Hello, ' + (title || 'CodeCanvas') + '!</h1>',
+      '  <h1>Hello, ' + resolvedTitle + '!</h1>',
       '</body>',
       '</html>',
     ].join('\n');
 
     const project = {
       id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('id_' + Date.now()),
-      title: title || (data.appName || '새 프로젝트'),
+      title: resolvedTitle,
       code: {
         html: html,
         css: 'body {\n  font-family: sans-serif;\n  padding: 40px;\n}',
@@ -116,5 +122,5 @@
     return data;
   }
 
-  global.StudioBridge = { load, save, clear, captureEntryFromURL, buildCodePrompt, sendToCodeCanvas, submitResult, CODECANVAS_URL };
+  global.StudioBridge = { load, save, clear, captureEntryFromURL, buildCodePrompt, sendToCodeCanvas, submitResult, defaultTitle, CODECANVAS_URL };
 })(window);
