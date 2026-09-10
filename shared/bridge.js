@@ -93,7 +93,12 @@
     };
 
     localStorage.setItem('codecanvas_current_project', JSON.stringify(project));
-    window.open(CODECANVAS_URL, '_blank');
+
+    const qs = new URLSearchParams();
+    if (data.classlogEntryCode) qs.set('entryCode', data.classlogEntryCode);
+    if (data.studentName) qs.set('studentName', data.studentName);
+    const url = qs.toString() ? `${CODECANVAS_URL}?${qs.toString()}` : CODECANVAS_URL;
+    window.open(url, '_blank');
   }
 
   // 학생 결과물을 ClassLog에 제출한다. 키는 /api/submit(서버) 안에만 있고
