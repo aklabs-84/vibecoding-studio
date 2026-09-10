@@ -26,6 +26,19 @@
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  // ClassLog 교실에서 진입할 때 URL 쿼리(?entryCode=...&studentName=...)로
+  // 넘어온 값을 저장한다. entryCode가 있어야 submitResult()로 제출 가능하다.
+  function captureEntryFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const entryCode = params.get('entryCode');
+    const studentName = params.get('studentName');
+    if (!entryCode) return load();
+    return save({
+      classlogEntryCode: entryCode,
+      studentName: studentName || load().studentName || '',
+    });
+  }
+
   function buildCodePrompt(data) {
     const lines = [];
     lines.push('아래 기획서(PRD)를 바탕으로 실행 가능한 단일 HTML 파일(HTML/CSS/JS 포함)을 만들어줘.');
@@ -98,5 +111,5 @@
     return data;
   }
 
-  global.StudioBridge = { load, save, clear, buildCodePrompt, sendToCodeCanvas, submitResult, CODECANVAS_URL };
+  global.StudioBridge = { load, save, clear, captureEntryFromURL, buildCodePrompt, sendToCodeCanvas, submitResult, CODECANVAS_URL };
 })(window);
