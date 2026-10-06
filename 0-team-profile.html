@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 협업 프로필 만들기 - 바이브코딩 스튜디오</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #f4f7ff;
+    --bg2: #eaf1ff;
+    --surface: #ffffff;
+    --surface2: #f3f6fd;
+    --border: #dfe6f5;
+    --text: #1b2340;
+    --text-muted: #6b7690;
+    --accent1: #3b82f6;
+    --accent2: #0ea5e9;
+    --accent3: #06b6d4;
+    --accent-warm: #fbbf24;
+    --gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 45%, #22d3ee 100%);
+    --shadow-card: 0 4px 18px rgba(30,64,175,0.07);
+    --shadow-card-hover: 0 8px 26px rgba(30,64,175,0.12);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 320px, var(--bg) 100%);
+    color: var(--text);
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+  .hero {
+    padding: 56px 20px 34px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-block; padding: 7px 18px; border-radius: 999px;
+    background: #fff; border: 1px solid rgba(59,130,246,0.35);
+    color: var(--accent1); font-size: 0.82rem; font-weight: 700; margin-bottom: 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .hero h1 { font-size: 2rem; line-height: 1.35; margin: 0 0 14px; color: #10193a; }
+  .hero p.sub { color: var(--text-muted); font-size: 1rem; max-width: 520px; margin: 0 auto; line-height: 1.7; }
+
+  section { padding: 22px 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 30px 28px; margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .card h2 { font-size: 1.2rem; margin: 0 0 8px; color: #10193a; }
+  .card .step-num {
+    display: inline-block; color: #fff; background: var(--gradient);
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 10px; padding: 4px 12px; border-radius: 999px;
+  }
+  .card p.hint { color: var(--text-muted); font-size: 0.88rem; margin: 6px 0 20px; line-height: 1.6; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .field input[type="text"] {
+    width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 0.98rem;
+  }
+  .field input[type="text"]:focus { outline: none; border-color: var(--accent1); background: #fff; }
+
+  .q-block {
+    margin-bottom: 18px; padding: 20px 20px 22px; border-radius: 16px;
+    background: var(--surface2); border: 1.5px solid var(--border);
+  }
+  .q-block:last-child { margin-bottom: 0; }
+  .q-title { font-weight: 800; font-size: 1rem; margin-bottom: 14px; color: #10193a; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    padding: 12px 18px; border-radius: 999px; border: 1.5px solid var(--border);
+    background: #fff; color: var(--text); font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: all .15s; user-select: none;
+  }
+  .chip:hover { border-color: var(--accent1); background: #eef4ff; }
+  .chip.selected { background: var(--gradient); border-color: transparent; color: #fff; font-weight: 800; box-shadow: 0 6px 16px rgba(37,99,235,0.35); }
+  .chip-other-input {
+    display: none; margin-top: 12px; width: 100%; padding: 12px 14px; border-radius: 12px;
+    border: 1.5px solid var(--border); background: #fff; color: var(--text); font-size: 0.92rem;
+  }
+  .chip-other-input.show { display: block; }
+
+  .btn-primary {
+    display: block; width: 100%; padding: 16px; border-radius: 14px; border: none;
+    background: var(--gradient); color: #fff; font-weight: 800; font-size: 1.02rem; cursor: pointer;
+    box-shadow: 0 10px 24px rgba(37,99,235,0.28);
+  }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+  .btn-secondary {
+    display: block; width: 100%; padding: 14px; border-radius: 14px; margin-top: 10px;
+    border: 1.5px solid var(--border); background: #fff; color: var(--text); font-weight: 600;
+    font-size: 0.92rem; cursor: pointer;
+  }
+  .btn-secondary:hover { border-color: var(--accent1); background: #eef4ff; }
+
+  #promptBox {
+    width: 100%; min-height: 220px; padding: 16px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: #10193a; color: #7dd3fc; font-size: 0.82rem; line-height: 1.7;
+    font-family: 'SFMono-Regular', Consolas, monospace; white-space: pre-wrap; resize: vertical;
+  }
+  #aiResponseInput {
+    width: 100%; min-height: 140px; padding: 16px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 0.94rem; line-height: 1.7; resize: vertical;
+  }
+  #aiResponseInput:focus { outline: none; border-color: var(--accent1); background: #fff; }
+
+  .result-card {
+    display: none;
+    background: var(--surface); border-radius: 26px; overflow: hidden;
+    box-shadow: var(--shadow-card-hover); border: 1px solid var(--border);
+  }
+  .result-card.show { display: block; }
+  .result-card .card-header {
+    background: var(--gradient); padding: 38px 26px 30px; text-align: center; color: #fff;
+  }
+  .result-card .role-emoji { font-size: 3.6rem; margin-bottom: 10px; }
+  .result-card .role-name { font-size: 1.9rem; font-weight: 800; margin-bottom: 6px; }
+  .result-card .role-tagline { font-size: 1rem; opacity: 0.85; }
+  .result-card .card-body { padding: 30px 30px 24px; }
+  .result-card .profile-row {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 22px; padding-bottom: 22px;
+    border-bottom: 1.5px dashed var(--border);
+  }
+  .result-card .profile-avatar {
+    width: 58px; height: 58px; border-radius: 50%; background: var(--surface2);
+    display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;
+  }
+  .result-card .profile-name { font-weight: 800; font-size: 1.3rem; color: #10193a; }
+  .result-card .profile-team { color: var(--text-muted); font-size: 1rem; margin-top: 3px; }
+  .result-card .role-text {
+    text-align: left; background: var(--surface2); border-radius: 14px; padding: 20px 22px;
+    font-size: 1.05rem; line-height: 1.85; color: var(--text);
+  }
+  .result-card .role-text strong { color: #10193a; }
+  .result-card .role-text .ai-heading {
+    font-weight: 800; color: #10193a; font-size: 1.12rem;
+    margin: 18px 0 10px; padding-top: 16px; border-top: 1.5px dashed var(--border);
+  }
+  .result-card .role-text .ai-heading:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .result-card .role-text .ai-list { margin: 0 0 12px; padding-left: 22px; }
+  .result-card .role-text .ai-list li { margin-bottom: 8px; }
+  .result-card .role-text .ai-p { margin: 0 0 12px; }
+  .result-card .card-footer-brand {
+    text-align: center; padding: 16px; font-size: 0.85rem; color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+  .print-row { margin-top: 14px; }
+  .print-hint { text-align: center; color: var(--text-muted); font-size: 0.78rem; margin: 8px 0 0; }
+
+  .nav-row { display: flex; gap: 10px; margin-top: 10px; }
+  .nav-row a { flex: 1; text-decoration: none; }
+
+  footer { text-align: center; padding: 34px 20px 50px; color: #8b96b8; font-size: 0.8rem; }
+
+  @media print {
+    @page { margin: 8mm; }
+    .hero, .card, footer, .no-print { display: none !important; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: none; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wrap { max-width: none; width: 100%; padding: 0; margin: 0; }
+    section { padding: 0; }
+    #resultCard {
+      margin: 0; box-shadow: none; border: none;
+      width: 100%; max-width: none;
+    }
+    #resultCard, #resultCard * {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="hero-badge">🤝 오전 활동 1</span>
+    <h1>나의 AI 협업 프로필 만들기</h1>
+    <p class="sub">아래 질문에 톡톡 골라서 답하면, AI가 나의 협업 스타일을 요약하고 어울리는 역할을 추천해줘요.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+
+    <div class="card">
+      <div class="step-num">STEP 1</div>
+      <h2>기본 정보</h2>
+      <div class="field">
+        <label>이름</label>
+        <input type="text" id="studentName" placeholder="이름을 입력하세요">
+      </div>
+      <div class="field">
+        <label>팀명 (선택)</label>
+        <input type="text" id="teamName" placeholder="예: 1팀, 드림팀 등">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="step-num">STEP 2</div>
+      <h2>질문에 골라서 답해보세요</h2>
+      <p class="hint">정답은 없어요. 나랑 제일 비슷한 걸 하나씩 골라주세요.</p>
+      <div id="questionsWrap"></div>
+    </div>
+
+    <div class="card">
+      <div class="step-num">STEP 3</div>
+      <h2>AI에게 물어보기</h2>
+      <p class="hint">아래 버튼을 누르면 나의 답변이 채워진 질문이 만들어져요. 복사해서 평소 쓰는 AI 앱(제미나이 등)에 붙여넣어보세요.</p>
+      <button class="btn-primary" id="genPromptBtn" onclick="generatePrompt()">① AI 질문 만들기</button>
+      <textarea id="promptBox" style="display:none; margin-top:14px;" readonly></textarea>
+      <button class="btn-secondary" id="copyBtn" style="display:none;" onclick="copyPrompt()">📋 복사하기</button>
+    </div>
+
+    <div class="card" id="pasteCard" style="display:none;">
+      <div class="step-num">STEP 4</div>
+      <h2>AI 답변 붙여넣기</h2>
+      <p class="hint">AI 앱에서 나온 답변 전체를 복사해서 아래에 붙여넣어주세요.</p>
+      <textarea id="aiResponseInput" placeholder="여기에 AI 답변을 붙여넣으세요"></textarea>
+      <button class="btn-primary" style="margin-top:14px;" onclick="completeCard()">② 카드 완성하기</button>
+    </div>
+
+    <div class="result-card" id="resultCard">
+      <div class="card-header">
+        <div class="role-emoji" id="resultEmoji">🔍</div>
+        <div class="role-name" id="resultRoleName">리서처</div>
+        <div class="role-tagline">AI 협업 프로필 카드</div>
+      </div>
+      <div class="card-body">
+        <div class="profile-row">
+          <div class="profile-avatar" id="resultAvatarEmoji">🙂</div>
+          <div>
+            <div class="profile-name" id="resultStudentName">나의 협업 프로필</div>
+            <div class="profile-team" id="resultTeamName"></div>
+          </div>
+        </div>
+        <div class="role-text" id="resultText"></div>
+      </div>
+      <div class="card-footer-brand">바이브코딩 스튜디오 · AKLABS</div>
+    </div>
+
+    <div class="nav-row print-row no-print" id="printNav" style="display:none;">
+      <button class="btn-secondary" style="width:100%;" onclick="window.print()">🖨️ 카드 인쇄 / PDF로 저장하기</button>
+    </div>
+    <p class="print-hint no-print" id="printHint" style="display:none;">인쇄 창에서 '대상'을 'PDF로 저장'으로 바꾸면 카드가 PDF 파일로 저장돼요.</p>
+
+    <div class="nav-row no-print" id="nextNav" style="display:none;">
+      <a href="1-simulation.html"><button class="btn-secondary" style="width:100%;">다음: 몬스터 스타트업 시뮬레이션 →</button></a>
+    </div>
+    <div class="nav-row no-print">
+      <a href="index.html"><button class="btn-secondary" style="width:100%;">← 처음으로</button></a>
+    </div>
+
+  </div>
+</section>
+
+<footer>바이브코딩 스튜디오 · AKLABS</footer>
+
+<script src="shared/bridge.js"></script>
+<script>
+  const entryData = StudioBridge.captureEntryFromURL();
+  StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
+
+  const QUESTIONS = [
+    { key: 'q1', title: '① 조별과제할 때 나는 주로', options: ['아이디어 막 던지는 사람', '묵묵히 실행하는 사람', '꼼꼼히 체크하는 사람', '분위기 띄우는 사람', '발표 맡는 사람'] },
+    { key: 'q2', title: '② 나는 이럴 때 제일 집중이 잘된다', options: ['조용히 혼자', '친구들과 떠들면서', '마감이 코앞일 때', '손으로 뭔가 만들 때'] },
+    { key: 'q3', title: '③ 새로운 걸 배울 때 나는', options: ['일단 해본다', '설명부터 듣는다', '예시부터 본다', '친구한테 물어본다'] },
+    { key: 'q4', title: '④ 나는 이런 피드백이 편하다', options: ['대놓고 직진 화법', '칭찬 먼저 그다음 지적', '글로 써서', '알아서 잘하고 있다고만'] },
+    { key: 'q5', title: '⑤ 사람들 앞에 서는 건 나에게', options: ['완전 좋아함', '괜찮음', '긴장되지만 할 수 있음', '웬만하면 피하고 싶음'] },
+    { key: 'q6', title: '⑥ 요즘 제일 관심 있는 것', options: ['게임', 'SNS·콘텐츠', '운동', '그림·디자인', '음악', '사회문제·환경', '동물', '기타'] },
+  ];
+
+  const answers = {};
+
+  function renderQuestions() {
+    const wrap = document.getElementById('questionsWrap');
+    wrap.innerHTML = QUESTIONS.map(q => `
+      <div class="q-block">
+        <div class="q-title">${q.title}</div>
+        <div class="chip-row" id="chips-${q.key}">
+          ${q.options.map(opt => `<div class="chip" data-value="${opt}" onclick="selectChip('${q.key}', this)">${opt}</div>`).join('')}
+        </div>
+        <input type="text" class="chip-other-input" id="other-${q.key}" placeholder="직접 입력해주세요" oninput="answers['${q.key}']=this.value">
+      </div>
+    `).join('');
+  }
+
+  function selectChip(key, el) {
+    const row = document.getElementById(`chips-${key}`);
+    [...row.children].forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const otherInput = document.getElementById(`other-${key}`);
+    if (el.dataset.value === '기타') {
+      otherInput.classList.add('show');
+      otherInput.focus();
+      answers[key] = otherInput.value;
+    } else {
+      otherInput.classList.remove('show');
+      answers[key] = el.dataset.value;
+    }
+  }
+
+  function generatePrompt() {
+    const missing = QUESTIONS.filter(q => !answers[q.key]);
+    if (missing.length) {
+      alert('아직 답하지 않은 질문이 있어요: ' + missing.map(q => q.title).join(', '));
+      return;
+    }
+    const studentName = document.getElementById('studentName').value;
+    const teamName = document.getElementById('teamName').value;
+    StudioBridge.save({ studentName, teamName });
+
+    const prompt = StudioBridge.buildTeamProfilePrompt(answers);
+    const box = document.getElementById('promptBox');
+    box.value = prompt;
+    box.style.display = 'block';
+    document.getElementById('copyBtn').style.display = 'block';
+    document.getElementById('pasteCard').style.display = 'block';
+    document.getElementById('pasteCard').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function copyPrompt() {
+    const box = document.getElementById('promptBox');
+    box.select();
+    navigator.clipboard.writeText(box.value).then(() => {
+      alert('복사되었습니다! AI 앱에 붙여넣어보세요.');
+    }).catch(() => {
+      alert('복사에 실패했어요. 직접 선택해서 복사해주세요.');
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function inlineBold(str) {
+    return str.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  }
+
+  // AI 응답의 간단한 마크다운(**굵게**, * 목록, **줄 전체**는 소제목)을 HTML로 변환한다.
+  function formatAIText(raw) {
+    const lines = escapeHtml(raw).split('\n');
+    let html = '';
+    let inList = false;
+    const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed) { closeList(); return; }
+      const headingMatch = trimmed.match(/^\*\*(.+)\*\*$/);
+      if (headingMatch) {
+        closeList();
+        html += `<div class="ai-heading">${headingMatch[1]}</div>`;
+        return;
+      }
+      const bulletMatch = trimmed.match(/^[*-]\s+(.*)$/);
+      if (bulletMatch) {
+        if (!inList) { html += '<ul class="ai-list">'; inList = true; }
+        html += `<li>${inlineBold(bulletMatch[1])}</li>`;
+        return;
+      }
+      closeList();
+      html += `<p class="ai-p">${inlineBold(trimmed)}</p>`;
+    });
+    closeList();
+    return html;
+  }
+
+  function completeCard() {
+    const aiText = document.getElementById('aiResponseInput').value.trim();
+    if (!aiText) {
+      alert('AI 답변을 붙여넣어주세요.');
+      return;
+    }
+    const role = StudioBridge.detectRole(aiText);
+    const studentName = document.getElementById('studentName').value || entryData.studentName || '';
+
+    StudioBridge.save({
+      teamProfile: {
+        name: studentName,
+        teamName: document.getElementById('teamName').value,
+        answers,
+        aiResultText: aiText,
+        detectedRole: role,
+      },
+    });
+
+    const teamName = document.getElementById('teamName').value;
+    const roleInfo = role ? StudioBridge.ROLE_LABELS[role] : { emoji: '✨', name: 'AI가 역할을 특정하지 못했어요' };
+    document.getElementById('resultEmoji').textContent = roleInfo.emoji;
+    document.getElementById('resultAvatarEmoji').textContent = roleInfo.emoji;
+    document.getElementById('resultRoleName').textContent = roleInfo.name;
+    document.getElementById('resultStudentName').textContent = studentName ? `${studentName}` : '나의 협업 프로필';
+    document.getElementById('resultTeamName').textContent = teamName ? `${teamName}` : '';
+    document.getElementById('resultText').innerHTML = formatAIText(aiText);
+    document.getElementById('resultCard').classList.add('show');
+    document.getElementById('printNav').style.display = 'flex';
+    document.getElementById('printHint').style.display = 'block';
+    document.getElementById('nextNav').style.display = 'flex';
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  renderQuestions();
+  if (entryData.studentName) document.getElementById('studentName').value = entryData.studentName;
+</script>
+</body>
+</html>
