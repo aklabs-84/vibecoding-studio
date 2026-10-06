@@ -1,0 +1,406 @@
+{
+  "version": 1,
+  "status": "WARN",
+  "ok": true,
+  "file": "/Users/byunmose/Desktop/vibe_coding/vibe-coding-studio/docs/lesson/바이브코딩_수업계획안.hwpx",
+  "actions": [
+    {
+      "name": "fix_namespaces",
+      "ok": true
+    },
+    {
+      "name": "strip_linesegarray",
+      "ok": true,
+      "removed": 0
+    }
+  ],
+  "checks": {
+    "visual_review": {
+      "status": "not_run",
+      "ok": null
+    },
+    "render": {
+      "status": "not_run",
+      "ok": null
+    },
+    "structure": {
+      "ok": true,
+      "errors": []
+    },
+    "openable": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "raw_llm_suspect": false,
+      "raw_signals": {
+        "body_chars": 2311,
+        "preview_chars": 2311,
+        "linesegarray": 0,
+        "preview_reflects_body": true
+      },
+      "char_border_bug": false,
+      "char_border_signals": {
+        "bug": false,
+        "bordered_charpr": 0,
+        "total_charpr": 46
+      },
+      "vertical_misconvert": false,
+      "vertical_signals": {
+        "suspect": false,
+        "vertical": 0,
+        "horizontal": 115
+      }
+    },
+    "references": {
+      "ok": true,
+      "errors": [],
+      "sections": 1
+    },
+    "layout": {
+      "ok": true,
+      "tables": 13,
+      "cells": 114,
+      "text_cells": 105,
+      "blocking": [],
+      "advisory": [
+        {
+          "section": "Contents/section0.xml",
+          "table": 1,
+          "row": "1",
+          "col": "0",
+          "width": 48190,
+          "height": 3546,
+          "type": "estimated_cell_overflow",
+          "estimated_height": 5060,
+          "message": "Estimated text height exceeds cell; confirm auto-growth and page flow in Hancom."
+        },
+        {
+          "section": "Contents/section0.xml",
+          "table": 3,
+          "row": "4",
+          "col": "0",
+          "width": 3945,
+          "height": 3542,
+          "type": "estimated_cell_overflow",
+          "estimated_height": 4442,
+          "message": "Estimated text height exceeds cell; confirm auto-growth and page flow in Hancom."
+        },
+        {
+          "section": "Contents/section0.xml",
+          "table": 9,
+          "row": "3",
+          "col": "0",
+          "width": 2281,
+          "height": 6402,
+          "type": "estimated_cell_overflow",
+          "estimated_height": 8732,
+          "message": "Estimated text height exceeds cell; confirm auto-growth and page flow in Hancom."
+        },
+        {
+          "section": "Contents/section0.xml",
+          "table": 9,
+          "row": "4",
+          "col": "0",
+          "width": 2281,
+          "height": 6402,
+          "type": "estimated_cell_overflow",
+          "estimated_height": 8732,
+          "message": "Estimated text height exceeds cell; confirm auto-growth and page flow in Hancom."
+        },
+        {
+          "section": "Contents/section0.xml",
+          "table": 9,
+          "row": "5",
+          "col": "0",
+          "width": 2281,
+          "height": 6402,
+          "type": "estimated_cell_overflow",
+          "estimated_height": 8732,
+          "message": "Estimated text height exceeds cell; confirm auto-growth and page flow in Hancom."
+        },
+        {
+          "section": "Contents/section0.xml",
+          "table": 9,
+          "row": "6",
+          "col": "0",
+          "width": 2281,
+          "height": 6402,
+          "type": "estimated_cell_overflow",
+          "estimated_height": 8732,
+          "message": "Estimated text height exceeds cell; confirm auto-growth and page flow in Hancom."
+        }
+      ]
+    },
+    "package": {
+      "status": "PASS",
+      "issues": [],
+      "warnings": [],
+      "result": {
+        "path": "/Users/byunmose/Desktop/vibe_coding/vibe-coding-studio/docs/lesson/바이브코딩_수업계획안.hwpx",
+        "zip_entries": 11,
+        "bindata": 0,
+        "mimetype_first": true,
+        "mimetype_stored": true,
+        "required_files": {
+          "mimetype": true,
+          "Contents/content.hpf": true,
+          "Contents/header.xml": true,
+          "Contents/section0.xml": true
+        },
+        "section_size": 91265,
+        "paragraphs": 151,
+        "runs": 152,
+        "tables": 13,
+        "images": 0,
+        "xml_valid": 7,
+        "xml_invalid": 0,
+        "xml_errors": []
+      }
+    },
+    "content": {
+      "ok": true,
+      "expected_blocks": 110,
+      "missing": [],
+      "missing_images": []
+    },
+    "writing": {
+      "findings": [
+        {
+          "line": 18,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "1차시: 바이브코딩의 개념을 이해하고, 일상의 불편함에서 주제를 찾아 5단계 기획서(문제·사용자·기능·화면·",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 19,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "2차시: 기획서를 바탕으로 Gemini에서 웹서비스를 단계별로 제작·수정하고, 기획과 결과물을 발표한다.",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 25,
+          "kind": "para",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "1차시는 앞의 세 단계(주제 탐색 → 기획 퀘스트 → PRD 확인), 2차시는 뒤의 두 단계(Gemini 제",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 29,
+          "kind": "para",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "[1차시] 기획 (45분) — 주제를 찾고 나만의 기획서를 완성한다",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 39,
+          "kind": "para",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "[2차시] 제작·발표 (45분) — 기획서로 만들고 발표한다",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 53,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "작게 시작: 핵심 기능(Must) 1~3개로 작동하는 서비스를 먼저 만든 뒤 하나씩 추가한다.",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 55,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "확인하며 진행: 요청 한 번마다 결과를 확인하고 다음 요청으로 넘어간다.",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 68,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "완성도보다 작동하는 작은 서비스를 우선하고, 기능은 한 번에 하나씩 추가하도록 안내한다.",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 69,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "학생별 Google 계정이 반드시 필요하다. 학교 계정은 관리자 설정에 따라 Gemini 사용이 제한될 수 ",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 69,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "ITEM_LONG",
+          "text": "학생별 Google 계정이 반드시 필요하다. 학교 계정은 관리자 설정에 따라 Gemini 사용이 제한될 수 ",
+          "message": "❍ 항목 104자 — 중앙값 31, 2줄 한계",
+          "suggest": "세부(- )로 내림",
+          "original_severity": "warning"
+        },
+        {
+          "line": 70,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "제출은 링크가 아니라 코드로 이루어진다. 학생은 반드시 스튜디오 3단계의 'CodeCanvas에서 시작하기'",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 70,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "CONTRAST_CHECK",
+          "text": "제출은 링크가 아니라 코드로 이루어진다. 학생은 반드시 스튜디오 3단계의 'CodeCanvas에서 시작하기'",
+          "message": "'~가 아니라/아닌 코드로' — 구체 선택지인지 확인",
+          "suggest": "",
+          "original_severity": "warning"
+        },
+        {
+          "line": 70,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "ITEM_LONG",
+          "text": "제출은 링크가 아니라 코드로 이루어진다. 학생은 반드시 스튜디오 3단계의 'CodeCanvas에서 시작하기'",
+          "message": "❍ 항목 90자 — 중앙값 31, 2줄 한계",
+          "suggest": "세부(- )로 내림",
+          "original_severity": "warning"
+        },
+        {
+          "line": 72,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "기존 '몬스터 스타트업' 시뮬레이션과 협업 프로필은 이 수업에서 다루지 않으며, 시간이 남는 학생의 선택 체",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 73,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "DA_ENDING",
+          "text": "Gemini가 만든 단일 HTML 파일을 CodeCanvas에 붙여넣을 때 실행·제출이 정상 동작하는지 수업",
+          "message": "'~다' 서술형 종결 — 실측 0%",
+          "suggest": "명사·명사구 또는 '~함/있음' 으로",
+          "original_severity": "error"
+        },
+        {
+          "line": 73,
+          "kind": "item",
+          "severity": "warning",
+          "rule": "ITEM_LONG",
+          "text": "Gemini가 만든 단일 HTML 파일을 CodeCanvas에 붙여넣을 때 실행·제출이 정상 동작하는지 수업",
+          "message": "❍ 항목 75자 — 중앙값 31, 2줄 한계",
+          "suggest": "세부(- )로 내림",
+          "original_severity": "warning"
+        }
+      ]
+    },
+    "required_text": {
+      "ok": true,
+      "required": [
+        "바이브코딩으로 만드는 나만의 웹서비스 수업 계획안"
+      ],
+      "missing": [],
+      "body_chars": 2984
+    },
+    "hancom": {
+      "ok": false,
+      "mode": "auto",
+      "skipped": true,
+      "message": "Hancom is only available on Windows."
+    },
+    "input_text": {
+      "findings": []
+    }
+  },
+  "timings_ms": {
+    "quality": 88.43563200000004,
+    "preflight": 12.18766299999996,
+    "generation": 37.77753700000003
+  },
+  "warnings": [
+    "layout estimated_cell_overflow: Estimated text height exceeds cell; confirm auto-growth and page flow in Hancom.",
+    "writing L18 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L19 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L25 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L29 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L39 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L53 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L55 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L68 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L69 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L69 ITEM_LONG: ❍ 항목 104자 — 중앙값 31, 2줄 한계",
+    "writing L70 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L70 CONTRAST_CHECK: '~가 아니라/아닌 코드로' — 구체 선택지인지 확인",
+    "writing L70 ITEM_LONG: ❍ 항목 90자 — 중앙값 31, 2줄 한계",
+    "writing L72 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L73 DA_ENDING: '~다' 서술형 종결 — 실측 0%",
+    "writing L73 ITEM_LONG: ❍ 항목 75자 — 중앙값 31, 2줄 한계",
+    "Hancom open check skipped: Hancom is only available on Windows."
+  ],
+  "errors": [],
+  "kind": "plan-report",
+  "output": "/Users/byunmose/Desktop/vibe_coding/vibe-coding-studio/docs/lesson/바이브코딩_수업계획안.hwpx",
+  "published": true,
+  "draft": false,
+  "unresolved": [],
+  "unknowns": [],
+  "diagrams": [
+    {
+      "pattern": "process",
+      "direction": "horizontal",
+      "rows": 1,
+      "columns": 9,
+      "height": 2400,
+      "requested_direction": "horizontal",
+      "direction_reason": "explicit",
+      "horizontal_node_width": 7558,
+      "width": 48190,
+      "font_size_pt": 11
+    }
+  ],
+  "profile": {
+    "font": "맑은 고딕",
+    "body_size": 11,
+    "accent": "245A81"
+  },
+  "repairs": [],
+  "metadata_date": {
+    "value": "2000-01-01",
+    "source": "reproducible-default-not-document-date"
+  },
+  "spec_version": 2,
+  "report_saved": true
+}
