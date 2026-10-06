@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });</script>
     <script src="shared/bridge.js"></script>
+    <script>StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지</script>
     <style>
         :root {
             --bg-dark: #0d0221;
@@ -253,6 +254,17 @@
         .lesson-summary h3 { color: var(--monster-green); margin-bottom: 15px; font-size: 1rem; border-bottom: 2px solid #333; padding-bottom: 10px; }
         .btn-copy { margin-top: 20px; padding: 15px 30px; background: var(--monster-green); color: #000; font-family: var(--font-pixel); border: 4px solid #fff; cursor: pointer; }
 
+        .role-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        @media (min-width: 640px) { .role-grid { grid-template-columns: 1fr 1fr; } }
+        .role-card { padding: 20px; text-align: center; cursor: pointer; position: relative; }
+        .role-card .role-emoji { font-size: 1.8rem; margin-bottom: 8px; }
+        .role-card .role-name { color: var(--monster-green); font-size: 1.15rem; margin-bottom: 10px; }
+        .role-card .role-desc { font-size: 0.85rem; color: #eee; line-height: 1.7; }
+        .role-card .ai-badge {
+            position: absolute; top: -12px; right: -8px; background: var(--monster-red); color: #fff;
+            font-size: 0.55rem; padding: 5px 8px; border: 2px solid #fff;
+        }
+
         .hidden { display: none !important; }
         .transparent-target { opacity: 0; transition: opacity 0.2s; }
     </style>
@@ -314,7 +326,6 @@
                 <input type="text" id="team-name" placeholder="부대 이름을 입력하세요...">
                 <div style="display:flex; gap:15px;">
                     <button class="btn-start" style="flex:1;" onclick="startMission()">MISSION START!</button>
-                    <button class="btn-start" style="flex:1; background:var(--monster-purple);" onclick="location.href='monster_startup_guide.html'">GUIDE SLIDE</button>
                 </div>
             </div>
         </div>
@@ -358,7 +369,7 @@
         <h1 style="color:var(--monster-red); font-size:3rem; margin-bottom:20px;">MISSION COMPLETE</h1>
         <div style="color:var(--monster-green); font-size:1.5rem; margin-bottom:20px;">SYNERGY SCORE: <span id="final-score">99</span></div>
         <div class="result-container">
-            <div id="mermaid-result" style="width:100%;"></div>
+            <div id="mermaid-result" style="width:100%; background:#000; padding:20px; text-align:center;"></div>
             <div class="prd-box" id="final-prd">...</div>
             <div class="lesson-summary">
                 <h3>VIBE CODING: PLANNING MASTER GUIDE</h3>
@@ -368,8 +379,15 @@
                 <p><strong>4. UX/UI (경험):</strong> 디자인은 아름다움 이전에 '도구'입니다. 사용자가 생각하지 않고도 목표를 달성할 수 있는 직관적인 흐름을 설계하십시오.</p>
             </div>
             <button class="btn-copy" onclick="copyPRD()">COPY EVIL PLAN + GUIDE</button>
-            <button class="btn-start" style="margin-top:20px; background:var(--monster-green);" onclick="location.href='2-planner.html'">다음 단계: 기획서 작성하기 →</button>
+            <button class="btn-start" style="margin-top:20px; background:var(--monster-green); color:#111;" onclick="showRoleSelect()">다음 단계: 기획서 작성하기 →</button>
             <button class="btn-start" style="margin-top:12px;" onclick="location.reload()">REBOOT SYSTEM</button>
+
+            <div class="lesson-summary pixel-border" id="role-select-section" style="display:none; margin-top:30px;">
+                <h3>🎭 이제 진짜 우리 차례! 나는 어떤 역할이 끌리나요?</h3>
+                <p style="font-size:0.7rem; color:#ccc; margin-top:10px;">방금 진행한 퀘스트 중 어떤 게 제일 재밌었는지 떠올려보고 골라보세요.</p>
+                <div class="role-grid" id="role-grid"></div>
+                <button class="btn-start" style="margin-top:20px; background:var(--monster-green); color:#111;" onclick="confirmRole()">역할 확정하고 다음 단계로 →</button>
+            </div>
         </div>
     </div>
 
@@ -608,8 +626,13 @@
             document.getElementById('final-score').innerText = S.currentScore;
             const prd = `[마왕군 기획서 - PRD]\n\n부대명: ${S.teamName}\n앱 명칭: ${S.data.appName}\n문제 정의: ${S.data[1]}\n핵심 컨셉: ${S.data[2]}\n타겟 분석: ${S.data[3]}\n핵심 기능: ${S.data[4]}\n디자인 테마: ${S.data[5]}\n최종 전략: ${S.data[6]}\n\n------------------------------\n[VIBE CODING PLANNING GUIDE]\n1. Persona: 누구를 위한 앱인지 명확히 하라.\n2. Pain Point: 사용자의 고통에서 해결책을 찾아라.\n3. MVP: 가장 본질적인 핵심 기능에 집중하라.\n4. UI/UX: 직관적인 도구로서의 디자인을 완성하라.\n------------------------------\n시너지 점수: ${S.currentScore}%`;
             document.getElementById('final-prd').innerText = prd;
-            document.getElementById('mermaid-result').innerHTML = `<div style="background:#000; padding:20px;">graph LR\n  A[${S.teamName}] --> B[${S.data.appName}]</div>`;
-            mermaid.contentLoaded();
+            const safeTeam = String(S.teamName).replace(/[\[\]"]/g, '');
+            const safeApp = String(S.data.appName).replace(/[\[\]"]/g, '');
+            const mermaidEl = document.getElementById('mermaid-result');
+            mermaidEl.className = 'mermaid';
+            mermaidEl.removeAttribute('data-processed');
+            mermaidEl.textContent = `graph LR\n  A[${safeTeam}] --> B[${safeApp}]`;
+            mermaid.run({ nodes: [mermaidEl] });
 
             if (window.StudioBridge) {
                 StudioBridge.save({
@@ -622,6 +645,50 @@
         }
 
         function copyPRD() { navigator.clipboard.writeText(document.getElementById('final-prd').innerText).then(() => alert('복사되었습니다!')); }
+
+        const ROLES = [
+            { id: 'researcher', emoji: '🔍', name: '리서처', desc: 'QUEST 01 문제정의 · 03 타겟분석이 재밌었다면 — 문제와 사용자를 파고드는 역할' },
+            { id: 'builder', emoji: '🛠', name: '빌더', desc: 'QUEST 04 기능설계가 재밌었다면 — 실제 작동하는 걸 만드는 역할' },
+            { id: 'storyteller', emoji: '🎤', name: '스토리텔러', desc: 'QUEST 02 컨셉 · 06 최종전략이 재밌었다면 — 한 줄로 설득력있게 정리하는 역할' },
+            { id: 'maker', emoji: '🎨', name: '메이커', desc: 'QUEST 05 UI디자인이 재밌었다면 — 화면을 예쁘고 직관적으로 만드는 역할' },
+        ];
+        let selectedRole = null;
+
+        function showRoleSelect() {
+            const data = StudioBridge.load();
+            const recommended = (data.teamProfile && data.teamProfile.detectedRole) || null;
+            if (selectedRole === null) selectedRole = recommended;
+            renderRoleGrid(recommended);
+            document.getElementById('role-select-section').style.display = 'block';
+            document.getElementById('role-select-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderRoleGrid(recommended) {
+            const grid = document.getElementById('role-grid');
+            grid.innerHTML = ROLES.map(r => `
+                <div class="option-card pixel-border role-card ${selectedRole === r.id ? 'selected' : ''}" onclick="pickRole('${r.id}')">
+                    ${recommended === r.id ? '<div class="ai-badge">🤖 AI 추천</div>' : ''}
+                    <div class="role-emoji">${r.emoji}</div>
+                    <div class="role-name">${r.name}</div>
+                    <div class="role-desc">${r.desc}</div>
+                </div>
+            `).join('');
+        }
+
+        function pickRole(id) {
+            selectedRole = id;
+            const data = StudioBridge.load();
+            const recommended = (data.teamProfile && data.teamProfile.detectedRole) || null;
+            renderRoleGrid(recommended);
+        }
+
+        function confirmRole() {
+            if (!selectedRole) { alert('역할을 하나 골라주세요!'); return; }
+            const role = ROLES.find(r => r.id === selectedRole);
+            StudioBridge.save({ preferredRole: selectedRole, preferredRoleName: role.name });
+            StudioBridge.guard.allowLeave();
+            location.href = '2-planner.html';
+        }
 
         function toggleBGM() {
             const bgm = document.getElementById('bgm-player'); const btn = document.getElementById('sound-btn');

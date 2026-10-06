@@ -6,34 +6,47 @@
 <title>PRD 결과 - 바이브코딩 스튜디오</title>
 <style>
   * { box-sizing: border-box; }
+  :root {
+    --bg: #f4f7ff;
+    --bg2: #eaf1ff;
+    --surface: #ffffff;
+    --surface2: #f3f6fd;
+    --border: #dfe6f5;
+    --text: #1b2340;
+    --text-muted: #6b7690;
+    --accent1: #3b82f6;
+    --gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 45%, #22d3ee 100%);
+    --shadow-card: 0 4px 18px rgba(30,64,175,0.07);
+  }
   body {
     margin: 0;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0f1117;
-    color: #e8e8ec;
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 320px, var(--bg) 100%);
+    color: var(--text);
     padding: 40px 20px 80px;
   }
   .wrap { max-width: 820px; margin: 0 auto; }
-  h1 { font-size: 1.8rem; margin-bottom: 6px; }
-  .sub { color: #9a9aa8; margin-bottom: 32px; }
+  h1 { font-size: 1.8rem; margin-bottom: 6px; color: #10193a; }
+  .sub { color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; }
   .card {
-    background: #171a23;
-    border: 1px solid #2a2e3a;
-    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
     padding: 24px;
     margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
   }
-  .card h2 { font-size: 1.05rem; margin: 0 0 14px; color: #2dd4bf; }
+  .card h2 { font-size: 1.05rem; margin: 0 0 14px; color: var(--accent1); }
   pre {
     white-space: pre-wrap;
     word-break: break-word;
     font-family: 'SF Mono', Menlo, monospace;
     font-size: 0.88rem;
     line-height: 1.6;
-    color: #d4d4dc;
+    color: var(--text);
     margin: 0;
   }
-  .empty { color: #6b6b78; font-size: 0.9rem; }
+  .empty { color: #9aa4c2; font-size: 0.9rem; }
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
   button {
     border: none;
@@ -45,18 +58,30 @@
     transition: opacity .15s;
   }
   button:hover { opacity: 0.85; }
-  .btn-primary { background: #22c55e; color: #06120a; }
-  .btn-secondary { background: #2a2e3a; color: #e8e8ec; }
+  .btn-primary { background: #22c55e; color: #fff; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
   .btn-cta {
     display: block;
     width: 100%;
-    background: linear-gradient(90deg,#0d9488,#2dd4bf);
-    color: #06231f;
+    background: var(--gradient);
+    color: #fff;
     font-size: 1.05rem;
     padding: 16px;
     margin-top: 10px;
+    box-shadow: 0 10px 24px rgba(37,99,235,0.28);
   }
-  .nav-back { color: #9a9aa8; text-decoration: none; font-size: 0.85rem; }
+  .cta-row { display: flex; gap: 10px; margin-top: 10px; }
+  .cta-row .btn-cta { flex: 1.4; margin-top: 0; }
+  .btn-gemini {
+    flex: 1;
+    background: #fff;
+    color: #1a73e8;
+    border: 1.5px solid #1a73e8;
+    font-size: 1.05rem;
+    padding: 16px;
+    white-space: nowrap;
+  }
+  .nav-back { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; }
 </style>
 </head>
 <body>
@@ -83,7 +108,10 @@
     </div>
   </div>
 
-  <button class="btn-cta" onclick="startInCodeCanvas()">🚀 CodeCanvas에서 시작하기</button>
+  <div class="cta-row">
+    <button class="btn-gemini" onclick="goToGemini()">✨ Gemini로 이동하기</button>
+    <button class="btn-cta" onclick="startInCodeCanvas()">🚀 CodeCanvas에서 시작하기</button>
+  </div>
 
   <div class="card" id="submit-card" style="display:none;">
     <h2>📮 클래스에 제출하기</h2>
@@ -98,6 +126,7 @@
 <script src="shared/bridge.js"></script>
 <script>
   const data = StudioBridge.load();
+  StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
   const simEl = document.getElementById('sim-prd');
   const planEl = document.getElementById('planner-text');
   const promptEl = document.getElementById('ai-prompt');
@@ -129,6 +158,7 @@
         resultType: 'text',
         textContent: data.plannerText || data.simulationPRD || '',
       });
+      StudioBridge.guard.markClean();
       submitStatus.textContent = '✅ 제출 완료! 선생님이 확인할 수 있어요.';
     } catch (e) {
       submitStatus.textContent = '❌ ' + e.message;
@@ -142,6 +172,10 @@
   function startInCodeCanvas() {
     const title = data.appName || (data.plannerData && data.plannerData.app_name1) || StudioBridge.defaultTitle(data);
     StudioBridge.sendToCodeCanvas(prompt, title);
+  }
+
+  function goToGemini() {
+    window.open('https://gemini.google.com/app', '_blank');
   }
 </script>
 </body>

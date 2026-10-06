@@ -652,6 +652,7 @@ textarea::placeholder, input::placeholder { color: var(--text-muted); }
 }
 </style>
 <script src="shared/bridge.js"></script>
+<script>StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지</script>
 </head>
 <body>
 <div class="wrap">
@@ -949,7 +950,7 @@ textarea::placeholder, input::placeholder { color: var(--text-muted); }
     </div>
 
     <div class="result-actions">
-      <button class="action-btn action-primary" onclick="location.href='3-result.html'">다음 단계: PRD 확인하고 코딩 시작하기 →</button>
+      <button class="action-btn action-primary" onclick="StudioBridge.guard.allowLeave();location.href='3-result.html'">다음 단계: PRD 확인하고 코딩 시작하기 →</button>
       <button class="action-btn action-secondary" onclick="printPlan()">🖨️ 기획서 출력하기</button>
       <button class="action-btn action-secondary" id="copy_btn" onclick="copyPlanText(this)">📋 텍스트로 복사하기</button>
       <button class="action-btn action-secondary" onclick="resetAll()">↩ 처음부터 다시</button>
@@ -999,8 +1000,6 @@ function renderFlowPreview() {
 
 // ── STEP NAVIGATION ──
 function goStep(n) {
-  if (n > currentStep && !validateStep(currentStep)) return;
-
   document.querySelector(`#step${currentStep}`)?.classList.remove('active');
   document.querySelector(`#result`)?.classList.remove('active');
   document.querySelectorAll('.prog-step').forEach(s => {
