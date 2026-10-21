@@ -91,6 +91,43 @@
     return lines.join('\n');
   }
 
+  // 답변을 캐릭터의 눈에 보이는 특징(소품·배경·표정 등)으로 번역해 이미지용 프롬프트를 만들게 하는 질문.
+  function buildCharacterPrompt(answers, role) {
+    const a = answers || {};
+    const lines = [];
+    lines.push('너는 캐릭터 일러스트 프롬프트 작가야. 아래 학생의 답변으로 이 학생을 닮은 귀여운 동물 마스코트 캐릭터를 설계하고, 이미지 생성 AI에 그대로 붙여 넣을 그림 프롬프트를 만들어줘.');
+    lines.push('');
+    lines.push('[학생 답변]');
+    lines.push(`- 조별과제할 때 나는: ${a.q1 || ''}`);
+    lines.push(`- 집중이 잘되는 때: ${a.q2 || ''}`);
+    lines.push(`- 새로운 걸 배울 때: ${a.q3 || ''}`);
+    lines.push(`- 편한 피드백 방식: ${a.q4 || ''}`);
+    lines.push(`- 사람들 앞에 서는 것: ${a.q5 || ''}`);
+    lines.push(`- 요즘 관심있는 것: ${a.q6 || ''}`);
+    if (role) lines.push(`- 추천받은 팀 역할: ${role}`);
+    lines.push('');
+    lines.push('[답변을 그림 특징으로 바꾸는 방법]');
+    lines.push('- 조별과제할 때 나는 → 들고 있는 소품과 자세 (예: 아이디어 → 전구와 메모지, 실행 → 공구, 체크 → 체크리스트)');
+    lines.push('- 집중이 잘되는 때 → 배경 장소 (예: 혼자 → 조용한 방, 친구들과 → 북적이는 교실)');
+    lines.push('- 새로운 걸 배울 때 → 표정과 행동 (예: 일단 해본다 → 소매를 걷은 모습)');
+    lines.push('- 편한 피드백 방식 → 말풍선 느낌 (예: 직진 화법 → 굵은 말풍선, 칭찬 먼저 → 하트)');
+    lines.push('- 사람들 앞에 서는 것 → 표정과 자신감 (예: 좋아함 → 당당한 포즈, 피하고 싶음 → 수줍은 눈웃음)');
+    lines.push('- 요즘 관심있는 것 → 꾸밈 소품과 색 (예: 음악 → 헤드폰, 동물 → 작은 친구)');
+    lines.push('');
+    lines.push('[출력 형식]');
+    lines.push('1. 캐릭터 설명 3줄 (어떤 동물이고, 소품·배경·표정이 답변과 어떻게 이어지는지)');
+    lines.push('2. 이미지 생성 AI에 붙여 넣을 그림 프롬프트 (한국어, 하나의 글 덩어리로, 코드 블록 안에 써줘)');
+    lines.push('');
+    lines.push('[그림 조건 - 프롬프트에 꼭 넣어줘]');
+    lines.push('- 세로형 프로필 카드, 캐릭터가 가운데에 크게');
+    lines.push('- 파스텔톤 단색 배경, 귀여운 일러스트 스타일');
+    lines.push('- 그림 안에 글자·숫자·로고는 넣지 않기');
+    lines.push('- 실제 사람 얼굴이나 사진 느낌은 쓰지 않기');
+    lines.push('');
+    lines.push('친근한 존댓말로, 짧고 이해하기 쉽게 작성해줘.');
+    return lines.join('\n');
+  }
+
   // AI가 돌려준 텍스트에서 4가지 역할 중 언급된 것을 감지한다.
   function detectRole(text) {
     if (!text) return null;
@@ -181,5 +218,5 @@
     return { init: init, markDirty: markDirty, markClean: function () { dirty = false; }, allowLeave: allowLeave };
   })();
 
-  global.StudioBridge = { guard, load, save, clear, captureEntryFromURL, buildCodePrompt, sendToCodeCanvas, submitResult, defaultTitle, buildTeamProfilePrompt, detectRole, ROLE_LABELS, CODECANVAS_URL };
+  global.StudioBridge = { guard, load, save, clear, captureEntryFromURL, buildCodePrompt, sendToCodeCanvas, submitResult, defaultTitle, buildTeamProfilePrompt, buildCharacterPrompt, detectRole, ROLE_LABELS, CODECANVAS_URL };
 })(window);
