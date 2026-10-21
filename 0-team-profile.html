@@ -591,7 +591,8 @@
     document.getElementById('badgeCard').style.display = 'block';
     document.getElementById('badgeWrap').style.display = 'block';
     document.getElementById('badgeActions').style.display = 'flex';
-    if (StudioBridge.load().classlogEntryCode) document.getElementById('badgeSubmitBox').style.display = 'block';
+    const _d = StudioBridge.load();
+    document.getElementById('badgeSubmitBox').style.display = (_d.classlogEntryCode && _d.studentName) ? 'block' : 'none';
   }
 
   function setBadgeImage(file) {

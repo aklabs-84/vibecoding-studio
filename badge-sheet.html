@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사원증 모아 찍기 - 바이브코딩 스튜디오</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root { --bg:#f5f6fa; --card:#fff; --text:#1e293b; --sub:#64748b; --line:#e2e8f0; --main:#4f46e5; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif; line-height:1.6; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 80px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  .lead { color: var(--sub); margin: 0 0 22px; font-size: 15px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:18px; }
+  .panel h2 { font-size:16px; margin:0 0 12px; }
+  #drop { border:2px dashed #c7cbe0; border-radius:12px; padding:34px 16px; text-align:center; color:var(--sub); cursor:pointer; transition:.15s; }
+  #drop.over { border-color:var(--main); background:#eef0ff; color:var(--main); }
+  #drop b { color:var(--text); font-size:16px; display:block; margin-bottom:4px; }
+  .steps { margin:0; padding-left:20px; color:var(--sub); font-size:14px; }
+  .bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .bar .sp { flex:1; }
+  button.btn { border:1px solid var(--line); background:#fff; padding:8px 14px; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; color:var(--text); }
+  button.btn:hover { border-color:var(--main); color:var(--main); }
+  button.primary { background:var(--main); border-color:var(--main); color:#fff; }
+  button.primary:hover { color:#fff; opacity:.92; }
+  .thumbs { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:12px; }
+  .th { position:relative; border:2px solid var(--line); border-radius:10px; padding:6px; background:#fff; cursor:pointer; }
+  .th.off { opacity:.35; border-style:dashed; }
+  .th img { width:100%; aspect-ratio:55/85; object-fit:contain; background:#f1f5f9; border-radius:6px; display:block; }
+  .th label { display:flex; gap:6px; align-items:center; font-size:12px; margin-top:6px; cursor:pointer; }
+  .th span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .empty { color:var(--sub); text-align:center; padding:18px 0; font-size:14px; }
+  #sheets { display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .sheet { width:210mm; height:297mm; background:#fff; box-shadow:0 2px 14px rgba(0,0,0,.15); position:relative; padding:21mm 22.5mm; overflow:hidden; }
+  .grid { display:grid; grid-template-columns:repeat(3,55mm); grid-template-rows:repeat(3,85mm); }
+  .cell { width:55mm; height:85mm; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .cell::after { content:''; position:absolute; inset:0; border:0.25mm dashed #6b7280; pointer-events:none; }
+  .cell img { width:100%; height:100%; object-fit:contain; display:block; }
+  .pageno { position:absolute; bottom:8mm; left:0; right:0; text-align:center; font-size:9pt; color:#94a3b8; }
+  .scalebox { width:100%; overflow-x:auto; padding-bottom:6px; }
+  .tip { font-size:13px; color:var(--sub); }
+  @media (max-width: 860px) { .sheet { zoom:.55; } }
+  @page { size: A4; margin: 0; }
+  @media print {
+    body { background:#fff; }
+    .wrap > *:not(#sheetsBox) { display:none !important; }
+    #sheetsBox, #sheetsBox .panel { padding:0; margin:0; border:0; background:none; }
+    #sheetsBox .bar, #sheetsBox h2, #sheetsBox .tip { display:none !important; }
+    .wrap { max-width:none; padding:0; }
+    .scalebox { overflow:visible; padding:0; }
+    #sheets { gap:0; display:block; }
+    .sheet { zoom:1 !important; box-shadow:none; page-break-after:always; break-after:page; }
+    .sheet:last-child { page-break-after:auto; break-after:auto; }
+    .pageno { display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🪪 사원증 모아 찍기</h1>
+  <p class="lead">학생들이 제출한 사원증 그림을 한 장에 9개씩 모아서, 종이에 인쇄하고 가위로 잘라 쓸 수 있게 만들어 줘요. (파일은 이 컴퓨터 안에서만 쓰이고 어디로도 보내지 않아요.)</p>
+
+  <div class="panel">
+    <h2>① 사원증 그림 넣기</h2>
+    <ol class="steps">
+      <li>클래스로그 보드에서 <b>이미지 내려받기</b>로 받은 압축 파일(zip)을 아래에 놓아요.</li>
+      <li>압축 파일 대신 그림 파일 여러 개를 한꺼번에 놓아도 돼요.</li>
+    </ol>
+    <div id="drop" style="margin-top:14px">
+      <b>여기에 파일을 끌어다 놓거나, 눌러서 고르세요</b>
+      zip 파일 또는 png · jpg · webp 그림
+    </div>
+    <input id="file" type="file" accept=".zip,image/*" multiple hidden>
+  </div>
+
+  <div class="panel" id="listBox" style="display:none">
+    <h2>② 인쇄할 사원증 고르기</h2>
+    <div class="bar">
+      <span id="count" class="tip"></span>
+      <span class="sp"></span>
+      <button class="btn" id="allOn">모두 선택</button>
+      <button class="btn" id="allOff">모두 해제</button>
+      <button class="btn" id="reset">처음부터 다시</button>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+
+  <div class="panel" id="sheetsBox" style="display:none">
+    <h2>③ 인쇄 미리보기 (A4 한 장에 9개)</h2>
+    <div class="bar">
+      <span class="tip" id="pageInfo"></span>
+      <span class="sp"></span>
+      <button class="btn primary" id="printBtn">🖨️ 인쇄하기</button>
+    </div>
+    <p class="tip">인쇄 창에서 <b>배율 100%(실제 크기)</b>, <b>여백 없음</b>으로 맞추면 사원증이 55×85mm로 나와요. 점선을 따라 가위로 자르세요.</p>
+    <div class="scalebox"><div id="sheets"></div></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var items = []; // {name, url, on}
+  var $ = function (id) { return document.getElementById(id); };
+  var drop = $('drop'), fileInput = $('file');
+
+  function isImg(name) { return /\.(png|jpe?g|webp|gif)$/i.test(name); }
+  function mimeOf(name) { var e = name.split('.').pop().toLowerCase(); return e === 'jpg' ? 'image/jpeg' : 'image/' + e; }
+  function labelOf(name) { return name.replace(/^.*\//, '').replace(/\.[^.]+$/, ''); }
+
+  async function addFiles(fileList) {
+    var files = Array.prototype.slice.call(fileList);
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (/\.zip$/i.test(f.name)) {
+        try {
+          var zip = await JSZip.loadAsync(f);
+          var names = Object.keys(zip.files).filter(function (n) {
+            return !zip.files[n].dir && isImg(n) && !/(^|\/)__MACOSX\//.test(n) && !/(^|\/)\./.test(n);
+          }).sort(function (a, b) { return a.localeCompare(b, 'ko', { numeric: true }); });
+          for (var j = 0; j < names.length; j++) {
+            var blob = await zip.files[names[j]].async('blob');
+            var typed = new Blob([blob], { type: mimeOf(names[j]) });
+            items.push({ name: labelOf(names[j]), url: URL.createObjectURL(typed), on: true });
+          }
+        } catch (e) { alert('압축 파일을 열지 못했어요: ' + f.name); }
+      } else if (f.type.indexOf('image/') === 0) {
+        items.push({ name: labelOf(f.name), url: URL.createObjectURL(f), on: true });
+      }
+    }
+    render();
+  }
+
+  function render() {
+    var has = items.length > 0;
+    $('listBox').style.display = has ? 'block' : 'none';
+    $('sheetsBox').style.display = has ? 'block' : 'none';
+    var th = $('thumbs'); th.innerHTML = '';
+    items.forEach(function (it, idx) {
+      var d = document.createElement('div');
+      d.className = 'th' + (it.on ? '' : ' off');
+      var img = document.createElement('img'); img.src = it.url; img.alt = it.name;
+      var lb = document.createElement('label');
+      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = it.on;
+      var sp = document.createElement('span'); sp.textContent = it.name; sp.title = it.name;
+      lb.appendChild(cb); lb.appendChild(sp);
+      d.appendChild(img); d.appendChild(lb);
+      function toggle() { it.on = !it.on; render(); }
+      cb.addEventListener('click', function (e) { e.stopPropagation(); });
+      cb.addEventListener('change', toggle);
+      img.addEventListener('click', toggle);
+      th.appendChild(d);
+    });
+    var picked = items.filter(function (i) { return i.on; });
+    $('count').textContent = '전체 ' + items.length + '장 중 ' + picked.length + '장 선택';
+    var sheets = $('sheets'); sheets.innerHTML = '';
+    var pages = Math.ceil(picked.length / 9);
+    for (var p = 0; p < pages; p++) {
+      var sh = document.createElement('div'); sh.className = 'sheet';
+      var g = document.createElement('div'); g.className = 'grid';
+      for (var k = 0; k < 9; k++) {
+        var c = document.createElement('div'); c.className = 'cell';
+        var it = picked[p * 9 + k];
+        if (it) { var im = document.createElement('img'); im.src = it.url; c.appendChild(im); }
+        g.appendChild(c);
+      }
+      var no = document.createElement('div'); no.className = 'pageno'; no.textContent = (p + 1) + ' / ' + pages;
+      sh.appendChild(g); sh.appendChild(no); sheets.appendChild(sh);
+    }
+    $('pageInfo').textContent = pages ? 'A4 ' + pages + '장' : '선택한 사원증이 없어요';
+    $('printBtn').disabled = !pages;
+  }
+
+  drop.addEventListener('click', function () { fileInput.click(); });
+  fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); });
+  });
+  drop.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+  // 칸 밖에 놓쳐도 브라우저가 파일을 열어 버리지 않게
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+
+  $('allOn').addEventListener('click', function () { items.forEach(function (i) { i.on = true; }); render(); });
+  $('allOff').addEventListener('click', function () { items.forEach(function (i) { i.on = false; }); render(); });
+  $('reset').addEventListener('click', function () { items.forEach(function (i) { URL.revokeObjectURL(i.url); }); items = []; render(); });
+  $('printBtn').addEventListener('click', function () { window.print(); });
+  render();
+})();
+</script>
+</body>
+</html>

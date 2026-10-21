@@ -6,24 +6,41 @@
   const STORAGE_KEY = 'vcs_studio_data';
   const CODECANVAS_URL = 'https://code-canvas-fawn.vercel.app';
 
+  // 입장 코드는 이 창(탭)에서만 기억한다 (sessionStorage).
+  // 예전처럼 localStorage에 남기면 나중에 직접 연 화면에서도 "제출하기"가 보이는 문제가 있었다.
+  const ENTRY_KEY = 'vcs_classlog_entry_code';
+
   function load() {
+    let data = {};
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : {};
+      data = raw ? JSON.parse(raw) : {};
     } catch (e) {
-      return {};
+      data = {};
     }
+    delete data.classlogEntryCode;
+    try {
+      const code = sessionStorage.getItem(ENTRY_KEY);
+      if (code) data.classlogEntryCode = code;
+    } catch (e) {}
+    return data;
   }
 
   function save(patch) {
     const current = load();
     const next = Object.assign({}, current, patch, { updatedAt: new Date().toISOString() });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    if (patch && patch.classlogEntryCode) {
+      try { sessionStorage.setItem(ENTRY_KEY, patch.classlogEntryCode); } catch (e) {}
+    }
+    const persisted = Object.assign({}, next);
+    delete persisted.classlogEntryCode;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
     return next;
   }
 
   function clear() {
     localStorage.removeItem(STORAGE_KEY);
+    try { sessionStorage.removeItem(ENTRY_KEY); } catch (e) {}
   }
 
   // ClassLog 교실에서 진입할 때 URL 쿼리(?entryCode=...&studentName=...)로
