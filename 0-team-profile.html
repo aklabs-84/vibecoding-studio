@@ -183,7 +183,20 @@
   @media (max-width: 480px) { .pick-grid { gap: 6px; } }
   .badge-actions { display:flex; flex-direction:column; gap:10px; max-width: 560px; margin: 0 auto; }
   .badge-status { text-align:center; font-size: .9rem; color: var(--text-muted); min-height: 1.4em; }
+  .stepbar { display:flex; gap:6px; margin: 0 0 18px; }
+  .stepbar button { flex:1; min-width:0; border:2px solid var(--border); background:var(--surface2); color:var(--text-muted); border-radius:12px; padding:8px 4px; font:inherit; font-size:.85rem; font-weight:700; cursor:pointer; line-height:1.3; }
+  .stepbar button .n { display:block; font-size:.72rem; opacity:.8; }
+  .stepbar button.active { border-color:var(--accent1); background:#eef4ff; color:#1d4ed8; }
+  .stepbar button.done { color:var(--text); }
+  .stepbar button:disabled { opacity:.45; cursor:not-allowed; }
+  .pane { display:none; }
+  .pane.active { display:block; }
+  .step-nav { display:flex; gap:10px; margin-top:14px; }
+  .step-nav button { flex:1; }
+  @media (max-width: 480px) { .stepbar button { font-size:.76rem; } }
   @media print {
+    .pane { display:block !important; }
+    .stepbar, .step-nav { display:none !important; }
     @page { margin: 8mm; }
     .hero, .card, footer, .no-print, #classlog-guard-banner { display: none !important; }
     html, body { height: 100%; margin: 0; }
@@ -224,8 +237,16 @@
 <section>
   <div class="wrap">
 
+    <div class="stepbar no-print" id="stepbar">
+      <button data-go="1"><span class="n">1단계</span>나 소개하기</button>
+      <button data-go="2"><span class="n">2단계</span>AI에게 물어보기</button>
+      <button data-go="3"><span class="n">3단계</span>내 결과 보기</button>
+      <button data-go="4"><span class="n">4단계</span>캐릭터·사원증</button>
+    </div>
+
+    <div class="pane active" data-pane="1">
     <div class="card">
-      <div class="step-num">STEP 1</div>
+      <div class="step-num">1-1</div>
       <h2>기본 정보</h2>
       <div class="field">
         <label>이름</label>
@@ -238,14 +259,20 @@
     </div>
 
     <div class="card">
-      <div class="step-num">STEP 2</div>
+      <div class="step-num">1-2</div>
       <h2>질문에 골라서 답해보세요</h2>
       <p class="hint">정답은 없어요. 나랑 제일 비슷한 걸 하나씩 골라주세요.</p>
       <div id="questionsWrap"></div>
     </div>
 
+    <div class="step-nav no-print">
+      <button class="btn-primary" onclick="nextFrom1()">다음: AI에게 물어보기 →</button>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="2">
     <div class="card">
-      <div class="step-num">STEP 3</div>
+      <div class="step-num">2-1</div>
       <h2>AI에게 물어보기</h2>
       <p class="hint">아래 버튼을 누르면 나의 답변이 채워진 질문이 만들어져요. 복사해서 평소 쓰는 AI 앱(제미나이 등)에 붙여넣어보세요.</p>
       <button class="btn-primary" id="genPromptBtn" onclick="generatePrompt()">① AI 질문 만들기</button>
@@ -254,13 +281,19 @@
     </div>
 
     <div class="card" id="pasteCard" style="display:none;">
-      <div class="step-num">STEP 4</div>
+      <div class="step-num">2-2</div>
       <h2>AI 답변 붙여넣기</h2>
       <p class="hint">AI 앱에서 나온 답변 전체를 복사해서 아래에 붙여넣어주세요.</p>
       <textarea id="aiResponseInput" placeholder="여기에 AI 답변을 붙여넣으세요"></textarea>
       <button class="btn-primary" style="margin-top:14px;" onclick="completeCard()">② 카드 완성하기</button>
     </div>
 
+    <div class="step-nav no-print">
+      <button class="btn-secondary" onclick="goStep(1)">← 이전</button>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="3">
     <div class="result-card" id="resultCard">
       <div class="card-header">
         <div class="role-emoji" id="resultEmoji">🔍</div>
@@ -280,8 +313,20 @@
       <div class="card-footer-brand">바이브코딩 스튜디오 · AKLABS</div>
     </div>
 
+    <div class="nav-row print-row no-print" id="printNav" style="display:none;">
+      <button class="btn-secondary" style="width:100%;" onclick="window.print()">🖨️ 카드 인쇄 / PDF로 저장하기</button>
+    </div>
+    <p class="print-hint no-print" id="printHint" style="display:none;">인쇄 창에서 '대상'을 'PDF로 저장'으로 바꾸면 카드가 PDF 파일로 저장돼요.</p>
+
+    <div class="step-nav no-print">
+      <button class="btn-secondary" onclick="goStep(2)">← 이전</button>
+      <button class="btn-primary" onclick="goStep(4)">다음: 캐릭터·사원증 →</button>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="4">
     <div class="card no-print" id="pickCard" style="display:none;">
-      <div class="step-num">STEP 5</div>
+      <div class="step-num">4-1</div>
       <h2>나의 캐릭터 고르기</h2>
       <p class="hint">내 역할과 어울리는 동물 친구들이에요. 마음에 드는 친구를 누르면 아래 사원증에 바로 들어가요.</p>
       <div class="pick-grid" id="pickGrid"></div>
@@ -329,14 +374,14 @@
       <p class="hint" style="margin:10px 0 0;">그림을 복사했다면 이 화면에서 Ctrl+V(맥은 Cmd+V)로 붙여넣어도 돼요.</p>
     </div>
 
-    <div class="nav-row print-row no-print" id="printNav" style="display:none;">
-      <button class="btn-secondary" style="width:100%;" onclick="window.print()">🖨️ 카드 인쇄 / PDF로 저장하기</button>
-    </div>
-    <p class="print-hint no-print" id="printHint" style="display:none;">인쇄 창에서 '대상'을 'PDF로 저장'으로 바꾸면 카드가 PDF 파일로 저장돼요.</p>
-
     <div class="nav-row no-print" id="nextNav" style="display:none;">
       <a href="1-simulation.html"><button class="btn-secondary" style="width:100%;">다음: 몬스터 스타트업 시뮬레이션 →</button></a>
     </div>
+    <div class="step-nav no-print">
+      <button class="btn-secondary" onclick="goStep(3)">← 이전</button>
+    </div>
+    </div>
+
     <div class="nav-row no-print">
       <a href="index.html"><button class="btn-secondary" style="width:100%;">← 처음으로</button></a>
     </div>
@@ -361,6 +406,36 @@
   ];
 
   const answers = {};
+
+  // 단계별 화면: 한 번에 한 단계만 보여 준다. 지나온 단계는 위 표시줄에서 눌러 돌아갈 수 있다.
+  let curStep = 1, maxStep = 1;
+  function updateStepbar() {
+    document.querySelectorAll('#stepbar button').forEach(b => {
+      const n = Number(b.dataset.go);
+      b.classList.toggle('active', n === curStep);
+      b.classList.toggle('done', n < curStep);
+      b.disabled = n > maxStep;
+    });
+  }
+  function goStep(n) {
+    if (n > maxStep) return;
+    curStep = n;
+    document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', Number(p.dataset.pane) === n));
+    updateStepbar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function nextFrom1() {
+    if (!document.getElementById('studentName').value.trim()) {
+      alert('이름을 먼저 입력해 주세요.');
+      document.getElementById('studentName').focus();
+      return;
+    }
+    if (generatePrompt()) goStep(2); // 빠진 질문이 있으면 알려 주고 멈춘다
+  }
+  document.getElementById('stepbar').addEventListener('click', e => {
+    const b = e.target.closest('button[data-go]');
+    if (b) goStep(Number(b.dataset.go));
+  });
 
   function renderQuestions() {
     const wrap = document.getElementById('questionsWrap');
@@ -394,7 +469,7 @@
     const missing = QUESTIONS.filter(q => !answers[q.key]);
     if (missing.length) {
       alert('아직 답하지 않은 질문이 있어요: ' + missing.map(q => q.title).join(', '));
-      return;
+      return false;
     }
     const studentName = document.getElementById('studentName').value;
     const teamName = document.getElementById('teamName').value;
@@ -406,7 +481,9 @@
     box.style.display = 'block';
     document.getElementById('copyBtn').style.display = 'block';
     document.getElementById('pasteCard').style.display = 'block';
-    document.getElementById('pasteCard').scrollIntoView({ behavior: 'smooth' });
+    maxStep = Math.max(maxStep, 2);
+    updateStepbar();
+    return true;
   }
 
   function copyPrompt() {
@@ -488,7 +565,8 @@
     document.getElementById('nextNav').style.display = 'flex';
     document.getElementById('characterCard').style.display = 'block';
     showBadge(aiText, role, studentName, teamName);
-    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+    maxStep = 4;
+    goStep(3);
   }
 
   function generateCharacterPrompt() {
@@ -757,6 +835,7 @@
   }
 
   renderQuestions();
+  updateStepbar();
   if (entryData.studentName) document.getElementById('studentName').value = entryData.studentName;
 </script>
 </body>
