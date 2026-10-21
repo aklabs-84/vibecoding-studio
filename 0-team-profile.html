@@ -171,11 +171,16 @@
   #idBadge .b-hole { width: 54px; height: 9px; border-radius: 99px; background: #dfe6f5; border: 1.5px solid #1b2340; margin: 10px 0 8px; }
   #idBadge .b-team { width: 100%; background: var(--gradient); color: #fff; font-weight: 800; font-size: 0.8rem; padding: 7px 8px; letter-spacing: .02em; }
   #idBadge .b-photo { width: 132px; height: 132px; margin: 14px 0 10px; border-radius: 16px; background: var(--surface2); border: 1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size: 3.6rem; overflow:hidden; }
-  #idBadge .b-photo img { width: 100%; height: 100%; object-fit: cover; }
+  #idBadge .b-photo img { width: 100%; height: 100%; object-fit: contain; }
   #idBadge .b-name { font-size: 1.25rem; font-weight: 800; color: var(--text); }
   #idBadge .b-role { margin-top: 5px; display:inline-block; padding: 3px 12px; border-radius: 99px; background: #eef4ff; color: #1d4ed8; font-weight: 800; font-size: 0.86rem; }
   #idBadge .b-line { margin: 8px 14px 0; font-size: 0.72rem; line-height: 1.5; color: var(--text-muted); max-height: 3.3em; overflow: hidden; }
   #idBadge .b-foot { margin-top: auto; width: 100%; padding: 5px; font-size: 0.6rem; color: #94a3b8; border-top: 1px dashed var(--border); }
+  .pick-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .pick-btn { border: 2px solid var(--border); border-radius: 14px; background: var(--surface2); padding: 6px; cursor: pointer; aspect-ratio: 1; }
+  .pick-btn img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .pick-btn.selected { border-color: var(--accent1); background: #eef4ff; box-shadow: 0 0 0 3px rgba(59,130,246,.25); }
+  @media (max-width: 480px) { .pick-grid { gap: 6px; } }
   .badge-actions { display:flex; flex-direction:column; gap:10px; max-width: 560px; margin: 0 auto; }
   .badge-status { text-align:center; font-size: .9rem; color: var(--text-muted); min-height: 1.4em; }
   @media print {
@@ -272,24 +277,11 @@
       <div class="card-footer-brand">바이브코딩 스튜디오 · AKLABS</div>
     </div>
 
-    <div class="card no-print" id="characterCard" style="display:none;">
+    <div class="card no-print" id="pickCard" style="display:none;">
       <div class="step-num">STEP 5</div>
-      <h2>나만의 캐릭터 그림 만들기</h2>
-      <p class="hint">내 답변을 닮은 동물 캐릭터를 만들어 볼까요? 아래 버튼을 눌러 질문을 복사한 뒤 AI 앱에 붙여넣으면, 그림을 그리는 AI에게 줄 설명문을 만들어 줘요. 그 설명문을 이미지 만들기 AI에 붙여넣으면 캐릭터 그림이 나와요.</p>
-      <button class="btn-primary" onclick="generateCharacterPrompt()">③ 캐릭터 그림 질문 만들기</button>
-      <textarea id="characterPromptBox" style="display:none; margin-top:14px;" readonly></textarea>
-      <button class="btn-secondary" id="characterCopyBtn" style="display:none;" onclick="copyCharacterPrompt()">📋 복사하기</button>
-    </div>
-
-    <div class="card no-print" id="badgeCard" style="display:none;">
-      <div class="step-num">STEP 6</div>
-      <h2>나의 사원증 만들기</h2>
-      <p class="hint">STEP 5에서 만든 캐릭터 그림을 불러오면 이름과 역할이 들어간 사원증이 만들어져요. 그림이 없어도 먼저 만들 수 있어요. 그림 파일은 내 컴퓨터 화면에서만 쓰고 어디로도 보내지 않아요.</p>
-      <label class="btn-secondary" style="display:block; text-align:center; cursor:pointer;">
-        🖼️ 캐릭터 그림 불러오기
-        <input type="file" id="badgeImageInput" accept="image/*" style="display:none;">
-      </label>
-      <p class="hint" style="margin:10px 0 0;">그림을 복사했다면 이 화면에서 Ctrl+V(맥은 Cmd+V)로 붙여넣어도 돼요.</p>
+      <h2>나의 캐릭터 고르기</h2>
+      <p class="hint">내 역할과 어울리는 동물 친구들이에요. 마음에 드는 친구를 누르면 아래 사원증에 바로 들어가요.</p>
+      <div class="pick-grid" id="pickGrid"></div>
     </div>
 
     <div id="badgeWrap">
@@ -310,6 +302,26 @@
         <button class="btn-primary" style="width:100%;" onclick="submitBadge()">📤 선생님께 제출하기</button>
       </div>
       <div class="badge-status" id="badgeStatus"></div>
+    </div>
+
+    <div class="card no-print" id="characterCard" style="display:none;">
+      <div class="step-num">더 해보기 (선택)</div>
+      <h2>내 캐릭터를 직접 만들어 볼까요?</h2>
+      <p class="hint">내 답변을 닮은 동물 캐릭터를 만들어 볼까요? 아래 버튼을 눌러 질문을 복사한 뒤 AI 앱에 붙여넣으면, 그림을 그리는 AI에게 줄 설명문을 만들어 줘요. 그 설명문을 이미지 만들기 AI에 붙여넣으면 캐릭터 그림이 나와요.</p>
+      <button class="btn-primary" onclick="generateCharacterPrompt()">③ 캐릭터 그림 질문 만들기</button>
+      <textarea id="characterPromptBox" style="display:none; margin-top:14px;" readonly></textarea>
+      <button class="btn-secondary" id="characterCopyBtn" style="display:none;" onclick="copyCharacterPrompt()">📋 복사하기</button>
+    </div>
+
+    <div class="card no-print" id="badgeCard" style="display:none;">
+      <div class="step-num">더 해보기 (선택)</div>
+      <h2>내가 만든 그림으로 사원증 바꾸기</h2>
+      <p class="hint">위에서 만든 캐릭터 그림이 있다면 불러와서 사원증 그림을 바꿀 수 있어요.</p>
+      <label class="btn-secondary" style="display:block; text-align:center; cursor:pointer;">
+        🖼️ 캐릭터 그림 불러오기
+        <input type="file" id="badgeImageInput" accept="image/*" style="display:none;">
+      </label>
+      <p class="hint" style="margin:10px 0 0;">그림을 복사했다면 이 화면에서 Ctrl+V(맥은 Cmd+V)로 붙여넣어도 돼요.</p>
     </div>
 
     <div class="nav-row print-row no-print" id="printNav" style="display:none;">
@@ -495,6 +507,66 @@
 
   // ---- 사원증 ----
   let badgeInfo = { role: '', line: '' };
+  let badgeImageData = '';
+  let badgeCharacter = '';
+
+  const CHARACTERS = {
+    researcher:  [['owl', '부엉이'], ['fox', '여우'], ['cat', '고양이'], ['otter', '수달']],
+    builder:     [['beaver', '비버'], ['bear', '곰'], ['dog', '강아지'], ['raccoon', '너구리']],
+    storyteller: [['parrot', '앵무새'], ['rabbit', '토끼'], ['penguin', '펭귄'], ['lion', '사자']],
+    maker:       [['squirrel', '다람쥐'], ['panda', '판다'], ['duck', '오리'], ['hamster', '햄스터']],
+  };
+
+  function characterSrc(role, idx, key) { return `assets/characters/${role}-${idx + 1}-${key}.png`; }
+
+  // 역할에 맞는 4마리(역할을 못 찾으면 16마리 전부)를 보여준다.
+  function renderPicks(role) {
+    const grid = document.getElementById('pickGrid');
+    grid.textContent = '';
+    const roles = role ? [role] : Object.keys(CHARACTERS);
+    roles.forEach(r => CHARACTERS[r].forEach(([key, label], idx) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pick-btn';
+      b.setAttribute('aria-label', label);
+      const img = document.createElement('img');
+      img.alt = label;
+      img.src = characterSrc(r, idx, key);
+      b.appendChild(img);
+      b.addEventListener('click', () => pickCharacter(b, r, idx, key, label));
+      grid.appendChild(b);
+    }));
+    grid.firstChild.click();
+  }
+
+  // 고른 동물을 사원증에 넣고, 제출용 작은 JPEG도 함께 준비한다.
+  function pickCharacter(btn, role, idx, key, label) {
+    document.querySelectorAll('.pick-btn').forEach(x => x.classList.remove('selected'));
+    btn.classList.add('selected');
+    badgeCharacter = label;
+    const src = characterSrc(role, idx, key);
+    const photo = document.getElementById('badgePhoto');
+    photo.textContent = '';
+    const img = document.createElement('img');
+    img.alt = label;
+    img.src = src;
+    photo.appendChild(img);
+    const pre = new Image();
+    pre.onload = () => { badgeImageData = toJpegData(pre); };
+    pre.src = src;
+  }
+
+  function toJpegData(src) {
+    const scale = Math.min(1, 512 / Math.max(src.width, src.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(src.width * scale);
+    c.height = Math.round(src.height * scale);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(src, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.85);
+  }
 
   function firstLine(aiText) {
     const lines = aiText.split('\n').map(l => l.trim()).filter(Boolean);
@@ -509,8 +581,8 @@
     document.getElementById('badgeName').textContent = studentName || '이름';
     document.getElementById('badgeRole').textContent = roleInfo.emoji + ' ' + roleInfo.name;
     document.getElementById('badgeLine').textContent = badgeInfo.line;
-    const photo = document.getElementById('badgePhoto');
-    if (!photo.querySelector('img')) photo.textContent = roleInfo.emoji;
+    document.getElementById('pickCard').style.display = 'block';
+    renderPicks(role);
     document.getElementById('badgeCard').style.display = 'block';
     document.getElementById('badgeWrap').style.display = 'block';
     document.getElementById('badgeActions').style.display = 'flex';
@@ -521,12 +593,20 @@
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const photo = document.getElementById('badgePhoto');
-      photo.textContent = '';
-      const img = document.createElement('img');
-      img.alt = '캐릭터 그림';
-      img.src = reader.result;
-      photo.appendChild(img);
+      // 제출 용량을 줄이려고 가로세로 512px 안으로 줄여 JPEG로 바꾼다.
+      const src = new Image();
+      src.onload = () => {
+        badgeImageData = toJpegData(src);
+        badgeCharacter = '직접 만든 그림';
+        document.querySelectorAll('.pick-btn').forEach(x => x.classList.remove('selected'));
+        const photo = document.getElementById('badgePhoto');
+        photo.textContent = '';
+        const img = document.createElement('img');
+        img.alt = '캐릭터 그림';
+        img.src = badgeImageData;
+        photo.appendChild(img);
+      };
+      src.src = reader.result;
     };
     reader.readAsDataURL(file);
   }
@@ -549,7 +629,7 @@
     const d = StudioBridge.load();
     const name = document.getElementById('studentName').value || d.studentName || '';
     const team = document.getElementById('teamName').value;
-    const characterText = document.getElementById('characterPromptBox').value ? '(캐릭터 그림 질문을 만들었어요)' : '';
+    const characterText = badgeCharacter ? `캐릭터: ${badgeCharacter}` : '';
     const text = [
       '[사원증]',
       `이름: ${name}`,
@@ -567,6 +647,17 @@
         resultType: 'text',
         textContent: text,
       });
+      if (badgeImageData) {
+        status.textContent = '그림 제출 중...';
+        await StudioBridge.submitResult({
+          entryCode: d.classlogEntryCode,
+          studentName: name,
+          title: `${name || '학생'}의 사원증 그림`,
+          resultType: 'image',
+          fileName: 'badge.jpg',
+          fileData: badgeImageData,
+        });
+      }
       StudioBridge.guard.markClean();
       status.textContent = '✅ 제출 완료! 선생님이 확인할 수 있어요.';
     } catch (e) {

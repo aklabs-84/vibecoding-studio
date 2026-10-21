@@ -33,13 +33,20 @@ module.exports = async function handler(req, res) {
     resultType: raw.resultType,
     linkUrl: str(raw.linkUrl, 2000) || undefined,
     textContent: str(raw.textContent, 20000) || undefined,
+    fileName: str(raw.fileName, 200) || undefined,
+    // base64 파일(최대 3MB → 약 4MB 문자열). 형식·크기 최종 검사는 ClassLog가 한다.
+    fileData: typeof raw.fileData === 'string' && raw.fileData.length <= 5000000 ? raw.fileData : undefined,
   };
   if (!body.entryCode || !body.title) {
     res.status(400).json({ error: 'entryCode, title은 필수예요' });
     return;
   }
-  if (body.resultType !== 'link' && body.resultType !== 'text') {
-    res.status(400).json({ error: 'resultType은 link 또는 text여야 해요' });
+  if (!['link', 'text', 'image', 'file'].includes(body.resultType)) {
+    res.status(400).json({ error: 'resultType은 link, text, image, file 중 하나여야 해요' });
+    return;
+  }
+  if ((body.resultType === 'image' || body.resultType === 'file') && (!body.fileName || !body.fileData)) {
+    res.status(400).json({ error: '파일은 3MB 이하로 올려 주세요' });
     return;
   }
   if (body.linkUrl && !/^https:\/\//i.test(body.linkUrl)) {
