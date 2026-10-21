@@ -32,8 +32,8 @@
   .th span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .empty { color:var(--sub); text-align:center; padding:18px 0; font-size:14px; }
   #sheets { display:flex; flex-direction:column; align-items:center; gap:18px; }
-  .sheet { width:210mm; height:297mm; background:#fff; box-shadow:0 2px 14px rgba(0,0,0,.15); position:relative; padding:21mm 22.5mm; overflow:hidden; }
-  .grid { display:grid; grid-template-columns:repeat(3,55mm); grid-template-rows:repeat(3,85mm); }
+  .sheet { width:210mm; height:297mm; background:#fff; box-shadow:0 2px 14px rgba(0,0,0,.15); position:relative; padding:11mm 17.5mm; overflow:hidden; }
+  .grid { display:grid; grid-template-columns:repeat(3,55mm); grid-template-rows:repeat(3,85mm); gap:10mm; }
   .cell { width:55mm; height:85mm; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .cell::after { content:''; position:absolute; inset:0; border:0.25mm dashed #6b7280; pointer-events:none; }
   .cell img { width:100%; height:100%; object-fit:contain; display:block; }
@@ -93,7 +93,7 @@
       <span class="sp"></span>
       <button class="btn primary" id="printBtn">🖨️ 인쇄하기</button>
     </div>
-    <p class="tip">인쇄 창에서 <b>배율 100%(실제 크기)</b>, <b>여백 없음</b>으로 맞추면 사원증이 55×85mm로 나와요. 점선을 따라 가위로 자르세요.</p>
+    <p class="tip">인쇄 창에서 <b>배율 100%(실제 크기)</b>, <b>여백 없음</b>으로 맞추면 사원증이 55×85mm로 나와요. 사원증 사이에 10mm 여백이 있어요. 점선을 따라 가위로 자르세요.</p>
     <div class="scalebox"><div id="sheets"></div></div>
   </div>
 </div>
