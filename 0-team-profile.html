@@ -185,7 +185,7 @@
   .badge-status { text-align:center; font-size: .9rem; color: var(--text-muted); min-height: 1.4em; }
   @media print {
     @page { margin: 8mm; }
-    .hero, .card, footer, .no-print { display: none !important; }
+    .hero, .card, footer, .no-print, #classlog-guard-banner { display: none !important; }
     html, body { height: 100%; margin: 0; }
     body {
       background: none; padding: 0;
@@ -203,7 +203,10 @@
     body.print-badge #resultCard { display: none !important; }
     body.print-badge #badgeWrap { display: block !important; margin: 0; max-width: none; }
     body:not(.print-badge) #badgeWrap { display: none !important; }
-    body.print-badge #idBadge { box-shadow: none; width: 55mm; height: 85mm; border-radius: 3mm; }
+    body.print-badge #idBadge { box-shadow: none; }
+    body.print-badge.pb-big #idBadge { zoom: 2.5; }
+    body.print-badge.pb-real #idBadge { zoom: 0.945; }
+    body.print-badge.pb-big #badgeWrap { margin-top: 6mm; }
     #idBadge, #idBadge * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
@@ -297,7 +300,9 @@
     </div>
 
     <div class="badge-actions no-print" id="badgeActions" style="display:none;">
-      <button class="btn-secondary" onclick="printBadge()">🪪 사원증 인쇄 / PDF로 저장하기</button>
+      <button class="btn-secondary" onclick="printBadge('big')">🪪 크게 인쇄 / PDF로 저장 (A4에 크게)</button>
+      <button class="btn-secondary" onclick="printBadge('real')">✂️ 실제 사원증 크기로 인쇄 (55×85mm)</button>
+      <button class="btn-secondary" onclick="saveBadgePng()">🖼️ 그림(PNG)으로 저장</button>
       <div id="badgeSubmitBox" style="display:none;">
         <button class="btn-primary" style="width:100%;" onclick="submitBadge()">📤 선생님께 제출하기</button>
       </div>
@@ -618,10 +623,97 @@
     if (item) setBadgeImage(item.getAsFile());
   });
 
-  function printBadge() {
-    document.body.classList.add('print-badge');
+  // 사원증 전체(테두리·팀·그림·이름·역할·소개)를 하나의 PNG 그림으로 그린다. 화면 카드(220×340)와 같은 모양.
+  function renderBadgePng(scale) {
+    scale = scale || 3;
+    const W = 220, H = 340;
+    const c = document.createElement('canvas');
+    c.width = W * scale; c.height = H * scale;
+    const g = c.getContext('2d');
+    g.scale(scale, scale);
+    const FONT = "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    const rr = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+    const ink = '#1b2340';
+
+    // 바탕 + 테두리
+    rr(0, 0, W, H, 14); g.fillStyle = '#fff'; g.fill();
+    g.save(); rr(0, 0, W, H, 14); g.clip();
+
+    // 목걸이 구멍
+    rr(83, 10, 54, 9, 5); g.fillStyle = '#dfe6f5'; g.fill();
+    g.lineWidth = 1.5; g.strokeStyle = ink; g.stroke();
+
+    // 팀 띠
+    const grad = g.createLinearGradient(0, 27, W, 60);
+    grad.addColorStop(0, '#2563eb'); grad.addColorStop(0.5, '#3b82f6'); grad.addColorStop(1, '#22d3ee');
+    g.fillStyle = grad; g.fillRect(0, 27, W, 33);
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = `800 12.8px ${FONT}`;
+    g.fillText(document.getElementById('badgeTeam').textContent, W / 2, 43.5, W - 16);
+
+    // 그림 상자 + 그림
+    const px = (W - 132) / 2, py = 74;
+    rr(px, py, 132, 132, 16); g.fillStyle = '#f3f6fd'; g.fill();
+    g.lineWidth = 1.5; g.strokeStyle = '#dfe6f5'; g.stroke();
+    const img = document.querySelector('#badgePhoto img');
+    if (img && img.complete && img.naturalWidth) {
+      g.save(); rr(px, py, 132, 132, 16); g.clip();
+      const k = Math.min(132 / img.naturalWidth, 132 / img.naturalHeight);
+      const iw = img.naturalWidth * k, ih = img.naturalHeight * k;
+      g.drawImage(img, px + (132 - iw) / 2, py + (132 - ih) / 2, iw, ih);
+      g.restore();
+    } else {
+      g.font = `57px ${FONT}`; g.fillStyle = ink;
+      g.fillText('🙂', W / 2, py + 68);
+    }
+
+    // 이름
+    g.fillStyle = ink; g.font = `800 20px ${FONT}`;
+    g.fillText(document.getElementById('badgeName').textContent, W / 2, 231, W - 24);
+
+    // 역할 알약
+    const roleText = document.getElementById('badgeRole').textContent;
+    g.font = `800 13.8px ${FONT}`;
+    const rw = Math.min(W - 24, g.measureText(roleText).width + 24);
+    rr((W - rw) / 2, 251, rw, 27, 13.5); g.fillStyle = '#eef4ff'; g.fill();
+    g.fillStyle = '#1d4ed8'; g.fillText(roleText, W / 2, 265, rw - 16);
+
+    // 한 줄 소개 (최대 2줄)
+    g.fillStyle = '#64748b'; g.font = `400 11.5px ${FONT}`;
+    const words = document.getElementById('badgeLine').textContent.split(/\s+/).filter(Boolean);
+    const lines = []; let cur = '';
+    words.forEach(w => {
+      const t = cur ? cur + ' ' + w : w;
+      if (g.measureText(t).width > W - 28 && cur) { lines.push(cur); cur = w; } else cur = t;
+    });
+    if (cur) lines.push(cur);
+    lines.slice(0, 2).forEach((l, i) => g.fillText(l, W / 2, 294 + i * 17, W - 28));
+
+    // 아래 띠
+    g.strokeStyle = '#dfe6f5'; g.lineWidth = 1; g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(0, 322); g.lineTo(W, 322); g.stroke(); g.setLineDash([]);
+    g.fillStyle = '#94a3b8'; g.font = `400 9.6px ${FONT}`;
+    g.fillText('바이브코딩 스튜디오 · AKLABS', W / 2, 331);
+    g.restore();
+
+    // 바깥 테두리
+    rr(1, 1, W - 2, H - 2, 13); g.lineWidth = 2; g.strokeStyle = ink; g.stroke();
+    return c.toDataURL('image/png');
+  }
+
+  function saveBadgePng() {
+    const name = document.getElementById('badgeName').textContent || '사원증';
+    const a = document.createElement('a');
+    a.href = renderBadgePng(4);
+    a.download = `사원증-${name}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function printBadge(size) {
+    const cls = size === 'real' ? 'pb-real' : 'pb-big';
+    document.body.classList.add('print-badge', cls);
     window.print();
-    setTimeout(() => document.body.classList.remove('print-badge'), 500);
+    setTimeout(() => document.body.classList.remove('print-badge', 'pb-big', 'pb-real'), 500);
   }
 
   async function submitBadge() {
@@ -647,17 +739,15 @@
         resultType: 'text',
         textContent: text,
       });
-      if (badgeImageData) {
-        status.textContent = '그림 제출 중...';
-        await StudioBridge.submitResult({
-          entryCode: d.classlogEntryCode,
-          studentName: name,
-          title: `${name || '학생'}의 사원증 그림`,
-          resultType: 'image',
-          fileName: 'badge.jpg',
-          fileData: badgeImageData,
-        });
-      }
+      status.textContent = '사원증 그림 제출 중...';
+      await StudioBridge.submitResult({
+        entryCode: d.classlogEntryCode,
+        studentName: name,
+        title: `${name || '학생'}의 사원증 그림`,
+        resultType: 'image',
+        fileName: 'badge.png',
+        fileData: renderBadgePng(3), // 사원증 전체 모양 (모아 찍기에 바로 쓴다)
+      });
       StudioBridge.guard.markClean();
       status.textContent = '✅ 제출 완료! 선생님이 확인할 수 있어요.';
     } catch (e) {
