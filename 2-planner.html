@@ -695,6 +695,7 @@ textarea::placeholder, input::placeholder { color: var(--text-muted); }
 }
 </style>
 <script src="shared/bridge.js"></script>
+<script src="shared/submit-anim.js"></script>
 <script>
 StudioBridge.captureEntryFromURL(); // 클래스로그에서 이 화면으로 바로 들어와도 제출할 수 있게
 StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
@@ -1141,22 +1142,22 @@ async function submitOneLiner() {
   const cat = selectedCat === '기타'
     ? (document.getElementById('cat_custom').value.trim() || '기타') : selectedCat;
   const name = d.studentName || '';
-  btn.disabled = true;
-  status.textContent = '제출 중...';
-  try {
-    await StudioBridge.submitResult({
+  const ok = await SubmitAnim.run({
+    statusEl: status,
+    btnEl: btn,
+    doneLabel: '✅ 제출 완료 · 다시 제출하기',
+    task: () => StudioBridge.submitResult({
       entryCode: d.classlogEntryCode,
       studentName: name,
       title: `${name || '학생'}의 문제 한 문장`,
       resultType: 'text',
       textContent: ['[문제 한 문장]', name ? `이름: ${name}` : '', cat ? `카테고리: ${cat}` : '', ol].filter(Boolean).join('\n'),
-    });
+    }),
+  });
+  if (ok) {
     oneLinerSubmitted = true;
-    status.textContent = '✅ 제출 완료! 이제 발표하고, 선생님이 투표를 열면 클래스로그에서 투표하세요.';
-  } catch (e) {
-    status.textContent = '❌ ' + e.message;
+    status.insertAdjacentHTML('beforeend', '<div style="margin-top:8px;font-size:14px">이제 발표하고, 선생님이 투표를 열면 클래스로그에서 투표하세요.</div>');
   }
-  btn.disabled = false;
 }
 
 function finishVote() {
