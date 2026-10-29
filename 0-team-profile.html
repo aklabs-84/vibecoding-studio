@@ -330,6 +330,11 @@
       <h2>나의 캐릭터 고르기</h2>
       <p class="hint">내 역할과 어울리는 동물 친구들이에요. 마음에 드는 친구를 누르면 아래 사원증에 바로 들어가요.</p>
       <div class="pick-grid" id="pickGrid"></div>
+      <div class="field" style="margin:18px 0 0;">
+        <label for="badgeLineInput">사원증에 쓸 한 줄 (30자까지)</label>
+        <input type="text" id="badgeLineInput" maxlength="30" placeholder="예) 친구 이야기를 잘 들어 주는 사람" oninput="setBadgeLine(this.value)">
+        <p class="hint" style="margin:6px 0 0;">AI의 긴 설명은 3단계 결과 카드에 그대로 있어요. 사원증에는 짧게 쓰면 잘리지 않아요. 마음대로 고쳐도 돼요.</p>
+      </div>
     </div>
 
     <div id="badgeWrap">
@@ -716,7 +721,15 @@
   function firstLine(aiText) {
     const lines = cleanAIText(aiText).split('\n').map(l => l.replace(/^#+\s*/, '')).filter(Boolean);
     const pick = lines.find(l => !/^\*\*.+\*\*$/.test(l) && !/^\S{0,4}\s*\d+\.\s/.test(l) && !/^\d+\.\s*(이 사람|아래)/.test(l) && !l.includes('역할')) || lines[0] || '';
-    return pick.replace(/^[*\-\d.\s]+/, '').replace(/\*\*/g, '').slice(0, 60);
+    const clean = pick.replace(/^[*\-\d.\s]+/, '').replace(/\*\*/g, '').trim();
+    // 사원증 칸은 좁아서 첫 문장만, 30자 안으로 줄인다 (긴 설명은 3단계 결과 카드에 있다)
+    const first = (clean.match(/^.+?(?:[.!?。]|다\s|요\s|$)/) || [clean])[0].trim().replace(/[.。]$/, '');
+    return first.length > 30 ? first.slice(0, 29) + '…' : first;
+  }
+
+  function setBadgeLine(text) {
+    badgeInfo.line = text.trim().slice(0, 30);
+    document.getElementById('badgeLine').textContent = badgeInfo.line;
   }
 
   function showBadge(aiText, role, studentName, teamName) {
@@ -726,6 +739,7 @@
     document.getElementById('badgeName').textContent = studentName || '이름';
     document.getElementById('badgeRole').textContent = roleInfo.emoji + ' ' + roleInfo.name;
     document.getElementById('badgeLine').textContent = badgeInfo.line;
+    document.getElementById('badgeLineInput').value = badgeInfo.line;
     document.getElementById('pickCard').style.display = 'block';
     renderPicks(role);
     document.getElementById('badgeCard').style.display = 'block';
