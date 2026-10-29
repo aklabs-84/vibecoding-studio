@@ -220,7 +220,7 @@
   <div class="wrap">
     <div class="section-head">
       <div class="eyebrow">HOW TO USE</div>
-      <h2>이렇게 4단계로 완성해요</h2>
+      <h2>이렇게 단계별로 완성해요</h2>
       <p>순서대로 진행해도 되고, 필요한 단계부터 바로 시작해도 좋아요.</p>
     </div>
     <div class="steps" id="stepsList"></div>
@@ -238,6 +238,14 @@
 
   const stepDefs = [
     {
+      href: 'intro.html',
+      icon: '🎹',
+      title: '인트로: 바이브코딩이란?',
+      desc: '말하는 피아노를 직접 체험하고, 바이브코딩이 무엇인지 알아봐요.',
+      done: !!data.introDone,
+      optional: true,
+    },
+    {
       href: '0-team-profile.html',
       title: '0단계: 나의 협업 프로필 만들기 (선택)',
       desc: 'AI에게 물어보며 나의 협업 스타일과 어울리는 역할을 알아봐요.',
@@ -245,7 +253,7 @@
       optional: true,
     },
     {
-      href: '1-simulation.html',
+      href: '1-simulation-v2.html',
       title: '1단계: 기획 시뮬레이션 (선택)',
       desc: '몬스터 스타트업 게임으로 기획의 기본 개념을 익혀요.',
       done: !!data.simulationPRD,
@@ -274,7 +282,7 @@
   const stepsEl = document.getElementById('stepsList');
   stepsEl.innerHTML = stepDefs.map((s, i) => `
     <a class="step ${s.done ? 'done' : ''}" href="${s.href || '#'}" ${s.onClick ? `onclick="${s.onClick}; return false;"` : ''}>
-      <div class="num">${s.done ? '✓' : i + 1}</div>
+      <div class="num">${s.done ? '✓' : (s.icon || i - 1)}</div>
       <div class="step-body">
         <div class="step-title">${s.title}</div>
         <div class="step-desc">${s.desc}</div>

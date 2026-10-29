@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta http-equiv="Cache-Control" content="no-store">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시안 B — 스토리 구간</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+:root {
+  --desk: #1a0b2a; --desk2: #2a0845; --paper: #f0e0b8; --paper2: #e3cd97; --ink: #2a1608; --ink2: #6b4a2b;
+  --blood: #a3122b; --gold: #c9951c; --green: #00ff41; --light: #f4eeff;
+  --px: 'Press Start 2P', monospace; --kr: 'Galmuri11', 'Galmuri9', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--desk); color: var(--light); font-family: var(--kr); font-size: 18px; line-height: 1.75; min-height: 100vh;
+  background-image: radial-gradient(circle at 50% 0, #3a1260 0, transparent 60%); }
+button { font-family: inherit; cursor: pointer; color: inherit; }
+
+/* 시안 확인용 장면 고르개 (실제 앱에는 없음) */
+.switch { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; padding: 12px 12px 0; }
+.switch button { background: none; border: none; border-bottom: 3px solid transparent; color: #b9a8d6; font-size: 15px; padding: 6px 12px; transition: color .15s, border-color .15s; }
+.switch button:hover { color: #fff; border-color: #6b4a9a; }
+.switch button.on { color: var(--green); border-color: var(--green); }
+.switch .tag { align-self: center; font-family: var(--px); font-size: 10px; color: #7d6aa0; margin-right: 8px; }
+
+.screen { display: none; padding: 18px 16px 60px; max-width: 880px; margin: 0 auto; }
+.screen.on { display: block; animation: rise .35s; }
+@keyframes rise { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+/* 종이 한 장 */
+.sheet { background: var(--paper); color: var(--ink); border: 5px solid #000; box-shadow: 8px 8px 0 #000;
+  background-image: repeating-linear-gradient(transparent 0 33px, rgba(107,74,43,.13) 33px 34px); padding: 30px 34px 34px; }
+.eyebrow { font-family: var(--px); font-size: 11px; color: var(--blood); letter-spacing: 1px; }
+
+/* ① 제목 */
+.title h1 { font-family: var(--kr); font-size: 38px; line-height: 1.5; color: var(--ink); margin: 10px 0 6px; }
+.title h1 b { color: var(--blood); font-weight: normal; }
+.title .sub { color: var(--ink2); font-size: 19px; }
+.cast { display: flex; justify-content: center; align-items: flex-end; gap: 6px; margin: 22px 0 10px; }
+.cast img { height: 150px; image-rendering: pixelated; mix-blend-mode: multiply; transition: transform .15s; }
+.cast img:hover { transform: translateY(-8px); }
+.sign { margin-top: 18px; font-size: 21px; }
+.sign .line { display: inline-block; min-width: 260px; border-bottom: 3px solid var(--ink); padding: 0 8px; outline: none; color: var(--blood); font-size: 24px; }
+.sign .line:empty::before { content: attr(data-ph); color: #b3a07a; }
+.sign .line:focus { background: rgba(201,149,28,.18); }
+.hintline { color: var(--ink2); font-size: 15px; margin-top: 8px; }
+.go { display: flex; justify-content: flex-end; margin-top: 22px; align-items: center; gap: 18px; }
+.wax { width: 108px; height: 108px; border-radius: 50%; border: none; background: radial-gradient(circle at 35% 30%, #d4283f 0, var(--blood) 55%, #6e0a1c 100%); color: #ffe4ea; font-size: 18px; line-height: 1.35; box-shadow: 0 6px 0 #4a0613, 0 0 0 4px #000; transition: transform .1s, box-shadow .1s; }
+.wax:hover { transform: translateY(-3px) rotate(-4deg); box-shadow: 0 10px 0 #4a0613, 0 0 0 4px #000; }
+.wax:active { transform: translateY(5px); box-shadow: 0 1px 0 #4a0613, 0 0 0 4px #000; }
+
+/* ② 스토리 장면 */
+.scene-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.dots { display: flex; gap: 7px; }
+.dots i { width: 14px; height: 14px; border: 3px solid #000; background: #d9c699; }
+.dots i.on { background: var(--blood); }
+.dots i.past { background: var(--gold); }
+.skip { background: none; border: none; color: var(--ink2); text-decoration: underline; font-size: 15px; transition: color .15s; }
+.skip:hover { color: var(--blood); }
+.plate { background: var(--paper2); border: 4px solid #000; height: 300px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+.plate img { height: 94%; image-rendering: pixelated; mix-blend-mode: multiply; transition: opacity .25s; }
+.plate .cap { position: absolute; left: 10px; top: 8px; font-family: var(--px); font-size: 10px; color: var(--ink2); }
+.talk { margin-top: 18px; background: var(--ink); color: var(--paper); padding: 18px 24px 16px; box-shadow: 6px 6px 0 var(--gold); cursor: pointer; min-height: 126px; position: relative; }
+.talk .who { font-family: var(--px); font-size: 11px; color: var(--gold); margin-bottom: 8px; }
+.talk .txt { font-size: 22px; line-height: 1.65; min-height: 72px; word-break: keep-all; }
+.talk .next { position: absolute; right: 18px; bottom: 10px; color: var(--green); font-size: 15px; animation: blink 1.1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.talk:hover { transform: translate(-2px, -2px); }
+.talk { transition: transform .1s; }
+
+/* ③ 교훈 */
+.lesson { text-align: center; }
+.lesson .stamp { display: inline-block; font-family: var(--px); font-size: 14px; color: var(--blood); border: 5px solid var(--blood); padding: 10px 16px; transform: rotate(-6deg); margin: 8px 0 22px; }
+.lesson .done { color: var(--ink2); font-size: 17px; }
+.lesson .done b { color: var(--ink); }
+.lesson .quote { margin: 18px auto; max-width: 600px; font-size: 24px; line-height: 1.6; color: var(--ink); word-break: keep-all; }
+.lesson .quote mark { background: linear-gradient(transparent 55%, rgba(201,149,28,.55) 55%); color: inherit; }
+.lesson .who { font-family: var(--px); font-size: 11px; color: var(--ink2); }
+.lesson .go { justify-content: center; }
+.btn { background: var(--ink); color: var(--paper); border: none; padding: 14px 24px; font-size: 19px; box-shadow: 5px 5px 0 var(--gold); transition: transform .1s; }
+.btn:hover { transform: translate(-2px, -2px); }
+.btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--gold); }
+
+/* ④ 결과 */
+.res h2 { font-family: var(--kr); font-size: 28px; margin: 10px 0 4px; line-height: 1.6; }
+.score { display: flex; align-items: baseline; gap: 12px; margin: 6px 0 18px; }
+.score .num { font-family: var(--px); font-size: 40px; color: var(--blood); }
+.score .lab { color: var(--ink2); font-size: 16px; }
+.plan { list-style: none; border-top: 3px solid var(--ink); }
+.plan li { padding: 11px 0 11px 14px; border-bottom: 1px dashed var(--ink2); font-size: 18px; line-height: 1.6; position: relative; transition: background .12s, padding .12s; }
+.plan li:hover { background: rgba(163,18,43,.08); padding-left: 20px; }
+.plan li .n { font-family: var(--px); font-size: 11px; color: var(--blood); display: block; }
+.res .go { justify-content: space-between; }
+.back { background: none; border: none; color: var(--ink2); text-decoration: underline; font-size: 15px; }
+.back:hover { color: var(--ink); }
+.toast { color: var(--blood); font-size: 16px; margin-left: 10px; }
+
+/* BGM 켜기/끄기 */
+.bgm { position: fixed; right: 14px; top: 12px; z-index: 20; background: var(--desk2); border: 3px solid #000; color: var(--green); font-size: 15px; padding: 6px 12px; box-shadow: 3px 3px 0 #000; transition: transform .1s, background .15s; }
+.bgm:hover { background: #3d1568; transform: translate(-1px, -1px); }
+.bgm.off { color: #b9a8d6; }
+.out { margin-top: 26px; border-top: 3px solid var(--ink); padding-top: 16px; }
+.out-h { font-size: 22px; color: var(--ink); }
+.orow { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--ink2); }
+.orow .ot { flex: 1; min-width: 0; }
+.orow .ot b { display: block; font-size: 19px; color: var(--ink); }
+.orow .ot span { font-size: 15px; color: var(--ink2); }
+.ghost { background: none; border: none; color: var(--ink2); text-decoration: underline; font-size: 15px; transition: color .15s; }
+.ghost:hover { color: var(--blood); }
+.pv { display: none; margin-top: 14px; background: var(--ink); color: var(--paper); padding: 16px 18px; font-family: var(--kr); font-size: 15px; line-height: 1.7; white-space: pre-wrap; max-height: 320px; overflow: auto; box-shadow: 5px 5px 0 var(--gold); }
+.pv.on { display: block; }
+.out .toast { margin: 10px 0 0; min-height: 24px; }
+@media (max-width: 600px) {
+  .orow { flex-wrap: wrap; }
+  .orow .ot { flex-basis: 100%; }
+  .sheet { padding: 20px 16px 24px; }
+  .title h1 { font-size: 28px; }
+  .cast img { height: 90px; }
+  .plate { height: 200px; }
+  .talk .txt { font-size: 19px; }
+  .sign .line { min-width: 0; width: 100%; }
+  .wax { width: 92px; height: 92px; font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<audio id="bgm" src="../assets/Sunrise_at_the_Castle_Gate.mp3" loop></audio>
+<button class="bgm off" id="bgmBtn" onclick="toggleBgm()">♪ 배경음악 켜기</button>
+
+<div class="switch" id="switch">
+  <span class="tag">장면 보기 ▸</span>
+  <button data-s="title" class="on">① 시작 화면</button>
+  <button data-s="scene">② 스토리 장면</button>
+  <button data-s="lesson">③ 단계 사이 교훈</button>
+  <button data-s="res">④ 결과 화면</button>
+</div>
+
+<!-- ① 시작 -->
+<section class="screen on" id="s-title">
+  <div class="sheet title">
+    <div class="eyebrow">MONSTER STARTUP</div>
+    <h1>마왕군 <b>기획 계약서</b></h1>
+    <div class="sub">사악한 천재 기획팀이여, 먼저 부대 이름을 서명하라!</div>
+    <div class="cast">
+      <img src="../assets/orc_pixel_member_1777946394304.png" alt="">
+      <img src="../assets/angry_overlord_pixel_1777947150969.png" alt="" style="height:190px">
+      <img src="../assets/monster_ai_secretary_1777946372077.png" alt="">
+      <img src="../assets/skeleton_pixel_member_1777946415693.png" alt="">
+    </div>
+    <div class="sign">부대 이름: <span class="line" id="team" contenteditable="plaintext-only" data-ph="여기에 서명" spellcheck="false"></span></div>
+    <div class="hintline">조원들과 상의해서 가장 무서운(또는 웃긴) 이름을 정해 보세요. 예: 마왕군 특공대</div>
+    <div class="go"><button class="wax" onclick="playBgm(); show('scene'); startScene()">계약<br>시작!</button></div>
+  </div>
+</section>
+
+<!-- ② 스토리 -->
+<section class="screen" id="s-scene">
+  <div class="sheet">
+    <div class="scene-top">
+      <div class="dots" id="dots"></div>
+      <button class="skip" onclick="show('lesson')">이야기 건너뛰기 ▶▶</button>
+    </div>
+    <div class="plate"><span class="cap" id="cap">PROLOGUE</span><img id="pimg" alt=""></div>
+    <div class="talk" id="talk" onclick="nextLine()">
+      <div class="who">AIDEN (마왕군 AI 비서)</div>
+      <div class="txt" id="txt"></div>
+      <div class="next" id="nx">▶ 눌러서 다음</div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ 교훈 -->
+<section class="screen" id="s-lesson">
+  <div class="sheet lesson">
+    <div class="eyebrow">QUEST 02 / 06 · CLEAR</div>
+    <div class="stamp">앱 컨셉 승인!</div>
+    <div class="done">우리가 적은 문장: <b>그래서 우리 앱은 「용사 지옥」 — 실시간으로 용사를 추적해 함정을 자동으로 맞춰 주는 앱이다.</b></div>
+    <div class="quote">컨셉은 앱의 <mark>정체성</mark>이에요. 이름만 들어도 무슨 사악한 일을 하는지 떠올라야 해요.</div>
+    <div class="who">— 마왕님의 한 줄 교훈</div>
+    <div class="go"><button class="btn" onclick="show('scene'); startScene(1)">다음 장으로 넘기기 →</button></div>
+  </div>
+</section>
+
+<!-- ④ 결과 -->
+<section class="screen" id="s-res">
+  <div class="sheet res">
+    <div class="eyebrow">THE END · 계약 완성</div>
+    <h2>「마왕군 특공대」의 사악한 앱 기획서</h2>
+    <div class="score"><span class="num">99</span><span class="lab">SYNERGY SCORE · 마왕님이 번개를 한 번만 치셨어요</span></div>
+    <ol class="plan" id="plan"></ol>
+    <div class="out">
+      <div class="out-h">AI에게 이 기획서를 전달하세요</div>
+      <div class="hintline">아래 버튼으로 복사한 뒤, Gemini나 ChatGPT 대화창에 그대로 붙여넣기만 하면 돼요.</div>
+      <div class="orow">
+        <div class="ot"><b>① 앱 만들어 줘</b><span>화면이 움직이는 프로토타입 앱(HTML 한 파일)을 만들어 줘요</span></div>
+        <button class="ghost" onclick="preview('app')">내용 보기</button>
+        <button class="btn" onclick="copyIt('app')">복사</button>
+      </div>
+      <div class="orow">
+        <div class="ot"><b>② 프로토타입 그림 만들어 줘</b><span>화면 3개를 한 장에 나란히 그린 그림을 만들어 줘요</span></div>
+        <button class="ghost" onclick="preview('img')">내용 보기</button>
+        <button class="btn" onclick="copyIt('img')">복사</button>
+      </div>
+      <pre class="pv" id="pv"></pre>
+      <div class="toast" id="toast"></div>
+    </div>
+    <div class="go"><button class="back" onclick="show('title')">처음부터 다시</button></div>
+  </div>
+</section>
+
+<script src="quest-common.js"></script>
+<script>
+const SCENES = [
+  { cap: 'PROLOGUE 1', img: '../assets/bankrupt_dungeon_pixel_1777947106918.png', text: '서기 666년... 던전 산업은 유례없는 대공황에 직면했다.' },
+  { cap: 'PROLOGUE 2', img: '../assets/hero_knight_pixel_1777947119473.png', text: '용사들은 유튜브 공략을 보며 우리 집을 안방처럼 드나들고 있지.' },
+  { cap: 'PROLOGUE 3', img: '../assets/angry_overlord_pixel_1777947150969.png', text: '부하 몬스터들은 사기를 잃고 흩어지는데, 마왕님은 번개를 내리치신다!' },
+  { cap: 'PROLOGUE 4', img: '../assets/cool_architect_pixel_1777947168739.png', text: "이대로는 안 된다. 우리에겐 혁신적인 '디지털 전환'이 필요하다." },
+  { cap: 'PROLOGUE 5', img: '../assets/cool_architect_pixel_1777947168739.png', text: "사악한 천재 기획팀이여, 당신들의 손으로 '스마트 던전' 앱을 탄생시켜라!" }
+];
+let list = SCENES, idx = 0, timer = null, typing = false;
+
+function setBgmUI(on) { const b = document.getElementById('bgmBtn'); b.classList.toggle('off', !on); b.textContent = on ? '♪ 배경음악 끄기' : '♪ 배경음악 켜기'; }
+function playBgm() { const a = document.getElementById('bgm'); a.volume = .5; a.play().then(() => setBgmUI(true), () => setBgmUI(false)); }
+function toggleBgm() { const a = document.getElementById('bgm'); if (a.paused) playBgm(); else { a.pause(); setBgmUI(false); } }
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(e => e.classList.toggle('on', e.id === 's-' + id));
+  document.querySelectorAll('#switch button').forEach(b => b.classList.toggle('on', b.dataset.s === id));
+  if (id === 'scene') startScene();
+  if (id === 'res') renderPlan();
+}
+document.querySelectorAll('#switch button').forEach(b => b.onclick = () => show(b.dataset.s));
+
+function startScene(which) {
+  list = which ? [
+    { cap: 'QUEST 03', img: '../assets/orc_pixel_member_1777946394304.png', text: "이 앱을 주로 사용하게 될 '불쌍한 영혼'들을 골라보게." },
+    { cap: 'QUEST 03', img: '../assets/orc_pixel_member_1777946394304.png', text: '오크용은 단순해야 하고, 스켈레톤용은 정교해야 하겠지?' }
+  ] : SCENES;
+  idx = 0; draw();
+}
+function draw() {
+  const s = list[idx];
+  document.getElementById('dots').innerHTML = list.map((_, i) => `<i class="${i === idx ? 'on' : i < idx ? 'past' : ''}"></i>`).join('');
+  document.getElementById('cap').textContent = s.cap;
+  document.getElementById('pimg').src = s.img;
+  type(s.text);
+}
+function type(t) {
+  clearTimeout(timer); const el = document.getElementById('txt'); el.textContent = ''; typing = true;
+  document.getElementById('nx').style.visibility = 'hidden';
+  let i = 0;
+  (function step() {
+    if (i < t.length) { el.textContent += t[i++]; timer = setTimeout(step, 30); }
+    else { typing = false; document.getElementById('nx').style.visibility = 'visible'; document.getElementById('nx').textContent = idx === list.length - 1 ? '▶ 눌러서 시작' : '▶ 눌러서 다음'; }
+  })();
+}
+function nextLine() {
+  if (typing) { clearTimeout(timer); document.getElementById('txt').textContent = list[idx].text; typing = false; document.getElementById('nx').style.visibility = 'visible'; return; }
+  if (idx < list.length - 1) { idx++; draw(); } else show(list === SCENES ? 'lesson' : 'title');
+}
+
+function renderPlan() {
+  const st = Store.load();
+  document.getElementById('plan').innerHTML = QUESTS.map(q => {
+    const a = st.answers[q.n] || q.seeds[0];
+    const s = q.hasName ? `${q.before} 「${st.name || '용사 지옥'}」 — ${a} ${q.after}` : `${q.before} ${a} ${q.after}`;
+    return `<li><span class="n">${q.n}장 · ${q.name}</span>${s}</li>`;
+  }).join('');
+}
+function data() {
+  const st = Store.load(), g = n => { const q = QUESTS[n - 1]; return (st.answers[n] || q.seeds[0]); };
+  return { team: st.team || '마왕군 특공대', app: st.name || '용사 지옥',
+    problem: g(1), concept: g(2), target: g(3), features: g(4), look: g(5), launch: g(6) };
+}
+function summary(d) {
+  return `- 앱 이름: ${d.app}
+- 만든 팀: ${d.team}
+- 해결할 문제: ${d.problem}
+- 한 줄 컨셉: ${d.concept} 앱
+- 주 사용자: ${d.target}
+- 필수 기능(필살기): ${d.features}
+- 화면 분위기: ${d.look}
+- 퍼뜨리는 방법(출시 전략): ${d.launch}`;
+}
+function buildPrompt(kind) {
+  const d = data(), sm = summary(d);
+  if (kind === 'app') return `너는 친절한 앱 프로토타입 개발자야.
+아래는 학생들이 "마왕군(몬스터)이 되어 용사를 물리치는" 가상의 앱 기획서야. 허구의 재미있는 설정이니 현실성은 따지지 말고, 기획서 내용을 그대로 살려 줘.
+
+[기획서]
+${sm}
+
+[부탁]
+1. 위 기획서로 화면이 실제로 움직이는 프로토타입 앱을 HTML 파일 하나(CSS·JS 포함)로 만들어 줘.
+2. 첫 화면 → "필수 기능" 화면 → 결과(또는 마무리) 화면, 최소 3개 화면을 버튼으로 오갈 수 있게 해 줘.
+3. 필수 기능은 가짜(샘플) 데이터로 눌러 보면 동작이 보이게 해 줘. 서버·로그인·API 키는 쓰지 마.
+4. "화면 분위기"에 적힌 색과 느낌으로 디자인하고, 앱 이름을 눈에 띄게 넣어 줘.
+5. 화면 글자는 모두 한국어로 쓰고, 글씨는 크고 읽기 쉽게 해 줘.
+6. 만든 뒤, 내가 어디서 눌러 보면 되는지 초등학생도 알 수 있게 3줄로 설명해 줘.`;
+  return `너는 앱 디자이너야. 아래 가상의 앱 기획서를 바탕으로, "프로토타입 그림" 한 장을 그려 줘. (허구의 재미있는 설정이니 그대로 표현해 줘)
+
+[기획서]
+${sm}
+
+[그림 조건]
+1. 한 장의 가로 그림 안에 스마트폰 화면 3개를 나란히 그려 줘.
+   - 왼쪽: 첫 화면 (앱 이름 「${d.app}」과 한 줄 컨셉)
+   - 가운데: 필수 기능 화면 (${d.features})
+   - 오른쪽: 마무리 화면 (사용자가 얻는 결과나 효과)
+2. 전체 색과 느낌은 "${d.look}" 분위기로 통일해 줘.
+3. 화면 속 한국어 글자는 짧고 크게, 화면마다 제목 한 줄만 넣어 줘. 작은 글씨나 긴 문장은 넣지 마.
+4. 그림 맨 위에 앱 이름 「${d.app}」을 크게 넣어 줘.
+5. 주 사용자는 "${d.target}"야. 그 사용자가 쓸 만한 화면처럼 보이게 그려 줘.`;
+}
+function preview(kind) { const e = document.getElementById('pv'); e.textContent = buildPrompt(kind); e.classList.add('on'); }
+function copyIt(kind) {
+  const t = buildPrompt(kind), ok = () => msg(kind === 'app' ? '복사됐어요! AI 대화창에 붙여넣기 하세요' : '복사됐어요! 그림 만들기 AI에 붙여넣기 하세요');
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(ok, () => msg('복사 완료(시안)'));
+}
+function msg(t) { const e = document.getElementById('toast'); e.textContent = t; setTimeout(() => e.textContent = '', 3500); }
+</script>
+</body>
+</html>

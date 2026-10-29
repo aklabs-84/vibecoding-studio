@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시안 A — 작전 지휘실</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+:root {
+  --bg: #0d0221; --panel: #14052e; --purple: #2a0845; --green: #00ff41; --red: #ff004c; --gold: #ffd23f;
+  --text: #f4eeff; --sub: #b9a8d6; --line: #3b2063;
+  --px: 'Press Start 2P', monospace; --kr: 'Galmuri11', 'Galmuri9', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--kr); font-size: 18px; line-height: 1.7; min-height: 100vh; }
+button { font-family: inherit; color: inherit; cursor: pointer; }
+.tag { font-family: var(--px); font-size: 12px; letter-spacing: .5px; }
+
+/* 상단 바 */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 24px; border-bottom: 4px solid var(--purple); background: #000; }
+.top .brand { color: var(--green); font-family: var(--px); font-size: 14px; }
+.top .team { color: var(--sub); }
+.save { display: flex; align-items: center; gap: 10px; font-size: 16px; color: var(--sub); }
+.save .dot { width: 12px; height: 12px; background: var(--sub); }
+.save.ok .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+.save.ok b { color: var(--green); font-weight: 400; }
+.save.pulse .dot { animation: pop .5s; }
+@keyframes pop { 0% { transform: scale(2.2); } 100% { transform: scale(1); } }
+.reset { background: none; border: none; color: var(--sub); text-decoration: underline; font-size: 14px; }
+.reset:hover { color: var(--red); }
+
+/* 단계 길잡이 */
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; border-bottom: 4px solid var(--purple); }
+.step { background: var(--panel); border: none; border-right: 2px solid var(--line); padding: 12px 6px 10px; text-align: center; font-size: 15px; color: var(--sub); position: relative; transition: background .15s, color .15s; }
+.step:last-child { border-right: none; }
+.step .n { display: block; font-family: var(--px); font-size: 12px; margin-bottom: 4px; }
+.step:hover:not(:disabled) { background: var(--purple); color: #fff; }
+.step:disabled { opacity: .35; cursor: not-allowed; }
+.step.done { color: var(--red); } .step.done .n::after { content: ' ✓'; }
+.step.on { background: var(--purple); color: var(--green); box-shadow: inset 0 -6px 0 var(--green); }
+
+/* 본문 2단 */
+.layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr); gap: 0; min-height: calc(100vh - 150px); }
+.main { padding: 28px 32px 60px; border-right: 4px solid var(--purple); max-width: 880px; width: 100%; justify-self: end; }
+.side { padding: 28px 24px 60px; background: #090118; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; }
+
+h2.quest { font-family: var(--px); font-size: 18px; color: var(--red); line-height: 1.6; margin-bottom: 8px; }
+.mission { font-size: 22px; color: #fff; line-height: 1.6; margin-bottom: 30px; }
+
+.sec { padding: 22px 0; border-top: 2px dashed var(--line); }
+.sec > .lab { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+.sec > .lab .no { font-family: var(--px); font-size: 14px; color: var(--gold); }
+.sec > .lab .t { font-size: 20px; color: var(--green); }
+.sec > .lab .s { font-size: 15px; color: var(--sub); }
+
+/* ① 토론 */
+.talk { list-style: none; display: grid; gap: 10px; }
+.talk li button { width: 100%; text-align: left; display: flex; gap: 14px; align-items: flex-start; background: none; border: none; padding: 10px 12px; font-size: 18px; color: var(--text); transition: background .12s, transform .12s; }
+.talk li button:hover { background: var(--purple); transform: translateX(4px); }
+.box { flex: none; width: 24px; height: 24px; border: 3px solid var(--sub); margin-top: 3px; display: grid; place-items: center; font-size: 16px; color: transparent; }
+.talk li.done .box { background: var(--green); border-color: var(--green); color: #000; }
+.talk li.done button { color: var(--sub); }
+.timer { margin-top: 12px; display: flex; gap: 12px; align-items: center; font-size: 16px; color: var(--sub); }
+.timer button { background: none; border: 3px solid var(--sub); padding: 6px 14px; font-size: 16px; }
+.timer button:hover { border-color: var(--green); color: var(--green); }
+.timer .clock { font-family: var(--px); font-size: 14px; color: var(--gold); }
+
+/* ② 쓰기 */
+.sentence { font-size: 21px; line-height: 1.7; }
+.sentence .fix { color: var(--sub); }
+.field { display: block; width: 100%; margin: 8px 0; background: #000; border: 4px solid var(--green); color: #fff; font-family: var(--kr); font-size: 20px; line-height: 1.6; padding: 14px 16px; resize: vertical; min-height: 92px; outline: none; transition: box-shadow .15s, border-color .15s; }
+.field::placeholder { color: #6d5b8f; }
+.field:focus { border-color: #fff; box-shadow: 0 0 0 4px rgba(0, 255, 65, .25); }
+.field.small { min-height: 0; height: 56px; resize: none; margin-bottom: 14px; border-color: var(--gold); }
+.name-lab { font-size: 16px; color: var(--gold); display: block; margin-top: 6px; }
+.hintline { font-size: 15px; color: var(--sub); margin-top: 6px; }
+.hintline .caps { float: right; font-family: var(--px); font-size: 11px; }
+
+.seeds-lab { margin: 22px 0 10px; font-size: 16px; color: var(--sub); }
+.seeds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.seed { text-align: left; background: #1a0838; border: 3px solid var(--line); padding: 12px 14px; font-size: 16px; line-height: 1.55; transition: transform .12s, border-color .12s, background .12s; position: relative; }
+.seed::before { content: '+ '; color: var(--green); font-family: var(--px); font-size: 11px; }
+.seed:hover { transform: translateY(-3px); border-color: var(--green); background: var(--purple); }
+.seed.used { border-color: var(--green); background: rgba(0, 255, 65, .1); }
+.dice { margin-top: 14px; background: none; border: 3px dashed var(--red); color: var(--red); padding: 10px 16px; font-size: 17px; transition: background .12s, color .12s; }
+.dice:hover { background: var(--red); color: #fff; }
+
+/* ③ 도장 */
+.actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.stamp { background: var(--red); border: 4px solid #fff; padding: 16px 28px; font-size: 20px; color: #fff; box-shadow: 6px 6px 0 #000; transition: transform .1s, box-shadow .1s, opacity .2s; }
+.stamp:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 #000; }
+.stamp:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #000; }
+.stamp:disabled { background: #3a2a52; border-color: #5a4a72; color: #8c7aa8; box-shadow: none; cursor: not-allowed; }
+.next { background: var(--green); border: 4px solid #fff; color: #000; padding: 16px 28px; font-size: 20px; box-shadow: 6px 6px 0 #000; display: none; }
+.next.show { display: inline-block; animation: rise .35s; }
+@keyframes rise { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.next:hover { transform: translate(-2px, -2px); }
+.prev { background: none; border: none; color: var(--sub); text-decoration: underline; font-size: 16px; }
+.prev:hover { color: #fff; }
+.why { font-size: 15px; color: var(--sub); margin-top: 10px; }
+
+/* 오른쪽: 두루마리 */
+.scroll-title { font-family: var(--px); font-size: 12px; color: var(--gold); margin-bottom: 4px; }
+.scroll-sub { font-size: 15px; color: var(--sub); margin-bottom: 18px; }
+.scroll { list-style: none; display: grid; gap: 0; }
+.scroll li { padding: 12px 0 12px 14px; border-left: 4px solid var(--line); font-size: 16px; line-height: 1.6; color: var(--sub); cursor: pointer; transition: background .12s; }
+.scroll li:hover { background: #14052e; }
+.scroll li .k { display: block; font-family: var(--px); font-size: 10px; margin-bottom: 4px; color: var(--sub); }
+.scroll li.filled { border-left-color: var(--red); color: var(--text); }
+.scroll li.filled .k { color: var(--red); }
+.scroll li.cur { border-left-color: var(--green); background: rgba(0, 255, 65, .06); }
+.scroll li.cur .k { color: var(--green); }
+.scroll li.empty { color: #5d4a80; }
+.scroll li.flash { animation: flash .9s; }
+@keyframes flash { 0% { background: rgba(255, 210, 63, .35); } 100% { background: transparent; } }
+.draft { color: var(--sub); font-style: normal; }
+
+.aiden { display: grid; grid-template-columns: 64px 1fr; gap: 14px; margin-top: 26px; padding-top: 22px; border-top: 2px dashed var(--line); align-items: start; }
+.aiden .face { width: 64px; height: 64px; background: var(--purple); border: 3px solid var(--green); display: grid; place-items: center; font-size: 28px; }
+.aiden .who { font-family: var(--px); font-size: 10px; color: var(--green); margin-bottom: 4px; }
+.aiden .say { font-size: 16px; line-height: 1.65; color: var(--text); }
+
+/* 도장 연출 */
+.seal { position: fixed; inset: 0; display: none; place-items: center; z-index: 50; pointer-events: none; }
+.seal.show { display: grid; }
+.seal span { font-family: var(--px); font-size: 40px; color: var(--red); border: 8px solid var(--red); padding: 18px 26px; transform: rotate(-12deg); background: rgba(13, 2, 33, .85); animation: slam .9s ease-out forwards; }
+@keyframes slam { 0% { transform: rotate(-12deg) scale(3); opacity: 0; } 25% { transform: rotate(-12deg) scale(1); opacity: 1; } 80% { opacity: 1; } 100% { transform: rotate(-12deg) scale(1); opacity: 0; } }
+
+.done-box { padding: 30px 0; }
+.done-box h2 { font-family: var(--px); font-size: 20px; color: var(--green); margin-bottom: 14px; line-height: 1.6; }
+
+@media (max-width: 860px) {
+  body { font-size: 17px; }
+  .layout { grid-template-columns: 1fr; }
+  .main { border-right: none; padding: 22px 16px 40px; justify-self: stretch; max-width: none; }
+  .side { position: static; max-height: none; padding: 22px 16px 40px; border-top: 4px solid var(--purple); }
+  .step { font-size: 12px; padding: 10px 2px; } .step .n { font-size: 10px; }
+  .seeds { grid-template-columns: 1fr; }
+  .mission { font-size: 19px; } .sentence { font-size: 19px; }
+  .top { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div><span class="brand">MONSTER STARTUP</span> &nbsp; <span class="team" id="team"></span></div>
+  <div class="save" id="save"><span class="dot"></span><span id="saveTxt"></span></div>
+  <button class="reset" onclick="if(confirm('처음부터 다시 할까요? (지금까지 쓴 내용이 지워져요)')) Store.reset()">처음부터 다시</button>
+</div>
+<nav class="steps" id="steps"></nav>
+<div class="layout">
+  <main class="main" id="main"></main>
+  <aside class="side">
+    <div class="scroll-title">EVIL PLAN SCROLL</div>
+    <div class="scroll-sub">우리 팀의 사악한 기획서가 한 줄씩 쌓여요</div>
+    <ol class="scroll" id="scroll"></ol>
+    <div class="aiden">
+      <div class="face">🤖</div>
+      <div><div class="who">AIDEN</div><div class="say" id="aiden"></div></div>
+    </div>
+  </aside>
+</div>
+<div class="seal" id="seal"><span>승인!</span></div>
+
+<script src="quest-common.js"></script>
+<script>
+const st = Store.load();
+document.getElementById('team').textContent = '· ' + st.team;
+let cur = Math.min(st.step || 1, 6);
+let timerId = null, timerLeft = 0;
+
+function furthest() { let m = 1; for (let i = 1; i <= 6; i++) if (st.stamped[i]) m = Math.min(i + 1, 7); return m; }
+function say(t) { document.getElementById('aiden').textContent = t; }
+
+function renderSteps() {
+  const f = furthest();
+  document.getElementById('steps').innerHTML = QUESTS.map(q => {
+    const cls = ['step', st.stamped[q.n] ? 'done' : '', q.n === cur ? 'on' : ''].join(' ');
+    return `<button class="${cls}" ${q.n > f ? 'disabled' : ''} onclick="go(${q.n})"><span class="n">0${q.n}</span>${q.name}</button>`;
+  }).join('');
+}
+
+function renderScroll(flashN) {
+  document.getElementById('scroll').innerHTML = QUESTS.map(q => {
+    const s = sentence(q, st);
+    const c = ['', s ? 'filled' : 'empty', q.n === cur ? 'cur' : '', flashN === q.n ? 'flash' : ''].join(' ');
+    const body = s ? (st.stamped[q.n] ? s : `<span class="draft">${s}</span>`) : (q.n === cur ? '지금 쓰는 중…' : '아직 비어 있어요');
+    return `<li class="${c}" onclick="${q.n <= furthest() ? `go(${q.n})` : ''}"><span class="k">0${q.n} ${q.key}</span>${body}</li>`;
+  }).join('');
+}
+
+function saveStatus(ok) {
+  const el = document.getElementById('save');
+  el.className = 'save ' + (ok ? 'ok pulse' : '');
+  document.getElementById('saveTxt').innerHTML = ok
+    ? `<b>자동 저장됨</b> · ${agoText(st.at)} <span style="color:var(--sub)">(이 컴퓨터의 이 브라우저에 저장)</span>`
+    : '저장 못 함 — 브라우저 설정을 확인해 주세요';
+  setTimeout(() => el.classList.remove('pulse'), 600);
+}
+
+function renderMain() {
+  const q = QUESTS[cur - 1];
+  const a = st.answers[q.n] || '';
+  const stamped = !!st.stamped[q.n];
+  const t = st.talked[q.n] || {};
+  const m = document.getElementById('main');
+  if (cur === 7) {
+    m.innerHTML = `<div class="done-box"><h2>MISSION COMPLETE</h2><p class="mission">마왕님께 올릴 기획서가 완성됐어요! 오른쪽 두루마리가 우리 팀의 결과물이에요.</p><div class="actions"><button class="next show" onclick="copyAll()">기획서 복사하기</button><button class="prev" onclick="go(6)">← 마지막 퀘스트 다시 보기</button></div></div>`;
+    return;
+  }
+  m.innerHTML = `
+    <div class="tag" style="color:var(--sub);margin-bottom:10px">QUEST 0${q.n} / 06</div>
+    <h2 class="quest">${q.key}</h2>
+    <p class="mission">${q.mission}</p>
+
+    <section class="sec">
+      <div class="lab"><span class="no">①</span><span class="t">먼저 조원끼리 이야기해요</span><span class="s">누르면 ✓ 체크돼요</span></div>
+      <ul class="talk">${q.talk.map((x, i) => `<li class="${t[i] ? 'done' : ''}"><button onclick="toggleTalk(${i})"><span class="box">✓</span><span>${x}</span></button></li>`).join('')}</ul>
+      <div class="timer"><button onclick="startTimer()">⏱ 2분 토론 시작</button><span class="clock" id="clock"></span></div>
+    </section>
+
+    <section class="sec">
+      <div class="lab"><span class="no">②</span><span class="t">우리 답을 문장으로 완성해요</span><span class="s">정답은 없어요. 웃기고 사악할수록 좋아요</span></div>
+      ${q.hasName ? `<label class="name-lab" for="nameIn">앱 이름</label><textarea id="nameIn" class="field small" maxlength="20" placeholder="예: 용사 지옥" oninput="onName(this.value)">${st.name || ''}</textarea>` : ''}
+      <div class="sentence"><span class="fix">${q.before}</span></div>
+      <textarea id="ans" class="field" maxlength="120" placeholder="${q.hint}" oninput="onType(this.value)">${a}</textarea>
+      <div class="sentence"><span class="fix">${q.after}</span></div>
+      <div class="hintline"><span id="hintTxt">${q.hint}</span><span class="caps" id="caps"></span></div>
+
+      <div class="seeds-lab">막막하면 아이디어 씨앗을 눌러 보세요. 입력칸에 들어가고, 고쳐 써도 돼요.</div>
+      <div class="seeds">${q.seeds.map((s, i) => `<button class="seed ${s === a ? 'used' : ''}" onclick="useSeed(${i})">${s}</button>`).join('')}</div>
+      ${q.nameSeeds ? `<div class="seeds-lab" style="margin-top:14px">이름 씨앗: ${q.nameSeeds.map((n, i) => `<button class="seed" style="display:inline-block;margin:4px 6px 0 0;padding:6px 12px" onclick="useName(${i})">${n}</button>`).join('')}</div>` : ''}
+      <button class="dice" onclick="roll()">🎲 AIDEN, 더 사악한 아이디어 줘!</button>
+    </section>
+
+    <section class="sec">
+      <div class="lab"><span class="no">③</span><span class="t">마왕 도장을 찍어 확정해요</span></div>
+      <div class="actions">
+        <button class="stamp" id="stampBtn" onclick="doStamp()" ${canStamp() ? '' : 'disabled'}>${stamped ? '✔ 도장 완료 (다시 찍기)' : '도장 쾅!'}</button>
+        <button class="next ${stamped ? 'show' : ''}" id="nextBtn" onclick="go(${q.n + 1})">${q.n === 6 ? '기획서 완성 보기 →' : '다음 퀘스트 →'}</button>
+        ${q.n > 1 ? `<button class="prev" onclick="go(${q.n - 1})">← 이전</button>` : ''}
+      </div>
+      <p class="why" id="why">${canStamp() ? '도장을 찍어도 나중에 다시 고칠 수 있어요.' : (q.hasName && !st.name ? '앱 이름과 문장을 모두 채우면 도장을 찍을 수 있어요.' : '두 글자 이상 쓰면 도장을 찍을 수 있어요.')}</p>
+    </section>`;
+  updateCaps();
+}
+
+function canStamp() { const q = QUESTS[cur - 1]; return (st.answers[q.n] || '').trim().length >= 2 && (!q.hasName || (st.name || '').trim().length >= 1); }
+function updateCaps() { const el = document.getElementById('caps'); if (el) el.textContent = ((st.answers[cur] || '').length) + ' / 120'; }
+function refreshLight() {
+  const b = document.getElementById('stampBtn'); if (b) b.disabled = !canStamp();
+  const w = document.getElementById('why'); if (w) w.textContent = canStamp() ? '도장을 찍어도 나중에 다시 고칠 수 있어요.' : (QUESTS[cur - 1].hasName && !st.name ? '앱 이름과 문장을 모두 채우면 도장을 찍을 수 있어요.' : '두 글자 이상 쓰면 도장을 찍을 수 있어요.');
+  updateCaps(); renderScroll(); renderSteps();
+}
+let saveT;
+function commit() { clearTimeout(saveT); saveT = setTimeout(() => saveStatus(Store.save()), 300); }
+
+function onType(v) { st.answers[cur] = v; st.stamped[cur] = false; document.getElementById('nextBtn')?.classList.remove('show'); commit(); refreshLight(); say(v.length > 12 ? '오, 꽤 구체적이군! 사악함이 느껴져.' : '좋아, 계속 써 보게. 짧아도 괜찮네.'); }
+function onName(v) { st.name = v; commit(); refreshLight(); }
+function useSeed(i) { st.answers[cur] = QUESTS[cur - 1].seeds[i]; st.stamped[cur] = false; commit(); renderMain(); renderScroll(cur); renderSteps(); say('씨앗을 심었네! 더 사악하게 고쳐 써도 되네.'); document.getElementById('ans').focus(); }
+function useName(i) { st.name = QUESTS[cur - 1].nameSeeds[i]; commit(); renderMain(); renderScroll(cur); say('이름까지 정했군. 소름 돋는 이름일세!'); }
+function roll() { const q = QUESTS[cur - 1]; st.answers[cur] = pick(q.dice); st.stamped[cur] = false; commit(); renderMain(); renderScroll(cur); renderSteps(); say('이건 어떤가? 마음에 안 들면 다시 굴려도 되네 🎲'); }
+function toggleTalk(i) { const t = st.talked[cur] = st.talked[cur] || {}; t[i] = !t[i]; commit(); renderMain(); if (t[0] && t[1]) say('이야기를 충분히 나눴군! 이제 문장으로 써 볼 차례일세.'); }
+
+function doStamp() {
+  if (!canStamp()) return;
+  st.stamped[cur] = true; st.step = Math.max(st.step || 1, cur + 1); saveStatus(Store.save());
+  const s = document.getElementById('seal'); s.classList.add('show'); setTimeout(() => s.classList.remove('show'), 950);
+  renderMain(); renderScroll(cur); renderSteps();
+  say('[배움] ' + QUESTS[cur - 1].lesson);
+}
+function go(n) { cur = n; st.step = Math.max(st.step || 1, Math.min(n, 6)); stopTimer(); renderSteps(); renderMain(); renderScroll(); say(n === 7 ? '축하하네! 마왕님이 아주 흡족해하시네.' : '팀원들과 먼저 이야기부터 나눠 보게나.'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+function startTimer() { stopTimer(); timerLeft = 120; tick(); timerId = setInterval(tick, 1000); }
+function stopTimer() { clearInterval(timerId); timerId = null; }
+function tick() { const c = document.getElementById('clock'); if (!c) return stopTimer(); c.textContent = Math.floor(timerLeft / 60) + ':' + String(timerLeft % 60).padStart(2, '0'); if (timerLeft-- <= 0) { stopTimer(); c.textContent = '시간 끝! 이제 써 봐요'; } }
+function copyAll() { const txt = QUESTS.map(q => sentence(q, st)).filter(Boolean).join('\n'); navigator.clipboard?.writeText(`[${st.team} 기획서]\n` + txt); say('기획서를 복사했네!'); }
+
+renderSteps(); renderMain(); renderScroll(); say('팀원들과 먼저 이야기부터 나눠 보게나.');
+if (st.at) saveStatus(true); else document.getElementById('saveTxt').textContent = '쓰는 대로 자동 저장돼요';
+</script>
+</body>
+</html>
