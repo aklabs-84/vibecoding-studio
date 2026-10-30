@@ -94,7 +94,7 @@
   }
 
   // 새 버전이 올라오면 안내만 띄운다. 쓰던 내용이 날아가지 않도록 저절로 새로고침하지는 않는다.
-  var PAGE_VERSION = '2026-10-30-c';
+  var PAGE_VERSION = '2026-10-30-d';
   function watchVersion() {
     var shown = false;
     function check() {
