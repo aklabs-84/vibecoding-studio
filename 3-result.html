@@ -139,7 +139,7 @@
   if (!data.simulationPRD) simEl.innerHTML = '<span class="empty">기획 시뮬레이션을 진행하지 않았습니다. (선택 단계)</span>';
 
   planEl.textContent = data.plannerText || '';
-  if (!data.plannerText) planEl.innerHTML = '<span class="empty">아직 기획서가 작성되지 않았습니다. 3단계(기획하기)를 먼저 완료해주세요.</span>';
+  if (!data.plannerText) planEl.innerHTML = '<span class="empty">아직 기획서가 작성되지 않았습니다. 4단계(기획하기)를 먼저 완료해주세요.</span>';
 
   const prompt = StudioBridge.buildCodePrompt(data);
   promptEl.textContent = prompt;

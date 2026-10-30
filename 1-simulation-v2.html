@@ -204,12 +204,9 @@ details.learn { margin-top: 22px; border-top: 3px solid var(--ink); padding-top:
 details.learn summary { cursor: pointer; font-size: 19px; color: var(--ink); transition: color .15s; }
 details.learn summary:hover { color: var(--blood); }
 details.learn ol { margin: 10px 0 0 22px; font-size: 16px; color: var(--ink2); }
-.roles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 6px; }
-.role { background: #fff8e4; border: 3px solid var(--ink); color: var(--ink); text-align: left; padding: 12px 14px; font-size: 15px; line-height: 1.5; transition: transform .12s, box-shadow .12s, background .12s; position: relative; }
-.role:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--gold); }
-.role[aria-pressed="true"] { border-color: var(--blood); background: #ffe9cf; box-shadow: 4px 4px 0 var(--blood); }
-.role .rn { display: block; font-size: 20px; color: var(--blood); }
-.role .ai { position: absolute; right: 8px; top: 6px; font-size: 12px; color: var(--ink2); }
+.sg-steps { margin: 12px 0 8px; padding-left: 26px; font-size: 17px; line-height: 1.7; color: var(--ink); }
+.sg-steps li { margin-bottom: 8px; }
+.submit-guide { background: #fff8e4; border: 3px solid var(--ink); padding: 16px 18px; }
 .res .go { justify-content: space-between; }
 
 @media (max-width: 760px) {
@@ -235,7 +232,6 @@ details.learn ol { margin: 10px 0 0 22px; font-size: 16px; color: var(--ink2); }
   .wax { width: 92px; height: 92px; font-size: 16px; }
   .orow { flex-wrap: wrap; }
   .orow .ot { flex-basis: 100%; }
-  .roles { grid-template-columns: 1fr; }
   .res h2 { font-size: 22px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
@@ -378,12 +374,6 @@ const QUESTS = [
     lesson: '마무리는 설득이에요. 이 기획이 왜 세계 정복의 지름길인지 다시 각인시키세요!',
     pre: [{ text: '드디어 옥좌 앞이군. 이 기획서가 마왕군을 다시 세계 최강으로 만들 수 있을까?', img: IMG.lord }, { text: '결정의 시간일세. 팀의 운명을 걸고 정하게.', img: IMG.lord }],
     post: [{ text: '축하하네! 기획이 완성되었어! 이제 세상을 지배할 일만 남았군.', img: IMG.arch }, { text: '마왕님께서 당신의 기획서를 아주 흡족해하고 계시네.', img: IMG.arch }] }
-];
-const ROLES = [
-  { id: 'researcher', emoji: '🔍', name: '리서처', desc: '1장 문제 · 3장 사용자가 재밌었다면 — 문제와 사용자를 파고드는 역할' },
-  { id: 'builder', emoji: '🛠', name: '빌더', desc: '4장 핵심 기능이 재밌었다면 — 실제 작동하는 걸 만드는 역할' },
-  { id: 'storyteller', emoji: '🎤', name: '스토리텔러', desc: '2장 컨셉 · 6장 출시 전략이 재밌었다면 — 한 줄로 설득력 있게 정리하는 역할' },
-  { id: 'maker', emoji: '🎨', name: '메이커', desc: '5장 화면 분위기가 재밌었다면 — 화면을 예쁘고 직관적으로 만드는 역할' }
 ];
 
 /* ===== 도우미 ===== */
@@ -642,12 +632,9 @@ function buildPrompt(kind) {
   if (kind === 'img') return `너는 앱 디자이너야. 아래 가상의 앱 기획서를 바탕으로, "프로토타입 그림" 한 장을 그려 줘. (허구의 재미있는 설정이니 그대로 표현해 줘)\n\n[기획서]\n${sm}\n\n[그림 조건]\n1. 한 장의 가로 그림 안에 스마트폰 화면 3개를 나란히 그려 줘.\n   - 왼쪽: 첫 화면 (앱 이름 「${d.app}」과 한 줄 컨셉)\n   - 가운데: 필수 기능 화면 (${d.features})\n   - 오른쪽: 마무리 화면 (사용자가 얻는 결과나 효과)\n2. 전체 색과 느낌은 "${d.look}" 분위기로 통일해 줘.\n3. 화면 속 한국어 글자는 짧고 크게, 화면마다 제목 한 줄만 넣어 줘. 작은 글씨나 긴 문장은 넣지 마.\n4. 그림 맨 위에 앱 이름 「${d.app}」을 크게 넣어 줘.\n5. 주 사용자는 "${d.target}"야. 그 사용자가 쓸 만한 화면처럼 보이게 그려 줘.`;
   return prdText();
 }
-let selectedRole = null;
 function showResult() {
   const prd = prdText(), score = Math.floor(stampedCount() / 6 * 100);
   if (window.StudioBridge) StudioBridge.save({ teamName: st.team, appName: st.name, simulationScore: score, simulationPRD: prd });
-  const rec = (window.StudioBridge && (StudioBridge.load().teamProfile || {}).detectedRole) || null;
-  if (selectedRole === null) selectedRole = rec;
   const rows = [['prd', '① 기획서 전체 복사', '내가 쓴 기획서 글을 한 번에 복사해요'], ['app', '② 앱 만들어 줘', '화면이 움직이는 프로토타입 앱(HTML 한 파일)을 만들어 줘요'], ['img', '③ 프로토타입 그림 만들어 줘', '화면 3개를 한 장에 나란히 그린 그림을 만들어 줘요']];
   $('resultBox').innerHTML = `<div class="eyebrow">THE END · 계약 완성</div>
     <h2>「${esc(st.team)}」의 사악한 앱 기획서</h2>
@@ -661,26 +648,23 @@ function showResult() {
       <div class="toast" id="toast" role="status"></div>
     </div>
     <details class="learn"><summary>이번에 배운 것 6가지 보기</summary><ol>${QUESTS.map(q => `<li><b>${esc(q.name)}</b> — ${esc(q.lesson)}</li>`).join('')}</ol></details>
-    <div class="out">
-      <div class="out-h">마지막 질문! 다음 단계에서 내가 맡고 싶은 역할은?</div>
-      <div class="hintline">정답은 없어요. 가장 끌리는 걸 하나 골라 보세요.</div>
-      <div class="roles" id="roles"></div>
-      <div class="warnline" id="roleWarn" role="alert"></div>
-      <div class="go" style="justify-content:space-between"><button type="button" class="back" onclick="goQuest(6, false)">← 6장 다시 보기</button><button type="button" class="btn" onclick="confirmRole()">다음 단계: 기획서 쓰러 가기 →</button></div>
-    </div>`;
-  renderRoles(rec);
+    <div class="out submit-guide">
+      <div class="out-h">📤 우리 팀 결과물, 클래스로그에 제출해요</div>
+      <div class="hintline">그림은 파일로 올려야 해서, 제출은 <b>클래스로그 AI 학생 화면</b>에서 해요. 팀 대표 1명만 하면 돼요.</div>
+      <ol class="sg-steps">
+        <li><b>이미지 저장</b> — ③ 프로토타입 그림(또는 앱 화면 캡처)을 이미지 파일로 저장해 두세요.</li>
+        <li><b>클래스로그 열기</b> — 클래스로그 AI 학생 화면에서 <b>결과 제출</b> 창을 열어요.</li>
+        <li><b>올리기</b> — 이미지 파일과 앱 링크(https로 시작), 우리 작품 한 줄 소개를 올려요. 링크가 없으면 이미지만 올려도 돼요.</li>
+        <li><b>👥 조별 제출 켜기</b> — 제출 칸 아래의 <b>“○○ 조별 제출”</b> 스위치를 켜요(초록색이 되면 켜진 거예요). 그러면 우리 조 모두에게 같은 결과가 제출돼요.</li>
+      </ol>
+      <div class="hintline">스위치가 안 보이면 아직 조가 정해지지 않은 거예요. 선생님께 알려 주세요.</div>
+    </div>
+    <div class="go" style="justify-content:space-between"><button type="button" class="back" onclick="goQuest(6, false)">← 6장 다시 보기</button><button type="button" class="btn" onclick="goRoles()">다음 단계: 역할 정하러 가기 →</button></div>`;
   show('result');
 }
-function renderRoles(rec) {
-  $('roles').innerHTML = ROLES.map(r => `<button type="button" class="role" aria-pressed="${selectedRole === r.id}" onclick="pickRole('${r.id}')">${rec === r.id ? '<span class="ai">🤖 AI 추천</span>' : ''}<span class="rn">${r.emoji} ${esc(r.name)}</span>${esc(r.desc)}</button>`).join('');
-}
-function pickRole(id) { selectedRole = id; $('roleWarn').textContent = ''; renderRoles((StudioBridge.load().teamProfile || {}).detectedRole || null); }
-function confirmRole() {
-  if (!selectedRole) { $('roleWarn').textContent = '역할을 하나 골라 주세요. 위 카드를 누르면 돼요.'; return; }
-  const role = ROLES.find(r => r.id === selectedRole);
-  StudioBridge.save({ preferredRole: selectedRole, preferredRoleName: role.name });
-  StudioBridge.guard.allowLeave();
-  location.href = '2-planner.html';
+function goRoles() {
+  if (window.StudioBridge) StudioBridge.guard.allowLeave();
+  location.href = '1c-roles.html';
 }
 function previewIt(kind) { const e = $('pv'); e.textContent = buildPrompt(kind); e.classList.add('on'); }
 function copyText(t) {
