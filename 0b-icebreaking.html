@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아이스브레이킹 - 바이브코딩 스튜디오</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #f4f7ff; --bg2: #eaf1ff; --surface: #fff; --surface2: #f3f6fd; --border: #dfe6f5;
+    --text: #1b2340; --text-muted: #6b7690; --accent1: #3b82f6;
+    --gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 45%, #22d3ee 100%);
+    --shadow-card: 0 4px 18px rgba(30,64,175,0.07);
+  }
+  body { margin: 0; min-height: 100vh; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 320px, var(--bg) 100%); color: var(--text); }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
+  .hero { padding: 48px 20px 26px; text-align: center; }
+  .hero-badge { display: inline-block; padding: 7px 18px; border-radius: 999px; background: #fff;
+    border: 1px solid rgba(59,130,246,.35); color: var(--accent1); font-size: .82rem; font-weight: 700; margin-bottom: 18px; box-shadow: var(--shadow-card); }
+  .hero h1 { font-size: 1.9rem; line-height: 1.35; margin: 0 0 12px; color: #10193a; }
+  .hero p { color: var(--text-muted); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 22px; box-shadow: var(--shadow-card); }
+  .num { display: inline-block; color: #fff; background: var(--gradient); font-size: .72rem; font-weight: 800; letter-spacing: .06em;
+    margin-bottom: 10px; padding: 4px 12px; border-radius: 999px; }
+  .card h2 { font-size: 1.2rem; margin: 0 0 8px; color: #10193a; }
+  .card p { color: var(--text-muted); font-size: .95rem; line-height: 1.7; margin: 6px 0 0; }
+  .say { margin-top: 14px; padding: 14px 16px; background: var(--surface2); border-radius: 12px; font-weight: 700; color: #1d4ed8; line-height: 1.6; }
+  .tip { margin-top: 12px; padding: 13px 16px; background: #fff8e1; border-left: 4px solid #fbbf24; border-radius: 8px; font-size: .92rem; line-height: 1.65; color: #5b4300; }
+  .warn { margin-top: 14px; padding: 13px 16px; background: #fdecec; border-left: 4px solid #ef4444; border-radius: 8px; font-size: .92rem; line-height: 1.65; color: #7f1d1d; font-weight: 600; }
+  .example { font-size: .84rem; color: #94a0b8; margin: 14px 0 8px; }
+  .field { display: block; margin-top: 14px; }
+  .field span { display: block; font-size: .88rem; font-weight: 800; margin-bottom: 6px; color: #10193a; }
+  .field input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 12px; font: inherit; font-size: 1.05rem; background: #fff; color: var(--text); }
+  .field input:focus { outline: none; border-color: var(--accent1); box-shadow: 0 0 0 3px rgba(59,130,246,.18); }
+  .check { display: flex; gap: 12px; align-items: center; padding: 14px 16px; margin-top: 10px; border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; font-weight: 600; background: #fff; }
+  .check input { width: 22px; height: 22px; accent-color: #2563eb; flex: none; }
+  .check:has(input:checked) { border-color: #2563eb; background: #eef4ff; }
+  .btn { display: block; width: 100%; padding: 17px 16px; border: 0; border-radius: 14px; background: var(--gradient); color: #fff; font: inherit; font-weight: 900; font-size: 1.1rem; cursor: pointer;
+    box-shadow: 0 10px 24px rgba(37,99,235,.35); transition: transform .15s; text-align: center; text-decoration: none; }
+  .btn:hover:not(:disabled) { transform: translateY(-2px); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+  .btn.ghost { background: transparent; color: var(--text-muted); box-shadow: none; font-weight: 700; font-size: .95rem; margin-top: 8px; }
+  .note { font-size: .84rem; color: var(--text-muted); margin-top: 10px; line-height: 1.6; text-align: center; }
+  @media (max-width: 480px) { .hero h1 { font-size: 1.55rem; } .card { padding: 22px 18px; } }
+</style>
+</head>
+<body>
+<div class="hero">
+  <span class="hero-badge">STEP 0-2 · 아이스브레이킹</span>
+  <h1>우리 팀 이름과<br>캐치프레이즈 정하기</h1>
+  <p>사원증을 서로 보여 주며 인사하고, 공통 관심사로 팀 이름을 만들어요. (약 10분)</p>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <span class="num">① 사원증 소개</span>
+    <h2>사원증을 보여 주며 한 명씩 30초 소개</h2>
+    <p>내 사원증(앞면·뒷면)을 보여 주면서 돌아가며 말해요.</p>
+    <div class="say">“내 강점은 ○○이고, AI는 나에게 ○○ 역할을 추천했어요.”</div>
+    <div class="tip">💡 소개 꿀팁 — “저는 ○○할 때 가장 힘이 나는 사람이에요. 그래서 팀에서 ○○를 해 보고 싶어요.”</div>
+  </div>
+
+  <div class="card">
+    <span class="num">② 공통 관심사</span>
+    <h2>같은 걸 좋아하는 게 뭘까?</h2>
+    <p>한 명씩 관심사를 말해요. 손을 2명 이상 들면 공통 관심사예요.</p>
+    <label class="field"><span>우리 팀의 공통 관심사</span>
+      <input id="interest" type="text" maxlength="40" placeholder="예: 음악" autocomplete="off"></label>
+  </div>
+
+  <div class="card">
+    <span class="num">③ 팀 이름</span>
+    <h2>팀 이름과 캐치프레이즈 정하기</h2>
+    <p>공통 관심사에서 팀 이름과 한 줄 구호를 만들어요.</p>
+    <div class="example">예시 · 음악 → 팀 이름 “마음 DJ” / 캐치프레이즈 “우리의 마음을 틀어요”</div>
+    <label class="field"><span>팀 이름</span>
+      <input id="teamName" type="text" maxlength="30" placeholder="우리 팀 이름" autocomplete="off"></label>
+    <label class="field"><span>캐치프레이즈</span>
+      <input id="catchphrase" type="text" maxlength="60" placeholder="우리 팀을 한 줄로" autocomplete="off"></label>
+    <div class="warn">⚠️ 팀 이름은 다음 단계(몬스터 스타트업)의 “부대 이름”으로 쓰여요. 띄어쓰기까지 모든 팀원이 똑같이 적어 주세요.</div>
+  </div>
+
+  <div class="card">
+    <span class="num">체크</span>
+    <h2>다 했나요?</h2>
+    <label class="check"><input type="checkbox" id="c1"> 사원증을 보여 주며 서로 소개했어요</label>
+    <label class="check"><input type="checkbox" id="c2"> 팀 이름과 캐치프레이즈를 정했어요</label>
+    <div id="submitBox" style="margin-top:18px;display:none">
+      <button class="btn" id="submitBtn" type="button" disabled>📨 팀 대표가 선생님께 제출하기</button>
+      <div id="submitStatus"></div>
+      <p class="note">제출은 팀 대표 한 명만 해요. 다른 팀원은 건너뛰고 다음으로 가면 돼요. (팀 이름은 각자 칸에 똑같이 적어 주세요)</p>
+    </div>
+  </div>
+
+  <a class="btn" id="nextBtn" href="1-simulation-v2.html">다음: 몬스터 스타트업 →</a>
+  <a class="btn ghost" href="0-team-profile.html">← 이전: 협업 프로필</a>
+</div>
+
+<script src="shared/bridge.js"></script>
+<script src="shared/progress.js"></script>
+<script src="shared/submit-anim.js"></script>
+<script>
+  StudioBridge.captureEntryFromURL();
+  StudioBridge.guard.init();
+
+  const $ = (id) => document.getElementById(id);
+  // 클래스로그로 입장했을 때(입장 코드 + 이름이 있을 때)만 제출 영역을 보여 준다
+  (function () {
+    const d = StudioBridge.load();
+    $('submitBox').style.display = (d.classlogEntryCode && d.studentName) ? 'block' : 'none';
+  })();
+  const fields = ['interest', 'teamName', 'catchphrase'];
+  const LABELS = ['사원증 소개', '공통 관심사', '팀 이름 정하기'];
+
+  // 이미 적어 둔 내용이 있으면 되살린다
+  (function restore() {
+    const ice = StudioBridge.load().ice || {};
+    fields.forEach((f) => { $(f).value = ice[f] || ''; });
+    $('c1').checked = !!ice.c1; $('c2').checked = !!ice.c2;
+    refresh();
+  })();
+
+  function snapshot() {
+    const o = {};
+    fields.forEach((f) => { o[f] = $(f).value.trim(); });
+    o.c1 = $('c1').checked; o.c2 = $('c2').checked;
+    return o;
+  }
+  // 입력할 때마다 저장 + 다음 단계(부대 이름)에 쓸 팀 이름도 함께 저장
+  function save() {
+    const ice = snapshot();
+    StudioBridge.save({ ice, iceTeamName: ice.teamName });
+  }
+  function currentStep() {
+    const ice = snapshot();
+    if (ice.teamName || ice.catchphrase) return 3;
+    if (ice.interest) return 2;
+    return 1;
+  }
+  function report() {
+    if (!window.StudioProgress) return;
+    const n = currentStep();
+    StudioProgress.report({ page: 1, pageLabel: '아이스브레이킹', stepNo: n, stepTotal: 3, stepLabel: LABELS[n - 1] });
+  }
+  function refresh() {
+    const ice = snapshot();
+    $('submitBtn').disabled = !(ice.teamName && ice.c1 && ice.c2);
+  }
+  document.addEventListener('input', () => { save(); refresh(); report(); });
+  document.addEventListener('change', () => { save(); refresh(); report(); });
+  report();
+
+  $('nextBtn').addEventListener('click', () => {
+    save();
+    if (window.StudioProgress && snapshot().teamName) StudioProgress.complete(1);
+  });
+
+  $('submitBtn').addEventListener('click', async () => {
+    const d = StudioBridge.load();
+    const ice = snapshot();
+    const name = d.studentName || '';
+    await SubmitAnim.run({
+      statusEl: $('submitStatus'), btnEl: $('submitBtn'), doneLabel: '✅ 제출 완료 · 다시 제출하기',
+      task: async () => {
+        const text = [
+          `팀 이름: ${ice.teamName}`,
+          `캐치프레이즈: ${ice.catchphrase || '(없음)'}`,
+          `공통 관심사: ${ice.interest || '(없음)'}`,
+          `제출한 사람(팀 대표): ${name || '이름 없음'}`,
+        ].join('\n');
+        await StudioBridge.submitResult({
+          entryCode: d.classlogEntryCode, studentName: name,
+          title: `[아이스브레이킹] ${ice.teamName}`, resultType: 'text', textContent: text,
+        });
+        StudioBridge.guard.markClean();
+        if (window.StudioProgress) StudioProgress.submitted(1);
+      },
+    });
+  });
+</script>
+</body>
+</html>

@@ -445,7 +445,7 @@
     <div class="badge-actions no-print" id="badgeActions" style="display:none;">
       <button class="btn-secondary" style="width:100%;padding:20px 16px;font-size:1.15rem;font-weight:800;" onclick="saveBadgePng()">🖼️ 그림(PNG)으로 저장 (앞면)</button>
       <div id="badgeSubmitBox" style="display:none;">
-        <button class="btn-primary" style="width:100%;" onclick="submitBadge()">📤 선생님께 제출하기</button>
+        <button class="btn-primary" id="badgeSubmitBtn" style="width:100%;" onclick="submitBadge()">📤 선생님께 제출하기</button>
       </div>
       <div class="badge-status" id="badgeStatus"></div>
     </div>
@@ -473,7 +473,7 @@
     </div>
 
     <div class="nav-row no-print" id="nextNav" style="display:none;">
-      <a href="1-simulation-v2.html"><button class="btn-primary" style="width:100%;">다음: 몬스터 스타트업 시뮬레이션 →</button></a>
+      <a href="0b-icebreaking.html"><button class="btn-primary" style="width:100%;">다음: 아이스브레이킹 (팀 이름 정하기) →</button></a>
     </div>
     <div class="step-nav no-print">
       <button class="btn-secondary" onclick="goStep(3)">← 이전</button>
@@ -491,6 +491,7 @@
 
 <script src="shared/bridge.js"></script>
 <script src="shared/progress.js"></script>
+<script src="shared/submit-anim.js"></script>
 <script>
   const entryData = StudioBridge.captureEntryFromURL();
   StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
@@ -1055,7 +1056,7 @@
   });
 
   // 사원증 앞면(테두리·팀·그림·이름·역할)을 하나의 PNG 그림으로 그린다. 화면 카드(220×340)와 같은 모양.
-  function renderBadgePng(scale) {
+  function renderBadgeFront(scale) {
     scale = scale || 3;
     const W = 220, H = 340;
     const c = document.createElement('canvas');
@@ -1129,6 +1130,76 @@
 
     // 바깥 테두리
     rr(1, 1, W - 2, H - 2, 13); g.lineWidth = 2; g.strokeStyle = ink; g.stroke();
+    return c;
+  }
+
+  // 글자를 폭에 맞게 줄바꿈 (한글은 글자 단위로 자른다)
+  function wrapLines(g, text, maxW, maxLines) {
+    const lines = []; let cur = '';
+    for (const ch of String(text || '')) {
+      if (ch === '\n') { lines.push(cur); cur = ''; continue; }
+      if (g.measureText(cur + ch).width > maxW && cur) { lines.push(cur); cur = ch.trim() ? ch : ''; } else cur += ch;
+    }
+    if (cur) lines.push(cur);
+    if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…'; }
+    return lines;
+  }
+
+  function renderBadgeBack(scale) {
+    const W = 220, H = 340;
+    const c = document.createElement('canvas');
+    c.width = W * scale; c.height = H * scale;
+    const g = c.getContext('2d');
+    g.scale(scale, scale);
+    const FONT = "'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    const rr = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+    const ink = '#1b2340';
+    rr(0, 0, W, H, 14); g.fillStyle = '#fff'; g.fill();
+    g.save(); rr(0, 0, W, H, 14); g.clip();
+    rr(83, 10, 54, 9, 5); g.fillStyle = '#dfe6f5'; g.fill();
+    g.lineWidth = 1.5; g.strokeStyle = ink; g.stroke();
+    const grad = g.createLinearGradient(0, 27, W, 60);
+    grad.addColorStop(0, '#2563eb'); grad.addColorStop(0.5, '#3b82f6'); grad.addColorStop(1, '#22d3ee');
+    g.fillStyle = grad; g.fillRect(0, 27, W, 33);
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = `800 12.8px ${FONT}`;
+    g.fillText('이 역할은요', W / 2, 43.5, W - 16);
+
+    g.fillStyle = '#1d4ed8'; g.font = `800 24px ${FONT}`;
+    g.fillText(document.getElementById('badgeBackRole').textContent, W / 2, 92, W - 24);
+
+    g.fillStyle = ink; g.font = `400 13px ${FONT}`;
+    wrapLines(g, document.getElementById('badgeBackDesc').textContent, W - 36, 5)
+      .forEach((ln, i) => g.fillText(ln, W / 2, 124 + i * 20));
+
+    g.fillStyle = '#94a3b8'; g.font = `800 10px ${FONT}`;
+    g.fillText('내가 쓴 한 줄', W / 2, 236);
+    rr(14, 248, W - 28, 56, 12); g.fillStyle = '#eef4ff'; g.fill();
+    g.fillStyle = '#1d4ed8'; g.font = `700 14px ${FONT}`;
+    const ll = wrapLines(g, document.getElementById('badgeLine').textContent, W - 56, 2);
+    ll.forEach((ln, i) => g.fillText(ln, W / 2, 276 - (ll.length - 1) * 9 + i * 18));
+
+    g.strokeStyle = '#dfe6f5'; g.lineWidth = 1; g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(0, 322); g.lineTo(W, 322); g.stroke(); g.setLineDash([]);
+    g.fillStyle = '#94a3b8'; g.font = `400 9.6px ${FONT}`;
+    g.fillText('바이브코딩 스튜디오 · AKLABS', W / 2, 331);
+    g.restore();
+    rr(1, 1, W - 2, H - 2, 13); g.lineWidth = 2; g.strokeStyle = ink; g.stroke();
+    return c;
+  }
+
+  // 앞면 + 뒷면을 나란히 붙인 한 장 (제출·저장 공통)
+  function renderBadgePng(scale) {
+    scale = scale || 3;
+    const front = renderBadgeFront(scale), back = renderBadgeBack(scale);
+    const pad = 16 * scale, gap = 24 * scale;
+    const c = document.createElement('canvas');
+    c.width = front.width + back.width + pad * 2 + gap;
+    c.height = front.height + pad * 2;
+    const g = c.getContext('2d');
+    g.fillStyle = '#eef3fd'; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(front, pad, pad);
+    g.drawImage(back, pad + front.width + gap, pad);
     return c.toDataURL('image/png');
   }
 
@@ -1149,42 +1220,27 @@
 
   async function submitBadge() {
     const status = document.getElementById('badgeStatus');
+    const btn = document.getElementById('badgeSubmitBtn');
     const d = StudioBridge.load();
     const name = document.getElementById('studentName').value || d.studentName || '';
-    const team = document.getElementById('teamName').value;
-    const characterText = badgeCharacter ? `캐릭터: ${badgeCharacter}` : '';
-    const text = [
-      '[사원증]',
-      `이름: ${name}`,
-      `팀: ${team}`,
-      `역할: ${badgeInfo.role}`,
-      `한 줄 소개: ${badgeInfo.line}`,
-      characterText,
-    ].filter(Boolean).join('\n');
-    status.textContent = '제출 중...';
-    try {
-      await StudioBridge.submitResult({
-        entryCode: d.classlogEntryCode,
-        studentName: name,
-        title: `${name || '학생'}의 사원증`,
-        resultType: 'text',
-        textContent: text,
-      });
-      status.textContent = '사원증 그림 제출 중...';
-      await StudioBridge.submitResult({
-        entryCode: d.classlogEntryCode,
-        studentName: name,
-        title: `${name || '학생'}의 사원증 그림`,
-        resultType: 'image',
-        fileName: 'badge.png',
-        fileData: renderBadgePng(3), // 사원증 전체 모양 (모아 찍기에 바로 쓴다)
-      });
-      StudioBridge.guard.markClean();
-      if (window.StudioProgress) StudioProgress.submitted(0);
-      status.textContent = '✅ 제출 완료! 선생님이 확인할 수 있어요.';
-    } catch (e) {
-      status.textContent = '❌ ' + e.message;
-    }
+    await SubmitAnim.run({
+      statusEl: status, btnEl: btn,
+      doneLabel: '✅ 제출 완료 · 다시 제출하기',
+      task: async () => {
+        let png = renderBadgePng(3);
+        if (png.length > 4000000) png = renderBadgePng(2); // 서버 한도(약 3MB)를 넘으면 한 단계 작게
+        await StudioBridge.submitResult({
+          entryCode: d.classlogEntryCode,
+          studentName: name,
+          title: `${name || '학생'}의 사원증 (앞면·뒷면)`,
+          resultType: 'image',
+          fileName: 'badge.png',
+          fileData: png,
+        });
+        StudioBridge.guard.markClean();
+        if (window.StudioProgress) StudioProgress.submitted(0);
+      },
+    });
   }
 
   renderQuestions();

@@ -3,7 +3,7 @@
 
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const int = (v, min, max) => (Number.isInteger(v) && v >= min && v <= max ? v : undefined);
-const pages = (v) => (Array.isArray(v) ? v.filter((n) => Number.isInteger(n) && n >= 0 && n <= 3).slice(0, 4) : []);
+const pages = (v) => (Array.isArray(v) ? v.filter((n) => Number.isInteger(n) && n >= 0 && n <= 4).slice(0, 5) : []);
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -28,7 +28,7 @@ module.exports = async function handler(req, res) {
     studentId: str(raw.studentId, 100) || undefined,
     studentName: str(raw.studentName, 100) || undefined,
     teamName: str(raw.teamName, 40) || undefined,
-    page: int(raw.page, 0, 3),
+    page: int(raw.page, 0, 4),
     pageLabel: str(raw.pageLabel, 40) || undefined,
     stepNo: int(raw.stepNo, 0, 99),
     stepTotal: int(raw.stepTotal, 0, 99),

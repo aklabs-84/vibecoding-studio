@@ -58,7 +58,7 @@
   .sum .s-warn b { color: var(--warn); } .sum .s-off b { color: var(--off); }
 
   /* 단계별 인원 */
-  .stagebar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); margin-bottom: 18px; }
+  .stagebar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border: 1px solid var(--line); margin-bottom: 18px; }
   .stagebar > div { padding: 10px 14px; border-right: 1px solid var(--line); }
   .stagebar > div:last-child { border-right: 0; }
   .stagebar b { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
@@ -136,7 +136,7 @@
     <div id="list"></div>
 
     <div class="legend">
-      막대 4칸 = 0 팀 프로필 · 1 몬스터 스타트업 · 2 기획서 · 3 앱 만들기 (파란색 = 마침, 초록색 = 지금 여기)<br>
+      막대 5칸 = 0 팀 프로필 · 1 아이스브레이킹 · 2 몬스터 스타트업 · 3 기획서 · 4 앱 만들기 (파란색 = 마침, 초록색 = 지금 여기)<br>
       <b>신호 없음</b> = 1분 넘게 소식이 없는 학생 (창을 닫았거나 인터넷이 끊겼을 수 있어요) · 화면은 5초마다 자동으로 새로 고쳐져요
     </div>
   </section>
@@ -144,7 +144,7 @@
 
 <script>
 (function () {
-  const PAGE_NAMES = ['팀 프로필', '몬스터 스타트업', '기획서', '앱 만들기'];
+  const PAGE_NAMES = ['팀 프로필', '아이스브레이킹', '몬스터 스타트업', '기획서', '앱 만들기'];
   const POLL_MS = 5000;
   const STALE_SEC = 60;      // 이 시간 넘게 신호가 없으면 "신호 없음"
   const LEFT_SEC = 10;       // 나간다는 신호 후 이 시간이 지나면 "나감"
@@ -219,7 +219,7 @@
   // 상태: off(접속 전) / done(끝) / left(나감) / stale(신호 없음) / go(진행 중)
   function statusOf(s) {
     if (!s.started) return 'off';
-    if ((s.submitted_pages || []).includes(3)) return 'done';
+    if ((s.submitted_pages || []).includes(4)) return 'done';
     const age = ageOf(s);
     if (!s.online && age > LEFT_SEC) return 'left';
     if (age > STALE_SEC) return 'stale';
@@ -321,7 +321,7 @@
     const where = document.createElement('div'); where.className = 'where';
     const pages = document.createElement('div'); pages.className = 'pages';
     const finished = new Set([...(r.completed_pages || []), ...(r.submitted_pages || [])]);
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < PAGE_NAMES.length; i++) {
       const p = document.createElement('div'); p.className = 'pip';
       p.title = i + ' ' + PAGE_NAMES[i] + ((r.submitted_pages || []).includes(i) ? ' · 제출함' : '');
       if (finished.has(i)) p.classList.add('done');
@@ -334,7 +334,7 @@
     else {
       const frac = r.step_total ? ` (${r.step_no}/${r.step_total})` : '';
       txt.textContent = `${r.page} ${r.page_label || PAGE_NAMES[r.page] || ''} · ${r.step_label || ''}${frac}`;
-      const subs = (r.submitted_pages || []).filter(p => p !== 3);
+      const subs = (r.submitted_pages || []).filter(p => p !== 4);
       if (subs.length) txt.textContent += ' · 제출: ' + subs.map(p => PAGE_NAMES[p]).join(', ');
     }
     where.append(pages, txt);

@@ -130,7 +130,7 @@
   const data = StudioBridge.load();
   StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
   // 선생님 화면에 "지금 여기 있어요"를 알린다. (실패해도 화면 동작에는 영향 없음)
-  if (window.StudioProgress) StudioProgress.report({ page: 3, pageLabel: '앱 만들기', stepNo: 1, stepTotal: 1, stepLabel: '기획서 확인하고 코딩 시작' });
+  if (window.StudioProgress) StudioProgress.report({ page: 4, pageLabel: '앱 만들기', stepNo: 1, stepTotal: 1, stepLabel: '기획서 확인하고 코딩 시작' });
   const simEl = document.getElementById('sim-prd');
   const planEl = document.getElementById('planner-text');
   const promptEl = document.getElementById('ai-prompt');
@@ -139,7 +139,7 @@
   if (!data.simulationPRD) simEl.innerHTML = '<span class="empty">기획 시뮬레이션을 진행하지 않았습니다. (선택 단계)</span>';
 
   planEl.textContent = data.plannerText || '';
-  if (!data.plannerText) planEl.innerHTML = '<span class="empty">아직 기획서가 작성되지 않았습니다. 2단계(기획하기)를 먼저 완료해주세요.</span>';
+  if (!data.plannerText) planEl.innerHTML = '<span class="empty">아직 기획서가 작성되지 않았습니다. 3단계(기획하기)를 먼저 완료해주세요.</span>';
 
   const prompt = StudioBridge.buildCodePrompt(data);
   promptEl.textContent = prompt;
@@ -167,7 +167,7 @@
     });
     if (ok) {
       StudioBridge.guard.markClean();
-      if (window.StudioProgress) StudioProgress.submitted(3);
+      if (window.StudioProgress) StudioProgress.submitted(4);
     }
   }
 

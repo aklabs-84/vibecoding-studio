@@ -1118,7 +1118,7 @@ function goStep(n) {
 const PROGRESS_STEPS = { 1: [1, '문제 정의'], 1.5: [2, '발표·투표'], 2: [3, '사용자'], 3: [4, '기능 설계'], 4: [5, '화면 구성'], 5: [6, '앱 이름'], result: [7, '기획서 완성'] };
 function reportProgress(key) {
   if (!window.StudioProgress || !PROGRESS_STEPS[key]) return;
-  StudioProgress.report({ page: 2, pageLabel: '기획서', stepNo: PROGRESS_STEPS[key][0], stepTotal: 7, stepLabel: PROGRESS_STEPS[key][1] });
+  StudioProgress.report({ page: 3, pageLabel: '기획서', stepNo: PROGRESS_STEPS[key][0], stepTotal: 7, stepLabel: PROGRESS_STEPS[key][1] });
 }
 reportProgress(1);
 
@@ -1507,7 +1507,7 @@ function generateResult() {
   document.getElementById('result').classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   reportProgress('result');
-  if (window.StudioProgress) StudioProgress.complete(2);
+  if (window.StudioProgress) StudioProgress.complete(3);
 }
 
 function printPlan() {

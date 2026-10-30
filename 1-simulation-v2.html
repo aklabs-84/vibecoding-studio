@@ -444,8 +444,8 @@ function reportProgress(id) {
     else if (id === 'book') { no = n + 1; label = `${n}장 ${q}`; }
     else if (id === 'lesson') { no = n + 1; label = `${n}장 승인 완료`; }
     else if (id === 'result') { no = 8; label = '계약 완성'; }
-    StudioProgress.report({ page: 1, pageLabel: '몬스터 스타트업', stepNo: no, stepTotal: 8, stepLabel: label });
-    if (id === 'result') StudioProgress.complete(1);
+    StudioProgress.report({ page: 2, pageLabel: '몬스터 스타트업', stepNo: no, stepTotal: 8, stepLabel: label });
+    if (id === 'result') StudioProgress.complete(2);
   } catch (e) {}
 }
 function updateBarTeam() { $('barTeam').textContent = st.team ? '· ' + st.team + '의 계약서' : ''; }
@@ -455,6 +455,10 @@ function initTitle() {
   const t = $('teamIn');
   t.setAttribute('contenteditable', CE);
   t.textContent = st.team || '';
+  // 아이스브레이킹에서 정한 팀 이름이 있으면 부대 이름 칸에 미리 채워 준다 (이미 쓴 이름이 있으면 그대로 둔다)
+  if (!st.team && !st.started) {
+    try { const ice = window.StudioBridge && StudioBridge.load().iceTeamName; if (ice) { t.textContent = ice; st.team = ice; } } catch (e) {}
+  }
   editable(t, v => { st.team = v; $('teamWarn').textContent = ''; });
   t.addEventListener('keydown', e => { if (e.key === 'Enter') startNew(); });
   if (st.started) {

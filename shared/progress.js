@@ -108,7 +108,7 @@
         sendSoon();
       } catch (e) {}
     },
-    // 한 화면(0~3)을 끝까지 마쳤을 때
+    // 한 화면(0~4)을 끝까지 마쳤을 때
     complete: function (page) { try { addPage('completed', page); sendSoon(); } catch (e) {} },
     // 한 화면의 결과를 제출했을 때
     submitted: function (page) { try { addPage('submitted', page); addPage('completed', page); sendSoon(); } catch (e) {} },
