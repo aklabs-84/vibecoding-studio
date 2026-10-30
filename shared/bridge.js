@@ -50,6 +50,8 @@
     const entryCode = params.get('entryCode');
     const studentName = params.get('studentName');
     if (!entryCode) return load();
+    // 진행 보고용: 입장할 때의 이름(반 명단과 같은 이름)을 따로 기억한다.
+    try { if (studentName) sessionStorage.setItem('vcs_progress_name', studentName); } catch (e) {}
     return save({
       classlogEntryCode: entryCode,
       studentName: studentName || load().studentName || '',

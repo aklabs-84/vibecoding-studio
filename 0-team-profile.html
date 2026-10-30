@@ -160,28 +160,77 @@
   footer { text-align: center; padding: 34px 20px 50px; color: #8b96b8; font-size: 0.8rem; }
 
 
-  /* 사원증 */
+  /* 사원증: 앞면·뒷면이 돌아가는 3D 카드 */
   #badgeWrap { display:none; margin: 0 auto 24px; max-width: 560px; }
-  #idBadge {
-    width: 220px; height: 340px; margin: 0 auto; border-radius: 14px; background: #fff;
-    border: 2px solid #1b2340; box-shadow: var(--shadow-card); overflow: hidden;
+  .flip-scene { width:220px; height:340px; margin: 6px auto 4px; perspective: 1100px; zoom: 1.45; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .flip-scene:active { cursor: grabbing; }
+  .flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+  .id-face {
+    position: absolute; left: 0; top: 0; width: 220px; height: 340px; border-radius: 14px; background: #fff;
+    border: 2px solid #1b2340; box-shadow: 0 14px 30px rgba(30,64,175,.20); overflow: hidden;
     display: flex; flex-direction: column; align-items: center; text-align: center;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-  #idBadge .b-hole { width: 54px; height: 9px; border-radius: 99px; background: #dfe6f5; border: 1.5px solid #1b2340; margin: 10px 0 8px; }
-  #idBadge .b-team { width: 100%; background: var(--gradient); color: #fff; font-weight: 800; font-size: 0.8rem; padding: 7px 8px; letter-spacing: .02em; }
-  #idBadge .b-photo { width: 132px; height: 132px; margin: 14px 0 10px; border-radius: 16px; background: var(--surface2); border: 1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size: 3.6rem; overflow:hidden; }
-  #idBadge .b-photo img { width: 100%; height: 100%; object-fit: contain; }
-  #idBadge .b-name { font-size: 1.25rem; font-weight: 800; color: var(--text); }
-  #idBadge .b-role { margin-top: 5px; display:inline-block; padding: 3px 12px; border-radius: 99px; background: #eef4ff; color: #1d4ed8; font-weight: 800; font-size: 0.86rem; }
-  #idBadge .b-line { margin: 8px 14px 0; font-size: 0.72rem; line-height: 1.5; color: var(--text-muted); max-height: 3.3em; overflow: hidden; }
-  #idBadge .b-foot { margin-top: auto; width: 100%; padding: 5px; font-size: 0.6rem; color: #94a3b8; border-top: 1px dashed var(--border); }
+  #idBadgeBack { transform: rotateY(180deg); }
+  .id-face .b-hole { width: 54px; height: 9px; border-radius: 99px; background: #dfe6f5; border: 1.5px solid #1b2340; margin: 10px 0 8px; flex-shrink: 0; }
+  .id-face .b-team { width: 100%; background: var(--gradient); color: #fff; font-weight: 800; font-size: 0.8rem; padding: 7px 8px; letter-spacing: .02em; }
+  .id-face .b-foot { margin-top: auto; width: 100%; padding: 5px; font-size: 0.6rem; color: #94a3b8; border-top: 1px dashed var(--border); }
+  #idBadge .b-photo { width: 144px; height: 144px; margin: 12px 0 8px; border-radius: 16px; background: var(--surface2); border: 1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size: 3.8rem; overflow:hidden; }
+  #idBadge .b-photo { position: relative; }
+  #idBadge .b-photo.fill { background: var(--photo-fill); }
+  #idBadge .b-photo.soft::before { content:''; position:absolute; inset:-20px; background: var(--photo-bg) center/cover no-repeat; filter: blur(14px); opacity:.35; }
+  #idBadge .b-photo img { position: relative; width: 100%; height: 100%; object-fit: contain; }
+  #idBadge .b-name { font-size: 1.65rem; line-height: 1.2; font-weight: 800; color: var(--text); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #idBadge .b-role { margin-top: 8px; display:inline-block; padding: 5px 16px; border-radius: 99px; background: #eef4ff; color: #1d4ed8; font-weight: 800; font-size: 1.05rem; }
+  #idBadgeBack .bk-role { margin-top: 22px; font-size: 1.5rem; font-weight: 800; color: #1d4ed8; }
+  #idBadgeBack .bk-desc { margin: 12px 16px 0; font-size: 0.92rem; line-height: 1.65; color: var(--text); word-break: keep-all; }
+  #idBadgeBack .bk-lbl { margin: 20px 0 8px; font-size: 0.66rem; font-weight: 800; letter-spacing: .08em; color: #94a3b8; }
+  #idBadgeBack .bk-line { width: calc(100% - 28px); min-height: 3.3em; display: flex; align-items: center; justify-content: center; padding: 8px 10px; border-radius: 12px; background: #eef4ff; font-size: 0.92rem; font-weight: 700; line-height: 1.5; color: #1d4ed8; word-break: keep-all; margin-bottom: 8px; }
+  .flip-tools { display:flex; justify-content:center; gap:10px; margin: 10px 0 0; }
+  .flip-tools button { border: 1.5px solid var(--border); background:#fff; color: var(--text); border-radius: 999px; padding: 9px 16px; font: inherit; font-size: .86rem; font-weight: 700; cursor: pointer; }
+  .flip-tools button:hover { border-color: var(--accent1); background:#eef4ff; }
+  .flip-help { text-align:center; color: var(--text-muted); font-size:.8rem; margin: 8px 0 0; }
+  @media (max-width: 380px) { .flip-scene { zoom: 1.25; } }
+
+  /* 더 해보기: 한 줄에 2개 */
+  .more-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; align-items: stretch; }
+  .more-grid .card { margin-bottom: 0; padding: 22px 20px; display:flex; flex-direction:column; }
+  .more-grid .card .hint { flex: 1 1 auto; }
+  @media (max-width: 600px) { .more-grid { grid-template-columns: 1fr; } }
+  .sec-label { font-size:.8rem; font-weight:800; color: var(--text-muted); letter-spacing:.04em; margin: 4px 4px 10px; }
+
+  /* 3단계: 결과 열어 보기 연출 */
+  #revealBox { display:none; text-align:center; padding: 34px 20px 30px; }
+  #revealBox.show { display:block; }
+  #revealBox .gift { font-size: 5rem; display:inline-block; animation: giftWobble 1.6s ease-in-out infinite; }
+  #revealBox h2 { margin: 6px 0 6px; font-size: 1.3rem; color:#10193a; }
+  #revealBox p { margin: 0 0 18px; color: var(--text-muted); font-size:.92rem; }
+  #revealBox .btn-primary { max-width: 360px; margin: 0 auto; }
+  @keyframes giftWobble { 0%,100% { transform: rotate(-6deg) scale(1); } 50% { transform: rotate(6deg) scale(1.08); } }
+  #tiltWrap { perspective: 1200px; }
+  #tiltWrap .result-card { transition: transform .12s ease-out, box-shadow .2s; transform-style: preserve-3d; will-change: transform; }
+  #tiltWrap.pre { display:none; }
+  .result-card.reveal { animation: cardReveal .95s cubic-bezier(.2,.9,.25,1.15) both; }
+  .result-card.reveal .role-emoji { animation: emojiPop .9s .5s cubic-bezier(.3,1.6,.5,1) both; }
+  .result-card.reveal .role-name { animation: nameRise .6s .7s ease-out both; }
+  .result-card.reveal .card-body { animation: nameRise .7s .9s ease-out both; }
+  @keyframes cardReveal { 0% { transform: perspective(1200px) rotateY(-100deg) scale(.55); opacity: 0; } 55% { opacity: 1; } 100% { transform: perspective(1200px) rotateY(0) scale(1); opacity: 1; } }
+  @keyframes emojiPop { 0% { transform: scale(0) rotate(-40deg); } 100% { transform: scale(1) rotate(0); } }
+  @keyframes nameRise { 0% { transform: translateY(14px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  #confettiCanvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+  .sound-btn { position: fixed; right: 14px; bottom: 14px; z-index: 40; width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--border); background:#fff; font-size: 1.2rem; cursor:pointer; box-shadow: var(--shadow-card); }
+  @media (prefers-reduced-motion: reduce) {
+    .result-card.reveal, .result-card.reveal * { animation: none !important; }
+    #revealBox .gift { animation: none; }
+    #tiltWrap .result-card { transition: none; }
+  }
   .pick-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .pick-btn { border: 2px solid var(--border); border-radius: 14px; background: var(--surface2); padding: 6px; cursor: pointer; aspect-ratio: 1; }
   .pick-btn img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .pick-btn.selected { border-color: var(--accent1); background: #eef4ff; box-shadow: 0 0 0 3px rgba(59,130,246,.25); }
   @media (max-width: 480px) { .pick-grid { gap: 6px; } }
-  .badge-actions { display:flex; flex-direction:column; gap:10px; max-width: 560px; margin: 0 auto; }
+  .badge-actions { display:flex; flex-direction:column; gap:10px; max-width: none; margin: 0; }
   .badge-status { text-align:center; font-size: .9rem; color: var(--text-muted); min-height: 1.4em; }
   .stepbar { display:flex; gap:6px; margin: 0 0 18px; }
   .stepbar button { flex:1; min-width:0; border:2px solid var(--border); background:var(--surface2); color:var(--text-muted); border-radius:12px; padding:8px 4px; font:inherit; font-size:.85rem; font-weight:700; cursor:pointer; line-height:1.3; }
@@ -193,6 +242,9 @@
   .pane.active { display:block; }
   .step-nav { display:flex; gap:10px; margin-top:14px; }
   .step-nav button { flex:1; }
+  .step-nav .btn-primary, #nextNav .btn-primary { padding:19px 16px; font-size:1.15rem; font-weight:900; box-shadow:0 12px 28px rgba(37,99,235,0.42); transition:transform .15s, box-shadow .15s; }
+  .step-nav .btn-primary:hover:not(:disabled), #nextNav .btn-primary:hover { transform:translateY(-2px); box-shadow:0 16px 32px rgba(37,99,235,0.5); }
+  .step-nav .btn-secondary, .nav-row .btn-secondary { margin-top:0; background:transparent; border-color:transparent; color:var(--text-dim,#64748b); font-weight:600; }
   @media (max-width: 480px) { .stepbar button { font-size:.76rem; } }
   @media print {
     .pane { display:block !important; }
@@ -213,18 +265,28 @@
     #resultCard, #resultCard * {
       -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
-    body.print-badge #resultCard { display: none !important; }
+    body.print-badge #tiltWrap, body.print-badge #revealBox { display: none !important; }
+    #tiltWrap.pre { display: none !important; }
+    #tiltWrap { perspective: none; }
+    #tiltWrap .result-card { transform: none !important; }
+    .sound-btn, #confettiCanvas { display: none !important; }
     body.print-badge #badgeWrap { display: block !important; margin: 0; max-width: none; }
     body:not(.print-badge) #badgeWrap { display: none !important; }
-    body.print-badge #idBadge { box-shadow: none; }
-    body.print-badge.pb-big #idBadge { zoom: 2.5; }
-    body.print-badge.pb-real #idBadge { zoom: 0.945; }
+    /* 인쇄: 앞면과 뒷면을 나란히 펼쳐서 찍는다 */
+    body.print-badge .flip-scene { zoom: 1 !important; perspective: none; width: auto; height: auto; margin: 0; }
+    body.print-badge .flip-inner { transform: none !important; transform-style: flat; width: auto; height: auto; display: flex; justify-content: center; gap: 5mm; }
+    body.print-badge .id-face { position: static; transform: none !important; box-shadow: none; flex-shrink: 0; backface-visibility: visible; -webkit-backface-visibility: visible; }
+    body.print-badge.pb-big .id-face { zoom: 1.6; }
+    body.print-badge.pb-real .id-face { zoom: 0.945; }
     body.print-badge.pb-big #badgeWrap { margin-top: 6mm; }
-    #idBadge, #idBadge * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .id-face, .id-face * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 </head>
 <body>
+
+<canvas id="confettiCanvas" class="no-print"></canvas>
+<button type="button" class="sound-btn no-print" id="soundBtn" onclick="toggleSound()" title="효과음 켜기/끄기" aria-label="효과음 켜기/끄기">🔊</button>
 
 <section class="hero">
   <div class="wrap">
@@ -294,6 +356,13 @@
     </div>
 
     <div class="pane" data-pane="3">
+    <div id="revealBox" class="no-print">
+      <div class="gift">🎁</div>
+      <h2>내 협업 프로필이 완성됐어요!</h2>
+      <p>버튼을 눌러 결과를 열어 보세요.</p>
+      <button class="btn-primary" onclick="revealResult()">✨ 내 결과 열어 보기</button>
+    </div>
+    <div id="tiltWrap" class="pre">
     <div class="result-card" id="resultCard">
       <div class="card-header">
         <div class="role-emoji" id="resultEmoji">🔍</div>
@@ -311,6 +380,7 @@
         <div class="role-text" id="resultText"></div>
       </div>
       <div class="card-footer-brand">바이브코딩 스튜디오 · AKLABS</div>
+    </div>
     </div>
 
     <div class="nav-row print-row no-print" id="printNav" style="display:none;">
@@ -330,37 +400,60 @@
       <h2>나의 캐릭터 고르기</h2>
       <p class="hint">내 역할과 어울리는 동물 친구들이에요. 마음에 드는 친구를 누르면 아래 사원증에 바로 들어가요.</p>
       <div class="pick-grid" id="pickGrid"></div>
-      <div class="field" style="margin:18px 0 0;">
-        <label for="badgeLineInput">사원증에 쓸 한 줄 (30자까지)</label>
-        <input type="text" id="badgeLineInput" maxlength="30" placeholder="예) 친구 이야기를 잘 들어 주는 사람" oninput="setBadgeLine(this.value)">
-        <p class="hint" style="margin:6px 0 0;">AI의 긴 설명은 3단계 결과 카드에 그대로 있어요. 사원증에는 짧게 쓰면 잘리지 않아요. 마음대로 고쳐도 돼요.</p>
-      </div>
     </div>
 
     <div id="badgeWrap">
-      <div id="idBadge">
-        <div class="b-hole"></div>
-        <div class="b-team" id="badgeTeam">우리 팀</div>
-        <div class="b-photo" id="badgePhoto">🙂</div>
-        <div class="b-name" id="badgeName">이름</div>
-        <div class="b-role" id="badgeRole">역할</div>
-        <div class="b-line" id="badgeLine"></div>
-        <div class="b-foot">바이브코딩 스튜디오 · AKLABS</div>
+      <div class="sec-label no-print">내 사원증 · 끌어서 돌려 보세요</div>
+      <div class="flip-scene" id="flipScene" title="끌어서 돌려 보세요">
+        <div class="flip-inner" id="flipInner">
+          <div id="idBadge" class="id-face">
+            <div class="b-hole"></div>
+            <div class="b-team" id="badgeTeam">우리 팀</div>
+            <div class="b-photo" id="badgePhoto">🙂</div>
+            <div class="b-name" id="badgeName">이름</div>
+            <div class="b-role" id="badgeRole">역할</div>
+            <div class="b-foot">바이브코딩 스튜디오 · AKLABS</div>
+          </div>
+          <div id="idBadgeBack" class="id-face">
+            <div class="b-hole"></div>
+            <div class="b-team">이 역할은요</div>
+            <div class="bk-role" id="badgeBackRole">역할</div>
+            <div class="bk-desc" id="badgeBackDesc"></div>
+            <div class="bk-lbl">내가 쓴 한 줄</div>
+            <div class="bk-line" id="badgeLine"></div>
+            <div class="b-foot">바이브코딩 스튜디오 · AKLABS</div>
+          </div>
+        </div>
+      </div>
+      <div class="flip-tools no-print">
+        <button type="button" onclick="flipBadge()">🔄 뒤집기</button>
+        <button type="button" onclick="spinBadge()">🌀 한 바퀴 돌리기</button>
+      </div>
+      <p class="flip-help no-print">앞면: 이름과 역할 · 뒷면: 역할 설명과 내가 쓴 한 줄</p>
+    </div>
+
+    <div class="card no-print" id="lineCard" style="display:none;">
+      <div class="step-num">4-2</div>
+      <h2>사원증 뒷면에 쓸 한 줄</h2>
+      <div class="field" style="margin:12px 0 0;">
+        <label for="badgeLineInput">나를 소개하는 한 줄 (30자까지)</label>
+        <input type="text" id="badgeLineInput" maxlength="30" placeholder="예) 친구 이야기를 잘 들어 주는 사람" oninput="setBadgeLine(this.value)" onfocus="showBadgeBack()">
+        <p class="hint" style="margin:6px 0 0;">쓰는 동안 사원증이 뒷면으로 돌아가서 바로 보여요. AI의 긴 설명은 3단계 결과 카드에 있어요. 마음대로 고쳐도 돼요.</p>
       </div>
     </div>
 
     <div class="badge-actions no-print" id="badgeActions" style="display:none;">
-      <button class="btn-secondary" onclick="printBadge('big')">🪪 크게 인쇄 / PDF로 저장 (A4에 크게)</button>
-      <button class="btn-secondary" onclick="printBadge('real')">✂️ 실제 사원증 크기로 인쇄 (55×85mm)</button>
-      <button class="btn-secondary" onclick="saveBadgePng()">🖼️ 그림(PNG)으로 저장</button>
+      <button class="btn-secondary" style="width:100%;padding:20px 16px;font-size:1.15rem;font-weight:800;" onclick="saveBadgePng()">🖼️ 그림(PNG)으로 저장 (앞면)</button>
       <div id="badgeSubmitBox" style="display:none;">
         <button class="btn-primary" style="width:100%;" onclick="submitBadge()">📤 선생님께 제출하기</button>
       </div>
       <div class="badge-status" id="badgeStatus"></div>
     </div>
 
+    <div class="sec-label no-print" id="moreLabel" style="display:none; margin-top:26px;">더 해보기 (선택)</div>
+    <div class="more-grid no-print">
     <div class="card no-print" id="characterCard" style="display:none;">
-      <div class="step-num">더 해보기 (선택)</div>
+      <div class="step-num">더 해보기 ①</div>
       <h2>내 캐릭터를 직접 만들어 볼까요?</h2>
       <p class="hint">내 답변을 닮은 동물 캐릭터를 만들어 볼까요? 아래 버튼을 눌러 질문을 복사한 뒤 AI 앱에 붙여넣으면, 그림을 그리는 AI에게 줄 설명문을 만들어 줘요. 그 설명문을 이미지 만들기 AI에 붙여넣으면 캐릭터 그림이 나와요.</p>
       <button class="btn-primary" onclick="generateCharacterPrompt()">③ 캐릭터 그림 질문 만들기</button>
@@ -369,18 +462,18 @@
     </div>
 
     <div class="card no-print" id="badgeCard" style="display:none;">
-      <div class="step-num">더 해보기 (선택)</div>
+      <div class="step-num">더 해보기 ②</div>
       <h2>내가 만든 그림으로 사원증 바꾸기</h2>
-      <p class="hint">위에서 만든 캐릭터 그림이 있다면 불러와서 사원증 그림을 바꿀 수 있어요.</p>
-      <label class="btn-secondary" style="display:block; text-align:center; cursor:pointer;">
+      <p class="hint">위에서 만든 캐릭터 그림이 있다면 불러와서 사원증 그림을 바꿀 수 있어요. 그림을 복사했다면 이 화면에서 Ctrl+V(맥은 Cmd+V)로 붙여넣어도 돼요.</p>
+      <label class="btn-secondary" style="display:block; text-align:center; cursor:pointer; margin-top:0;">
         🖼️ 캐릭터 그림 불러오기
         <input type="file" id="badgeImageInput" accept="image/*" style="display:none;">
       </label>
-      <p class="hint" style="margin:10px 0 0;">그림을 복사했다면 이 화면에서 Ctrl+V(맥은 Cmd+V)로 붙여넣어도 돼요.</p>
+    </div>
     </div>
 
     <div class="nav-row no-print" id="nextNav" style="display:none;">
-      <a href="1-simulation-v2.html"><button class="btn-secondary" style="width:100%;">다음: 몬스터 스타트업 시뮬레이션 →</button></a>
+      <a href="1-simulation-v2.html"><button class="btn-primary" style="width:100%;">다음: 몬스터 스타트업 시뮬레이션 →</button></a>
     </div>
     <div class="step-nav no-print">
       <button class="btn-secondary" onclick="goStep(3)">← 이전</button>
@@ -397,6 +490,7 @@
 <footer>바이브코딩 스튜디오 · AKLABS</footer>
 
 <script src="shared/bridge.js"></script>
+<script src="shared/progress.js"></script>
 <script>
   const entryData = StudioBridge.captureEntryFromURL();
   StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
@@ -428,6 +522,15 @@
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', Number(p.dataset.pane) === n));
     updateStepbar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (n === 4) introSpin();
+    reportProgress(n);
+  }
+  // 선생님 화면에 "지금 여기 있어요"를 알린다. (실패해도 화면 동작에는 영향 없음)
+  const PROGRESS_LABELS = { 1: '질문에 답하기', 2: 'AI에게 물어보기', 3: '내 결과 보기', 4: '캐릭터·사원증' };
+  function reportProgress(n) {
+    if (!window.StudioProgress) return;
+    StudioProgress.report({ page: 0, pageLabel: '팀 프로필', stepNo: n, stepTotal: 4, stepLabel: PROGRESS_LABELS[n] });
+    if (n === 4) StudioProgress.complete(0);
   }
   function nextFrom1() {
     if (!document.getElementById('studentName').value.trim()) {
@@ -627,8 +730,7 @@
     document.getElementById('resultTeamName').textContent = teamName ? `${teamName}` : '';
     document.getElementById('resultText').innerHTML = formatAIText(aiText);
     document.getElementById('resultCard').classList.add('show');
-    document.getElementById('printNav').style.display = 'flex';
-    document.getElementById('printHint').style.display = 'block';
+    resetReveal();
     document.getElementById('nextNav').style.display = 'flex';
     document.getElementById('characterCard').style.display = 'block';
     showBadge(aiText, role, studentName, teamName);
@@ -654,6 +756,157 @@
       alert('복사에 실패했어요. 직접 선택해서 복사해주세요.');
     });
   }
+
+
+  // ---- 역할 설명 (사원증 뒷면) ----
+  const ROLE_DESC = {
+    researcher: '자료를 찾고 사실을 확인해서, 팀이 믿고 쓸 수 있는 정보를 모아 와요.',
+    builder: 'AI와 도구를 써서 우리 앱을 실제로 만들고, 안 되는 곳을 고쳐요.',
+    storyteller: '우리 아이디어를 쉽고 재미있게 설명하고, 발표로 사람들에게 전해요.',
+    maker: '그림과 화면, 디자인으로 우리 앱을 한눈에 반하게 꾸며요.',
+    default: '팀의 한 사람으로 아이디어를 내고 서로 도우며 함께 만들어요.',
+  };
+
+  // ---- 효과음 (소리 파일 없이 브라우저가 직접 만든다) ----
+  let soundOn = true;
+  try { soundOn = localStorage.getItem('studio_sound') !== 'off'; } catch (e) {}
+  let audioCtx = null;
+  function getAudio() {
+    if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; audioCtx = new AC(); }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function tone(freq, start, dur, type, vol) {
+    const ac = getAudio(); if (!ac) return;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type || 'triangle'; o.frequency.value = freq;
+    const t = ac.currentTime + start;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.18, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + dur + 0.05);
+  }
+  function playReveal() {
+    if (!soundOn) return;
+    try {
+      for (let i = 0; i < 6; i++) tone(110 + i * 4, i * 0.09, 0.12, 'sine', 0.22); // 두근두근
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 0.6 + i * 0.1, 0.35, 'triangle', 0.2)); // 짠!
+      tone(2093, 1.0, 0.5, 'sine', 0.07); tone(1568, 1.05, 0.5, 'sine', 0.06); // 반짝
+    } catch (e) {}
+  }
+  function playWhoosh() {
+    if (!soundOn) return;
+    try { tone(420, 0, 0.18, 'sine', 0.06); tone(640, 0.08, 0.18, 'sine', 0.05); } catch (e) {}
+  }
+  function toggleSound() {
+    soundOn = !soundOn;
+    try { localStorage.setItem('studio_sound', soundOn ? 'on' : 'off'); } catch (e) {}
+    document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+    if (soundOn) tone(660, 0, 0.15, 'triangle', 0.12);
+  }
+  document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+
+  const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- 3단계: 결과 열어 보기 ----
+  function resetReveal() {
+    document.getElementById('tiltWrap').classList.add('pre');
+    document.getElementById('resultCard').classList.remove('reveal');
+    document.getElementById('revealBox').classList.add('show');
+    document.getElementById('printNav').style.display = 'none';
+    document.getElementById('printHint').style.display = 'none';
+  }
+  function revealResult() {
+    document.getElementById('revealBox').classList.remove('show');
+    document.getElementById('tiltWrap').classList.remove('pre');
+    const card = document.getElementById('resultCard');
+    card.classList.remove('reveal'); void card.offsetWidth;
+    if (!reduceMotion) { card.classList.add('reveal'); burstConfetti(); }
+    playReveal();
+    document.getElementById('printNav').style.display = 'flex';
+    document.getElementById('printHint').style.display = 'block';
+  }
+
+  // 컨페티 (색종이)
+  function burstConfetti() {
+    const cv = document.getElementById('confettiCanvas');
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+    const g = cv.getContext('2d'); g.scale(dpr, dpr);
+    const colors = ['#2563eb', '#22d3ee', '#fbbf24', '#f472b6', '#34d399', '#a78bfa'];
+    const ox = innerWidth / 2, oy = innerHeight * 0.38;
+    const ps = Array.from({ length: 130 }, () => {
+      const a = Math.random() * Math.PI * 2, v = 5 + Math.random() * 9;
+      return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 5, w: 6 + Math.random() * 6, h: 4 + Math.random() * 5,
+               r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: colors[(Math.random() * colors.length) | 0] };
+    });
+    const t0 = performance.now();
+    (function frame(now) {
+      const k = (now - t0) / 2400;
+      g.clearRect(0, 0, innerWidth, innerHeight);
+      if (k >= 1) return;
+      ps.forEach(p => {
+        p.vy += 0.28; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        g.save(); g.globalAlpha = Math.min(1, 2.2 - k * 2.2); g.translate(p.x, p.y); g.rotate(p.r);
+        g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); g.restore();
+      });
+      requestAnimationFrame(frame);
+    })(t0);
+  }
+
+  // 결과 카드 기울기 (마우스·손가락을 따라 살짝 3D로 움직인다)
+  (function () {
+    const wrap = document.getElementById('tiltWrap'), card = document.getElementById('resultCard');
+    if (reduceMotion) return;
+    wrap.addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') return; // 손가락은 스크롤과 겹쳐서 제외
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      card.style.transform = `perspective(1200px) rotateY(${(x * 8).toFixed(2)}deg) rotateX(${(-y * 5).toFixed(2)}deg)`;
+    });
+    wrap.addEventListener('pointerleave', () => { card.style.transform = ''; });
+  })();
+
+  // ---- 4단계: 돌아가는 3D 사원증 ----
+  const flip = { y: 0, dragging: false, startX: 0, base: 0, moved: 0, introDone: false };
+  function applyFlip(animate) {
+    const inner = document.getElementById('flipInner');
+    inner.style.transition = animate ? 'transform .75s cubic-bezier(.2,.8,.2,1)' : 'none';
+    inner.style.transform = `rotateY(${flip.y}deg)`;
+  }
+  function flipBadge() { flip.y = Math.round(flip.y / 180) * 180 + 180; applyFlip(true); playWhoosh(); }
+  function spinBadge() { flip.y = Math.round(flip.y / 180) * 180 + 360; applyFlip(true); playWhoosh(); }
+  function showBadgeBack() {
+    if (Math.round(flip.y / 180) % 2 === 0) { flip.y = Math.round(flip.y / 180) * 180 + 180; applyFlip(true); }
+  }
+  function introSpin() {
+    if (flip.introDone || document.getElementById('badgeWrap').style.display !== 'block') return;
+    flip.introDone = true;
+    if (reduceMotion) return;
+    setTimeout(spinBadge, 500);
+  }
+  (function () {
+    const scene = document.getElementById('flipScene');
+    scene.addEventListener('pointerdown', e => {
+      flip.dragging = true; flip.startX = e.clientX; flip.base = flip.y; flip.moved = 0;
+      scene.setPointerCapture(e.pointerId);
+    });
+    scene.addEventListener('pointermove', e => {
+      if (!flip.dragging) return;
+      const dx = e.clientX - flip.startX;
+      flip.moved = Math.max(flip.moved, Math.abs(dx));
+      flip.y = flip.base + dx * 0.9;
+      applyFlip(false);
+    });
+    function end() {
+      if (!flip.dragging) return;
+      flip.dragging = false;
+      flip.y = flip.moved < 6 ? Math.round(flip.base / 180) * 180 + 180 : Math.round(flip.y / 180) * 180; // 살짝 눌러도 뒤집힘
+      applyFlip(true); playWhoosh();
+    }
+    scene.addEventListener('pointerup', end);
+    scene.addEventListener('pointercancel', end);
+  })();
 
   // ---- 사원증 ----
   let badgeInfo = { role: '', line: '' };
@@ -690,6 +943,19 @@
   }
 
   // 고른 동물을 사원증에 넣고, 제출용 작은 JPEG도 함께 준비한다.
+  // 올린 그림의 가장자리 색을 읽는다. 색이 거의 같으면 그 색으로 배경을 깔고, 제각각이면 약한 번짐을 더한다.
+  let badgePhotoFill = null;
+  function edgeFill(im) {
+    const N = 40, c = document.createElement('canvas'); c.width = c.height = N;
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, N, N);
+    g.drawImage(im, 0, 0, N, N);
+    const d = g.getImageData(0, 0, N, N).data, px = [];
+    for (let i = 0; i < N; i++) for (const [x, y] of [[i, 0], [i, N - 1], [0, i], [N - 1, i]]) { const k = (y * N + x) * 4; px.push([d[k], d[k + 1], d[k + 2]]); }
+    const m = [0, 1, 2].map(j => px.reduce((a, p) => a + p[j], 0) / px.length);
+    const dev = px.reduce((a, p) => a + Math.max(Math.abs(p[0] - m[0]), Math.abs(p[1] - m[1]), Math.abs(p[2] - m[2])), 0) / px.length;
+    return { color: `rgb(${m.map(Math.round).join(',')})`, uniform: dev < 18 };
+  }
+
   function pickCharacter(btn, role, idx, key, label) {
     document.querySelectorAll('.pick-btn').forEach(x => x.classList.remove('selected'));
     btn.classList.add('selected');
@@ -701,6 +967,7 @@
     img.alt = label;
     img.src = src;
     photo.appendChild(img);
+    photo.classList.remove('fill', 'soft'); badgePhotoFill = null;
     const pre = new Image();
     pre.onload = () => { badgeImageData = toJpegData(pre); };
     pre.src = src;
@@ -738,11 +1005,15 @@
     document.getElementById('badgeTeam').textContent = teamName || '우리 팀';
     document.getElementById('badgeName').textContent = studentName || '이름';
     document.getElementById('badgeRole').textContent = roleInfo.emoji + ' ' + roleInfo.name;
+    document.getElementById('badgeBackRole').textContent = roleInfo.emoji + ' ' + roleInfo.name;
+    document.getElementById('badgeBackDesc').textContent = ROLE_DESC[role] || ROLE_DESC.default;
     document.getElementById('badgeLine').textContent = badgeInfo.line;
     document.getElementById('badgeLineInput').value = badgeInfo.line;
     document.getElementById('pickCard').style.display = 'block';
     renderPicks(role);
     document.getElementById('badgeCard').style.display = 'block';
+    document.getElementById('lineCard').style.display = 'block';
+    document.getElementById('moreLabel').style.display = 'block';
     document.getElementById('badgeWrap').style.display = 'block';
     document.getElementById('badgeActions').style.display = 'flex';
     const _d = StudioBridge.load();
@@ -765,6 +1036,11 @@
         img.alt = '캐릭터 그림';
         img.src = badgeImageData;
         photo.appendChild(img);
+        badgePhotoFill = edgeFill(src);
+        photo.classList.add('fill');
+        photo.style.setProperty('--photo-fill', badgePhotoFill.color);
+        photo.classList.toggle('soft', !badgePhotoFill.uniform);
+        photo.style.setProperty('--photo-bg', `url("${badgeImageData}")`);
       };
       src.src = reader.result;
     };
@@ -778,7 +1054,7 @@
     if (item) setBadgeImage(item.getAsFile());
   });
 
-  // 사원증 전체(테두리·팀·그림·이름·역할·소개)를 하나의 PNG 그림으로 그린다. 화면 카드(220×340)와 같은 모양.
+  // 사원증 앞면(테두리·팀·그림·이름·역할)을 하나의 PNG 그림으로 그린다. 화면 카드(220×340)와 같은 모양.
   function renderBadgePng(scale) {
     scale = scale || 3;
     const W = 220, H = 340;
@@ -807,42 +1083,42 @@
     g.fillText(document.getElementById('badgeTeam').textContent, W / 2, 43.5, W - 16);
 
     // 그림 상자 + 그림
-    const px = (W - 132) / 2, py = 74;
-    rr(px, py, 132, 132, 16); g.fillStyle = '#f3f6fd'; g.fill();
+    const PS = 144, px = (W - PS) / 2, py = 72;
+    rr(px, py, PS, PS, 16); g.fillStyle = '#f3f6fd'; g.fill();
     g.lineWidth = 1.5; g.strokeStyle = '#dfe6f5'; g.stroke();
     const img = document.querySelector('#badgePhoto img');
     if (img && img.complete && img.naturalWidth) {
-      g.save(); rr(px, py, 132, 132, 16); g.clip();
-      const k = Math.min(132 / img.naturalWidth, 132 / img.naturalHeight);
+      g.save(); rr(px, py, PS, PS, 16); g.clip();
+      if (badgePhotoFill) {
+        g.fillStyle = badgePhotoFill.color; g.fillRect(px, py, PS, PS);
+        if (!badgePhotoFill.uniform) {
+          const kc = Math.max(PS / img.naturalWidth, PS / img.naturalHeight) * 1.2;
+          const cw = img.naturalWidth * kc, ch = img.naturalHeight * kc;
+          g.globalAlpha = 0.35;
+          if ('filter' in g) g.filter = 'blur(14px)';
+          g.drawImage(img, px + (PS - cw) / 2, py + (PS - ch) / 2, cw, ch);
+          g.filter = 'none'; g.globalAlpha = 1;
+        }
+      }
+      const k = Math.min(PS / img.naturalWidth, PS / img.naturalHeight);
       const iw = img.naturalWidth * k, ih = img.naturalHeight * k;
-      g.drawImage(img, px + (132 - iw) / 2, py + (132 - ih) / 2, iw, ih);
+      g.drawImage(img, px + (PS - iw) / 2, py + (PS - ih) / 2, iw, ih);
       g.restore();
     } else {
-      g.font = `57px ${FONT}`; g.fillStyle = ink;
-      g.fillText('🙂', W / 2, py + 68);
+      g.font = `61px ${FONT}`; g.fillStyle = ink;
+      g.fillText('🙂', W / 2, py + 74);
     }
 
-    // 이름
-    g.fillStyle = ink; g.font = `800 20px ${FONT}`;
-    g.fillText(document.getElementById('badgeName').textContent, W / 2, 231, W - 24);
+    // 이름 (크게)
+    g.fillStyle = ink; g.font = `800 26px ${FONT}`;
+    g.fillText(document.getElementById('badgeName').textContent, W / 2, 242, W - 24);
 
-    // 역할 알약
+    // 역할 알약 (크게)
     const roleText = document.getElementById('badgeRole').textContent;
-    g.font = `800 13.8px ${FONT}`;
-    const rw = Math.min(W - 24, g.measureText(roleText).width + 24);
-    rr((W - rw) / 2, 251, rw, 27, 13.5); g.fillStyle = '#eef4ff'; g.fill();
-    g.fillStyle = '#1d4ed8'; g.fillText(roleText, W / 2, 265, rw - 16);
-
-    // 한 줄 소개 (최대 2줄)
-    g.fillStyle = '#64748b'; g.font = `400 11.5px ${FONT}`;
-    const words = document.getElementById('badgeLine').textContent.split(/\s+/).filter(Boolean);
-    const lines = []; let cur = '';
-    words.forEach(w => {
-      const t = cur ? cur + ' ' + w : w;
-      if (g.measureText(t).width > W - 28 && cur) { lines.push(cur); cur = w; } else cur = t;
-    });
-    if (cur) lines.push(cur);
-    lines.slice(0, 2).forEach((l, i) => g.fillText(l, W / 2, 294 + i * 17, W - 28));
+    g.font = `800 16.8px ${FONT}`;
+    const rw = Math.min(W - 24, g.measureText(roleText).width + 32);
+    rr((W - rw) / 2, 266, rw, 34, 17); g.fillStyle = '#eef4ff'; g.fill();
+    g.fillStyle = '#1d4ed8'; g.fillText(roleText, W / 2, 283.5, rw - 20);
 
     // 아래 띠
     g.strokeStyle = '#dfe6f5'; g.lineWidth = 1; g.setLineDash([3, 3]);
@@ -904,6 +1180,7 @@
         fileData: renderBadgePng(3), // 사원증 전체 모양 (모아 찍기에 바로 쓴다)
       });
       StudioBridge.guard.markClean();
+      if (window.StudioProgress) StudioProgress.submitted(0);
       status.textContent = '✅ 제출 완료! 선생님이 확인할 수 있어요.';
     } catch (e) {
       status.textContent = '❌ ' + e.message;
@@ -912,6 +1189,7 @@
 
   renderQuestions();
   updateStepbar();
+  reportProgress(curStep);
   if (entryData.studentName) document.getElementById('studentName').value = entryData.studentName;
   restoreDraft();
   ['studentName', 'teamName', 'aiResponseInput'].forEach(id => document.getElementById(id).addEventListener('input', persistDraft));

@@ -695,6 +695,7 @@ textarea::placeholder, input::placeholder { color: var(--text-muted); }
 }
 </style>
 <script src="shared/bridge.js"></script>
+<script src="shared/progress.js"></script>
 <script src="shared/submit-anim.js"></script>
 <script>
 StudioBridge.captureEntryFromURL(); // 클래스로그에서 이 화면으로 바로 들어와도 제출할 수 있게
@@ -1110,7 +1111,16 @@ function goStep(n) {
   const panel = document.getElementById(`step${n}`);
   if (panel) panel.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  reportProgress(n);
 }
+
+// 선생님 화면에 "지금 여기 있어요"를 알린다. (실패해도 화면 동작에는 영향 없음)
+const PROGRESS_STEPS = { 1: [1, '문제 정의'], 1.5: [2, '발표·투표'], 2: [3, '사용자'], 3: [4, '기능 설계'], 4: [5, '화면 구성'], 5: [6, '앱 이름'], result: [7, '기획서 완성'] };
+function reportProgress(key) {
+  if (!window.StudioProgress || !PROGRESS_STEPS[key]) return;
+  StudioProgress.report({ page: 2, pageLabel: '기획서', stepNo: PROGRESS_STEPS[key][0], stepTotal: 7, stepLabel: PROGRESS_STEPS[key][1] });
+}
+reportProgress(1);
 
 // ── 발표·투표 ──
 let oneLinerSubmitted = false;
@@ -1496,6 +1506,8 @@ function generateResult() {
   document.querySelectorAll('.prog-step').forEach(s => s.classList.add('done'));
   document.getElementById('result').classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  reportProgress('result');
+  if (window.StudioProgress) StudioProgress.complete(2);
 }
 
 function printPlan() {
