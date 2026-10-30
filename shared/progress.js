@@ -90,6 +90,33 @@
       if (document.visibilityState === 'visible') send(true, false);
     });
     window.addEventListener('pagehide', function () { send(false, true); });
+    watchVersion();
+  }
+
+  // 새 버전이 올라오면 안내만 띄운다. 쓰던 내용이 날아가지 않도록 저절로 새로고침하지는 않는다.
+  var PAGE_VERSION = '2026-10-30-b';
+  function watchVersion() {
+    var shown = false;
+    function check() {
+      if (shown) return;
+      fetch('/version.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (!j || !j.v || j.v === PAGE_VERSION || shown) return;
+          shown = true;
+          var bar = document.createElement('div');
+          bar.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:99999;background:#1b2340;color:#fff;padding:12px 16px;border-radius:12px;font:600 14px/1.4 sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;gap:12px;align-items:center;max-width:92vw';
+          bar.innerHTML = '<span>새 버전이 나왔어요. 쓰던 내용을 저장한 뒤 새로고침해 주세요.</span>';
+          var b = document.createElement('button');
+          b.textContent = '새로고침';
+          b.style.cssText = 'border:0;border-radius:8px;padding:8px 12px;background:#3b82f6;color:#fff;font:800 14px sans-serif;cursor:pointer';
+          b.onclick = function () { location.reload(); };
+          bar.appendChild(b);
+          document.body.appendChild(bar);
+        }).catch(function () {});
+    }
+    setTimeout(check, 5000 + Math.floor(Math.random() * 5000));
+    setInterval(check, 120000 + Math.floor(Math.random() * 20000));
   }
 
   global.StudioProgress = {
