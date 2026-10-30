@@ -377,6 +377,7 @@
             <div class="profile-team" id="resultTeamName"></div>
           </div>
         </div>
+        <div id="roleDutyBox" style="margin-bottom:14px"></div>
         <div class="role-text" id="resultText"></div>
       </div>
       <div class="card-footer-brand">바이브코딩 스튜디오 · AKLABS</div>
@@ -491,6 +492,7 @@
 
 <script src="shared/bridge.js"></script>
 <script src="shared/progress.js"></script>
+<script src="shared/role-guide.js"></script>
 <script src="shared/submit-anim.js"></script>
 <script>
   const entryData = StudioBridge.captureEntryFromURL();
@@ -730,6 +732,8 @@
     document.getElementById('resultStudentName').textContent = studentName ? `${studentName}` : '나의 협업 프로필';
     document.getElementById('resultTeamName').textContent = teamName ? `${teamName}` : '';
     document.getElementById('resultText').innerHTML = formatAIText(aiText);
+    RoleGuide.renderBox('#roleDutyBox', role, '내 역할 카드가 나왔어요! 이 역할은 앞으로 이런 일을 해요');
+    RoleGuide.refresh();
     document.getElementById('resultCard').classList.add('show');
     resetReveal();
     document.getElementById('nextNav').style.display = 'flex';
