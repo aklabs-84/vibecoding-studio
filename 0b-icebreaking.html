@@ -42,14 +42,75 @@
   .btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
   .btn.ghost { background: transparent; color: var(--text-muted); box-shadow: none; font-weight: 700; font-size: .95rem; margin-top: 8px; }
   .note { font-size: .84rem; color: var(--text-muted); margin-top: 10px; line-height: 1.6; text-align: center; }
-  @media (max-width: 480px) { .hero h1 { font-size: 1.55rem; } .card { padding: 22px 18px; } }
+  /* ② 질문 슬롯머신 (뽑은 질문은 저장하지 않는 놀이 도구) */
+  .size { display:flex; align-items:center; gap:8px; margin:16px 0 4px; font-size:.88rem; color:var(--text-muted); font-weight:700; }
+  .size button { border:0; background:none; font:inherit; font-weight:700; color:var(--text-muted); padding:4px 8px; cursor:pointer; border-bottom:2px solid transparent; }
+  .size button.on { color:var(--text); border-color:var(--text); }
+  .size button:hover { color:var(--text); }
+  .plan { font-size:.84rem; color:var(--text-muted); margin:2px 0 14px; line-height:1.6; }
+  .plan b { color:var(--text); }
+  .machine { position:relative; border-radius:26px; padding:16px 16px 18px; background:linear-gradient(180deg,#d8132f,#8f0a20); box-shadow:0 14px 30px rgba(143,10,32,.35), inset 0 2px 0 rgba(255,255,255,.25); }
+  .lights { display:flex; justify-content:space-between; padding:0 6px 12px; }
+  .lights i { width:12px; height:12px; border-radius:50%; background:#ffc83d; animation:blink 1.2s infinite; box-shadow:0 0 8px #ffc83d; }
+  .lights i:nth-child(even) { animation-delay:.6s; }
+  .machine.run .lights i { animation-duration:.25s; }
+  @keyframes blink { 50% { opacity:.25; box-shadow:none; } }
+  .mhead { text-align:center; font-family:'Jua','Pretendard',sans-serif; color:#ffc83d; font-size:1.5rem; letter-spacing:.06em; text-shadow:0 2px 0 rgba(0,0,0,.3); margin-bottom:10px; }
+  .mrow { display:flex; gap:14px; align-items:stretch; }
+  .glass { flex:1; min-width:0; border-radius:16px; background:#1a0a10; padding:8px; box-shadow:inset 0 4px 14px rgba(0,0,0,.7); }
+  .win { position:relative; height:228px; overflow:hidden; border-radius:10px; background:#fffaf0; }
+  .strip { position:absolute; left:0; right:0; top:0; will-change:transform; }
+  .item { height:76px; display:flex; align-items:center; justify-content:center; text-align:center; padding:0 16px; font-weight:700; font-size:.98rem; line-height:1.4; color:#5a4a42; word-break:keep-all; border-bottom:1px dashed #eadfce; }
+  .machine.run .strip { filter:blur(1.6px); }
+  .win::before, .win::after { content:''; position:absolute; left:0; right:0; height:76px; z-index:2; pointer-events:none; }
+  .win::before { top:0; background:linear-gradient(180deg,rgba(26,10,16,.55),rgba(255,250,240,0)); }
+  .win::after { bottom:0; background:linear-gradient(0deg,rgba(26,10,16,.55),rgba(255,250,240,0)); }
+  .pay { position:absolute; left:0; right:0; top:76px; height:76px; z-index:3; pointer-events:none; border-top:3px solid #ffc83d; border-bottom:3px solid #ffc83d; }
+  .pay::before, .pay::after { content:'▶'; position:absolute; top:50%; transform:translateY(-50%); color:#c8102e; font-size:1.1rem; }
+  .pay::before { left:3px; } .pay::after { right:3px; transform:translateY(-50%) scaleX(-1); }
+  .win.hit .item.mid { animation:flash .5s 3; }
+  @keyframes flash { 50% { background:#fff2b8; } }
+  .lever { width:64px; flex:none; position:relative; display:flex; justify-content:center; touch-action:none; cursor:grab; user-select:none; }
+  .lever .base { position:absolute; bottom:6px; width:34px; height:34px; border-radius:50%; background:#6d0717; box-shadow:inset 0 3px 6px rgba(0,0,0,.5); }
+  .lever .arm { position:absolute; bottom:22px; width:12px; height:130px; background:linear-gradient(90deg,#9aa3b5,#e9edf5,#9aa3b5); border-radius:6px; transform-origin:bottom center; transition:transform .25s cubic-bezier(.5,0,.3,1.4); }
+  .lever .ball { position:absolute; top:-18px; left:50%; width:38px; height:38px; margin-left:-19px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#ff8a9a,#e01535 55%,#8f0a20); box-shadow:0 4px 8px rgba(0,0,0,.4); transition:transform .15s; }
+  .lever:hover .ball { transform:scale(1.1); }
+  .lever.pulled .arm { transform:scaleY(.28); transition-duration:.18s; }
+  .lever.off { cursor:not-allowed; filter:grayscale(.6); }
+  .lhint { position:absolute; left:-8px; right:-8px; top:-26px; text-align:center; color:#ffc83d; font-size:.74rem; font-weight:800; animation:bob 1.1s infinite; }
+  @keyframes bob { 50% { transform:translateY(5px); } }
+  .lcd { margin-top:14px; border-radius:14px; background:#10193a; color:#fff; padding:16px 18px; display:flex; gap:16px; align-items:center; min-height:110px; }
+  .lcd .txt { flex:1; min-width:0; }
+  .lcd .who { font-size:.78rem; font-weight:800; color:#ffc83d; letter-spacing:.04em; }
+  .lcd .q { font-size:1.2rem; font-weight:800; line-height:1.5; margin-top:6px; word-break:keep-all; }
+  .lcd.pop .q { animation:pop .5s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes pop { from { transform:scale(.9); opacity:0; } to { transform:none; opacity:1; } }
+  .ring { width:84px; height:84px; flex:none; position:relative; }
+  .ring svg { transform:rotate(-90deg); }
+  .ring .t { position:absolute; inset:0; display:grid; place-items:center; font-family:'Jua','Pretendard',sans-serif; font-size:1.5rem; }
+  .ring.low .t { color:#ff7b8c; }
+  .ctrl { display:flex; gap:16px; margin-top:12px; justify-content:center; align-items:center; flex-wrap:wrap; }
+  .link { background:none; border:0; font:inherit; font-weight:800; color:var(--text); cursor:pointer; padding:4px 0; position:relative; }
+  .link::after { content:''; position:absolute; left:0; bottom:0; height:2px; width:0; background:currentColor; transition:width .25s; }
+  .link:hover::after { width:100%; }
+  .link[disabled] { opacity:.35; cursor:not-allowed; } .link[disabled]::after { display:none; }
+  .link.go { color:#c8102e; }
+  .dots { display:flex; justify-content:center; gap:8px; margin:0 0 10px; flex-wrap:wrap; }
+  .dot { width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:.82rem; background:#ffffff22; color:#ffd; border:2px solid #ffffff44; transition:.2s; }
+  .dot.now { background:#ffc83d; color:#6d0717; border-color:#fff; transform:scale(1.18); }
+  .dot.done { background:#2e9e5b; border-color:#2e9e5b; color:#fff; }
+  .dot.team { width:auto; padding:0 10px; border-radius:15px; }
+  .snd { position:absolute; top:12px; right:14px; background:none; border:0; color:#fff; font-size:1.1rem; cursor:pointer; opacity:.85; }
+  .snd:hover { opacity:1; transform:scale(1.15); }
+  @media (max-width: 480px) { .hero h1 { font-size: 1.55rem; } .card { padding: 22px 18px; } .machine { padding:12px 10px 14px; } .mrow { gap:8px; } .lever { width:48px; } .item { font-size:.88rem; padding:0 8px; } .lcd { padding:12px; gap:10px; } .lcd .q { font-size:1.05rem; } .ring { width:68px; height:68px; } .ring svg { width:68px; height:68px; } }
 </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
 </head>
 <body>
 <div class="hero">
   <span class="hero-badge">STEP 0-2 · 아이스브레이킹</span>
   <h1>우리 팀 이름과<br>캐치프레이즈 정하기</h1>
-  <p>사원증을 서로 보여 주며 인사하고, 공통 관심사로 팀 이름을 만들어요. (약 10분)</p>
+  <p>사원증을 보여 주며 인사하고, 질문 슬롯머신으로 서로의 취향과 불편함을 알아가며 팀 이름을 만들어요. (약 12분)</p>
 </div>
 
 <div class="wrap">
@@ -62,7 +123,37 @@
   </div>
 
   <div class="card">
-    <span class="num">② 공통 관심사</span>
+    <span class="num">② 질문 슬롯머신</span>
+    <h2>레버를 당겨 나온 질문에 1분씩 이야기해요</h2>
+    <p>팀 대표 기기로 한 사람씩 레버를 당겨요. 나온 질문에 1분 동안 말하고, 나머지 친구들은 “나도!”를 찾아 보세요. 뽑은 질문은 저장되지 않아요.</p>
+
+    <div class="size"><span>우리 팀</span>
+      <button type="button" data-n="3">3명</button><button type="button" data-n="4">4명</button><button type="button" data-n="5" class="on">5명</button><button type="button" data-n="6">6명</button></div>
+    <div class="plan" id="plan"></div>
+
+    <div class="machine" id="machine">
+      <button class="snd" id="snd" type="button" title="소리 켜기/끄기">🔊</button>
+      <div class="lights" id="lights"></div>
+      <div class="mhead">QUESTION MACHINE</div>
+      <div class="dots" id="dots"></div>
+      <div class="mrow">
+        <div class="glass"><div class="win" id="win"><div class="strip" id="strip"></div><div class="pay"></div></div></div>
+        <div class="lever" id="lever" role="button" tabindex="0" aria-label="레버 당기기"><span class="lhint" id="lhint">당겨요 ↓</span><div class="arm"><div class="ball"></div></div><div class="base"></div></div>
+      </div>
+      <div class="lcd" id="lcd">
+        <div class="txt"><div class="who" id="who"></div><div class="q" id="q"></div></div>
+        <div class="ring" id="ring"><svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="36" fill="none" stroke="#ffffff22" stroke-width="7"/><circle id="arc" cx="42" cy="42" r="36" fill="none" stroke="#ffc83d" stroke-width="7" stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="0"/></svg><div class="t" id="time">1:00</div></div>
+      </div>
+    </div>
+    <div class="ctrl">
+      <button class="link go" id="start" type="button" disabled>▶ 1분 시작</button>
+      <button class="link" id="next" type="button" disabled>다음 사람 →</button>
+      <button class="link" id="reset" type="button">↺ 처음부터</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="num">③ 공통 관심사</span>
     <h2>같은 걸 좋아하는 게 뭘까?</h2>
     <p>한 명씩 관심사를 말해요. 손을 2명 이상 들면 공통 관심사예요.</p>
     <label class="field"><span>우리 팀의 공통 관심사</span>
@@ -70,7 +161,7 @@
   </div>
 
   <div class="card">
-    <span class="num">③ 팀 이름</span>
+    <span class="num">④ 팀 이름</span>
     <h2>팀 이름과 캐치프레이즈 정하기</h2>
     <p>공통 관심사에서 팀 이름과 한 줄 구호를 만들어요.</p>
     <div class="example">예시 · 음악 → 팀 이름 “마음 DJ” / 캐치프레이즈 “우리의 마음을 틀어요”</div>
@@ -178,6 +269,151 @@
       },
     });
   });
+</script>
+<script>
+/* ② 질문 슬롯머신 — 뽑은 질문은 저장하지 않고, 진행 단계 보고에도 영향을 주지 않는 놀이 도구 */
+(function () {
+  const S = [
+    { name: '몸풀기', icon: '☀️', color: '#f59e0b', qs: [
+      '지금 내 기분을 날씨로 말하면? (맑음·흐림·비…)', '오늘 아침에 제일 먼저 한 일은 뭐예요?', '지금 당장 먹고 싶은 음식 하나는?', '요즘 가장 많이 들은 노래나 본 영상은?',
+      '나를 동물에 빗대면 어떤 동물일까요? 이유도 말해요.', '하루를 마음대로 쓸 수 있다면 뭘 하고 싶어요?', '무인도에 딱 하나만 가져간다면?', '나만 아는 작은 습관이 있다면?'] },
+    { name: '취향 찾기', icon: '🎧', color: '#2563eb', qs: [
+      '시간 가는 줄 모르고 하는 게 있다면?', '요즘 자주 보는 유튜브·웹툰·게임은 뭐예요?', '친구에게 꼭 추천하고 싶은 것 하나는?', '쉬는 시간에 가장 많이 하는 건 뭐예요?',
+      '가장 자주 여는 앱 하나와 그 이유는?', '잘 모르지만 한번 배워 보고 싶은 건?', '나를 신나게 만드는 것은? 편안하게 만드는 것은?', '내가 좋아하는 것과 같은 걸 좋아하는 사람은 손 들어요!'] },
+    { name: '불편함 찾기', icon: '😮‍💨', color: '#ea580c', qs: [
+      '하루 중 “아, 이거 진짜 귀찮다” 싶은 순간은 언제예요?', '학교나 집에서 매일 반복되는데 불편한 건 뭐예요?', '“이런 앱 하나 있으면 좋겠다” 싶었던 적이 있나요?', '자주 깜빡하거나 잃어버리는 건 뭐예요?',
+      '줄 서거나 기다리다가 답답했던 순간은?', '정보를 찾느라 헤맨 적이 있다면 어떤 거였나요?', '누가 대신 해 주면 좋겠다 싶은 일이 있나요?', '친구들이 자주 투덜대는 불편함은 뭐예요?'] },
+    { name: '우리 팀 구호', icon: '📣', color: '#7c3aed', qs: [
+      '우리 팀을 한 단어로 말하면? (한 명씩 말하고 많이 나온 걸 골라요)', '우리 팀을 색깔이나 동물에 빗대면 뭘까요?', '“우리가 좋아하는 ○○, 해결하고 싶은 ○○”을 한 문장으로 말해 봐요.', '우리 팀이 세상에 외치고 싶은 한마디는?',
+      '팀 이름에 꼭 넣고 싶은 글자나 소리가 있나요?', '우리 팀이 지킬 약속 한 가지를 정해 봐요.', '우리 팀이 유명해진다면 어떤 이유 때문일까요?', '박수 리듬에 맞춰 외칠 우리 팀 구호를 만들어 봐요!'] },
+  ];
+  const q$ = (id) => document.getElementById(id);
+  const H = 76, COPIES = 8, M = 8;
+  let N = 5, turn = 0, spinning = false, pulled = false, pos = 0, used = {}, timerId = null, left = 60, total = 60, muted = false;
+
+  /* 소리: 파일 없이 브라우저가 직접 만들어요 */
+  let ac = null;
+  function A() { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
+  function tone(f, d, type, v, when, slide) {
+    if (muted) return;
+    try {
+      const a = A(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime + (when || 0);
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d);
+      g.gain.setValueAtTime(v || .15, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+      o.connect(g).connect(a.destination); o.start(t); o.stop(t + d + .02);
+    } catch (e) { /* 소리를 못 내는 환경이면 조용히 넘어가요 */ }
+  }
+  const sfx = {
+    pull() { tone(140, .22, 'square', .2, 0, 55); tone(900, .08, 'triangle', .12, .02); },
+    tick(p) { tone(620 + p * 380, .035, 'square', .06); },
+    stop() { tone(220, .12, 'sawtooth', .16, 0, 120); },
+    win() { [523, 659, 784, 1047].forEach((f, i) => tone(f, .28, 'triangle', .17, .08 + i * .09)); tone(1568, .5, 'sine', .1, .5); },
+    beep() { tone(880, .08, 'square', .08); },
+    // 자명종처럼 '따르르릉' 3번: 빠르게 떨리는 높은 소리를 묶음으로 반복해요
+    bell() { for (let g = 0; g < 3; g++) for (let i = 0; i < 12; i++) { const t = g * .95 + i * .06; tone(i % 2 ? 2100 : 1750, .05, 'square', .22, t); tone(i % 2 ? 1050 : 875, .05, 'triangle', .18, t); } },
+  };
+
+  /* 차례 배분: 몸풀기 1 → 취향 → 불편함 → 마지막은 다 함께 팀 구호 */
+  function plan() {
+    const taste = Math.ceil((N - 1) / 2), pain = Math.floor((N - 1) / 2);
+    const a = [0]; for (let i = 0; i < taste; i++) a.push(1); for (let i = 0; i < pain; i++) a.push(2); a.push(3);
+    return a;
+  }
+  function minsOf(s) { return s === 3 ? 3 : 1; }
+  function renderPlan() {
+    const t = 2.5 + N + 3;
+    q$('plan').innerHTML = `시간 계산 · 소개 2분 30초 + 질문 <b>${N}명 × 1분 = ${N}분</b> + 구호 3분 = 약 <b>${Math.round(t)}분</b> (이름·구호 쓰기 포함 12분 안팎)`;
+  }
+
+  function setPos(row) { pos = row; q$('strip').style.transform = `translateY(${-(row - 1) * H}px)`; }
+  function markMid(row) { document.querySelectorAll('#strip .item.mid').forEach((e) => e.classList.remove('mid')); q$('strip').children[row].classList.add('mid'); }
+  function buildStrip(stage) {
+    let h = ''; for (let c = 0; c < COPIES; c++) S[stage].qs.forEach((q) => { h += `<div class="item">${q}</div>`; });
+    q$('strip').innerHTML = h; setPos(M);
+  }
+
+  function setTurn(t) {
+    turn = t; const p = plan(), st = p[t]; pulled = false; spinning = false;
+    buildStrip(st);
+    q$('dots').innerHTML = p.map((s, i) => { const c = (i < t ? 'done' : '') + ' ' + (i === t ? 'now' : '');
+      return s === 3 ? `<div class="dot team ${c}">📣 우리 팀</div>` : `<div class="dot ${c}">${i + 1}</div>`; }).join('');
+    q$('who').textContent = `${st === 3 ? '다 함께' : (t + 1) + '번째 친구 차례'} · ${S[st].icon} ${S[st].name}`;
+    q$('q').textContent = st === 3 ? '레버를 당겨 우리 팀 구호 재료를 뽑아요!' : '레버를 당겨 질문을 뽑아요!';
+    total = minsOf(st) * 60; left = total; drawTimer();
+    q$('lever').classList.remove('off', 'pulled'); q$('lhint').style.display = '';
+    q$('start').disabled = true; q$('next').disabled = true; q$('start').textContent = `▶ ${minsOf(st)}분 시작`; q$('next').textContent = '다음 사람 →';
+    q$('machine').classList.remove('run'); q$('win').classList.remove('hit');
+  }
+
+  function pull() {
+    if (spinning || pulled) return;
+    A(); pulled = spinning = true; sfx.pull();
+    q$('lever').classList.add('pulled'); q$('lhint').style.display = 'none';
+    setTimeout(() => q$('lever').classList.remove('pulled'), 380);
+    const st = plan()[turn], qn = S[st].qs.length; used[st] = used[st] || [];
+    let pool = [...Array(qn).keys()].filter((k) => !used[st].includes(k)); if (!pool.length) { used[st] = []; pool = [...Array(qn).keys()]; }
+    const idx = pool[Math.floor(Math.random() * pool.length)]; used[st].push(idx);
+    const from = pos, to = qn * 5 + idx, dur = 3800, t0 = performance.now(); let last = Math.floor(from);
+    q$('machine').classList.add('run');
+    (function frame(now) {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3), cur = from + (to - from) * e;
+      pos = cur; q$('strip').style.transform = `translateY(${-(cur - 1) * H}px)`;
+      const fl = Math.floor(cur); if (fl !== last) { sfx.tick(k); last = fl; }
+      if (k > .86) q$('machine').classList.remove('run');
+      if (k < 1) return requestAnimationFrame(frame);
+      setPos(to); markMid(to); land(st, idx);
+    })(performance.now());
+  }
+  function land(st, idx) {
+    spinning = false; sfx.stop(); setTimeout(sfx.win, 120);
+    q$('win').classList.add('hit'); q$('lcd').classList.remove('pop'); void q$('lcd').offsetWidth; q$('lcd').classList.add('pop');
+    q$('who').textContent = `${st === 3 ? '다 함께' : (turn + 1) + '번째 친구'} · ${S[st].icon} ${S[st].name}`;
+    q$('q').textContent = S[st].qs[idx];
+    q$('start').disabled = false; q$('next').disabled = false; q$('lever').classList.add('off');
+  }
+
+  function drawTimer() {
+    const m = Math.floor(left / 60), s = left % 60; q$('time').textContent = `${m}:${String(s).padStart(2, '0')}`;
+    q$('arc').style.strokeDashoffset = 226.2 * (1 - left / total); q$('ring').classList.toggle('low', left <= 10 && left > 0);
+  }
+  function startTimer() {
+    if (timerId) return; q$('start').disabled = true; sfx.beep();
+    timerId = setInterval(() => {
+      left--; drawTimer(); if (left > 0 && left <= 5) sfx.beep();
+      if (left <= 0) { clearInterval(timerId); timerId = null; sfx.bell(); q$('next').disabled = false; if (turn === plan().length - 1) q$('next').textContent = '✔ 끝내기'; }
+    }, 1000);
+  }
+  function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+  function next() {
+    stopTimer();
+    if (turn >= plan().length - 1) {
+      q$('who').textContent = '🎉 모두 끝났어요'; q$('q').textContent = '이제 아래 칸에 공통 관심사와 팀 이름을 적어요 ↓';
+      q$('start').disabled = true; q$('next').disabled = true; q$('lever').classList.add('off'); sfx.win(); return;
+    }
+    setTurn(turn + 1);
+  }
+  function reset() { stopTimer(); used = {}; renderPlan(); setTurn(0); }
+
+  const lever = q$('lever'); let dragY = null;
+  lever.addEventListener('pointerdown', (e) => { dragY = e.clientY; lever.setPointerCapture(e.pointerId); });
+  lever.addEventListener('pointermove', (e) => { if (dragY !== null && e.clientY - dragY > 30) { dragY = null; pull(); } });
+  lever.addEventListener('pointerup', () => { if (dragY !== null) { dragY = null; pull(); } });
+  lever.addEventListener('keydown', (e) => { if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); pull(); } });
+  q$('start').addEventListener('click', startTimer);
+  q$('next').addEventListener('click', () => { if (!q$('next').disabled) next(); });
+  q$('reset').addEventListener('click', reset);
+  q$('snd').addEventListener('click', () => { muted = !muted; q$('snd').textContent = muted ? '🔇' : '🔊'; });
+  document.querySelector('.size').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('.size button').forEach((x) => x.classList.toggle('on', x === b)); N = +b.dataset.n; reset();
+  });
+  // 입력칸·버튼에 글자를 칠 때는 방해하지 않고, 빈 곳에서 스페이스바를 누르면 레버를 당겨요
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !e.target.closest('input,textarea,button,select,[role=button]')) { e.preventDefault(); pull(); }
+  });
+  q$('lights').innerHTML = '<i></i>'.repeat(14);
+  reset();
+})();
 </script>
 </body>
 </html>
