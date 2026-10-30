@@ -53,8 +53,9 @@ body::before {
 }
 
 /* HEADER */
-.home-link { display: inline-block; margin-bottom: 18px; color: var(--text-muted, #7a7466); text-decoration: none; font-size: .9rem; font-weight: 700; }
-.home-link:hover { text-decoration: underline; }
+.home-link { display: flex; width: fit-content; align-items: center; gap: 6px; margin-bottom: 22px; padding: 11px 20px; background: #fff; color: #1f1d18; border: 2px solid #1f1d18; border-radius: 12px; text-decoration: none; font-size: 1rem; font-weight: 800; box-shadow: 0 3px 0 #1f1d18; transition: transform .12s, box-shadow .12s; }
+.home-link:hover { transform: translateY(-1px); box-shadow: 0 4px 0 #1f1d18; }
+.home-link:active { transform: translateY(2px); box-shadow: 0 1px 0 #1f1d18; }
 .top-label {
   display: inline-flex;
   align-items: center;
@@ -708,7 +709,7 @@ StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
 <div class="wrap">
 
   <!-- HEADER -->
-  <a class="home-link" href="index.html">← 처음 화면으로</a>
+  <a class="home-link" href="index.html">🏠 처음 화면으로</a>
   <div class="top-label">Vibe Coding</div>
   <h1>앱 기획서<br>직접 써보기</h1>
   <p class="header-desc">
