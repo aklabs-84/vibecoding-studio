@@ -199,8 +199,7 @@
   const $ = (id) => document.getElementById(id);
   // 클래스로그로 입장했을 때(입장 코드 + 이름이 있을 때)만 제출 영역을 보여 준다
   (function () {
-    const d = StudioBridge.load();
-    $('submitBox').style.display = (d.classlogEntryCode && d.studentName) ? 'block' : 'none';
+    StudioBridge.submitGate($('submitBox'));
   })();
   const fields = ['interest', 'teamName', 'catchphrase'];
   const LABELS = ['사원증 소개', '공통 관심사', '팀 이름 정하기'];

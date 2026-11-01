@@ -49,13 +49,68 @@
     const params = new URLSearchParams(window.location.search);
     const entryCode = params.get('entryCode');
     const studentName = params.get('studentName');
-    if (!entryCode) return load();
+    if (!entryCode) { syncURL(); return load(); }
     // 진행 보고용: 입장할 때의 이름(반 명단과 같은 이름)을 따로 기억한다.
     try { if (studentName) sessionStorage.setItem('vcs_progress_name', studentName); } catch (e) {}
-    return save({
+    const before = load();
+    // 이름이 주소에 없을 때: 같은 입장 코드로 이미 이 탭에 있던 이름만 이어 쓴다.
+    // (같은 컴퓨터를 쓴 앞 학생의 이름이 따라오지 않게 한다)
+    const keptName = before.classlogEntryCode === entryCode ? (before.studentName || '') : '';
+    const data = save({
       classlogEntryCode: entryCode,
-      studentName: studentName || load().studentName || '',
+      studentName: studentName || keptName,
     });
+    syncURL();
+    return data;
+  }
+
+  // 제출·진행 보고에 쓰는 "반 명단의 이름". 학생이 화면에서 이름칸을 고쳐도 입장할 때 받은 이름을 우선한다.
+  function rosterName() {
+    try {
+      const n = sessionStorage.getItem('vcs_progress_name');
+      if (n) return n;
+    } catch (e) {}
+    return load().studentName || '';
+  }
+
+  // 이 탭이 입장 정보를 갖고 있으면 주소 끝에 ?entryCode=…&studentName=… 을 다시 붙여 둔다(화면은 새로고침되지 않음).
+  // 단계를 옮겨도 주소에 이름이 남고, 주소를 복사해 새 탭에 붙이거나 북마크해도 입장 정보가 살아난다.
+  function syncURL() {
+    try {
+      const code = sessionStorage.getItem(ENTRY_KEY);
+      if (!code) return;
+      const name = rosterName();
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('entryCode') === code && (url.searchParams.get('studentName') || '') === name) return;
+      url.searchParams.set('entryCode', code);
+      if (name) url.searchParams.set('studentName', name);
+      else url.searchParams.delete('studentName');
+      window.history.replaceState(window.history.state, '', url.toString());
+    } catch (e) {}
+  }
+
+  // 제출 칸을 보여 주거나, 보여 줄 수 없으면 이유를 알려 주는 안내를 대신 띄운다.
+  // box: 제출 영역 요소, opts.display: 보일 때의 display 값, opts.needName: 이름도 있어야 하는지
+  function submitGate(box, opts) {
+    if (!box) return true;
+    const o = opts || {};
+    const code = load().classlogEntryCode;
+    const name = rosterName();
+    const ok = !!code && (o.needName === false || !!name);
+    box.style.display = ok ? (o.display || 'block') : 'none';
+    let note = box.parentNode && box.parentNode.querySelector('[data-no-submit-notice="' + (box.id || 'x') + '"]');
+    if (ok) { if (note) note.remove(); return true; }
+    if (!note) {
+      note = document.createElement('div');
+      note.setAttribute('data-no-submit-notice', box.id || 'x');
+      note.style.cssText = 'margin-top:12px;padding:10px 14px;border-radius:12px;background:#fff7e0;border:1px solid #f5d06f;' +
+        'color:#6b4e00;font-size:14px;line-height:1.6;width:100%;text-align:left;box-sizing:border-box;';
+      box.parentNode.insertBefore(note, box.nextSibling);
+    }
+    note.textContent = !code
+      ? '📮 지금은 제출 버튼을 쓸 수 없어요. 클래스로그에서 들어온 화면이 아니기 때문이에요. 제출하려면 클래스로그에서 이 활동을 다시 눌러 들어와 주세요. (혼자 연습 중이면 이 안내는 무시해도 돼요)'
+      : '📮 입장할 때 받은 이름이 없어서 제출 버튼을 쓸 수 없어요. 클래스로그에서 이 활동을 다시 눌러 들어와 주세요.';
+    return false;
   }
 
   function buildCodePrompt(data) {
@@ -223,6 +278,7 @@
       document.body.appendChild(bar);
     }
     function init() {
+      syncURL();
       if (started || !load().classlogEntryCode) return;
       started = true;
       window.addEventListener('beforeunload', onBeforeUnload);
@@ -238,5 +294,5 @@
     return { init: init, markDirty: markDirty, markClean: function () { dirty = false; }, allowLeave: allowLeave };
   })();
 
-  global.StudioBridge = { guard, load, save, clear, captureEntryFromURL, buildCodePrompt, sendToCodeCanvas, submitResult, defaultTitle, buildTeamProfilePrompt, buildCharacterPrompt, detectRole, ROLE_LABELS, CODECANVAS_URL };
+  global.StudioBridge = { guard, load, save, clear, captureEntryFromURL, rosterName, syncURL, submitGate, buildCodePrompt, sendToCodeCanvas, submitResult, defaultTitle, buildTeamProfilePrompt, buildCharacterPrompt, detectRole, ROLE_LABELS, CODECANVAS_URL };
 })(window);

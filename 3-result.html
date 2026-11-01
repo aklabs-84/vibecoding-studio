@@ -128,6 +128,7 @@
 <script src="shared/role-guide.js"></script>
 <script src="shared/submit-anim.js"></script>
 <script>
+  StudioBridge.captureEntryFromURL(); // 주소에 입장 정보가 있으면 되살리고, 없으면 주소에 다시 붙여 둔다
   const data = StudioBridge.load();
   StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
   // 선생님 화면에 "지금 여기 있어요"를 알린다. (실패해도 화면 동작에는 영향 없음)
@@ -148,9 +149,8 @@
   // ClassLog 교실에서 진입한 경우(entryCode 있음)에만 제출 카드를 노출한다.
   const submitCard = document.getElementById('submit-card');
   const submitStatus = document.getElementById('submit-status');
-  if (data.classlogEntryCode) {
-    submitCard.style.display = 'block';
-  }
+  // 입장 정보가 없으면 카드를 숨기는 대신 이유를 알려 준다.
+  StudioBridge.submitGate(submitCard, { needName: false });
 
   async function submitToClassLog() {
     const title = data.appName || (data.plannerData && data.plannerData.app_name1) || StudioBridge.defaultTitle(data);
@@ -160,7 +160,7 @@
       doneLabel: '✅ 제출 완료 · 다시 제출하기',
       task: () => StudioBridge.submitResult({
         entryCode: data.classlogEntryCode,
-        studentName: data.studentName,
+        studentName: StudioBridge.rosterName(),
         title: title,
         resultType: 'text',
         textContent: data.plannerText || data.simulationPRD || '',

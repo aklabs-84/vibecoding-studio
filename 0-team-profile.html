@@ -1021,8 +1021,7 @@
     document.getElementById('moreLabel').style.display = 'block';
     document.getElementById('badgeWrap').style.display = 'block';
     document.getElementById('badgeActions').style.display = 'flex';
-    const _d = StudioBridge.load();
-    document.getElementById('badgeSubmitBox').style.display = (_d.classlogEntryCode && _d.studentName) ? 'block' : 'none';
+    StudioBridge.submitGate(document.getElementById('badgeSubmitBox'));
   }
 
   function setBadgeImage(file) {
@@ -1226,7 +1225,8 @@
     const status = document.getElementById('badgeStatus');
     const btn = document.getElementById('badgeSubmitBtn');
     const d = StudioBridge.load();
-    const name = document.getElementById('studentName').value || d.studentName || '';
+    // 반 명단과 같은 입장 이름을 우선 쓴다 (이름칸을 고쳐도 제출 이름이 달라지지 않게)
+    const name = StudioBridge.rosterName() || document.getElementById('studentName').value || '';
     await SubmitAnim.run({
       statusEl: status, btnEl: btn,
       doneLabel: '✅ 제출 완료 · 다시 제출하기',

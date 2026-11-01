@@ -793,7 +793,7 @@ StudioBridge.guard.init(); // ClassLog 입장 시 실수로 창 닫기 방지
         <button class="vote-submit" id="vote_submit_btn" onclick="submitOneLiner()">📤 선생님께 한 문장 제출하기</button>
         <div class="vote-status" id="vote_submit_status"></div>
       </div>
-      <div class="hint-box" id="vote_no_entry" style="display:none;margin-top:12px">ℹ️ 클래스로그로 입장하지 않아서 제출 버튼이 없어요. 혼자 연습할 때는 아래 안내만 읽고 넘어가도 괜찮아요.</div>
+      <div class="hint-box" id="vote_no_entry" style="display:none;margin-top:12px">📮 지금은 제출 버튼을 쓸 수 없어요. 클래스로그에서 들어온 화면이 아니기 때문이에요. 제출하려면 클래스로그에서 이 활동을 다시 눌러 들어와 주세요. (혼자 연습 중이면 아래 안내만 읽고 넘어가도 괜찮아요)</div>
     </div>
 
     <div class="card">
@@ -1156,7 +1156,7 @@ async function submitOneLiner() {
   if (!ol) return;
   const cat = selectedCat === '기타'
     ? (document.getElementById('cat_custom').value.trim() || '기타') : selectedCat;
-  const name = d.studentName || '';
+  const name = StudioBridge.rosterName();
   const ok = await SubmitAnim.run({
     statusEl: status,
     btnEl: btn,
