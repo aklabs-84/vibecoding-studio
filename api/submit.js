@@ -1,6 +1,7 @@
 // 학생 결과물을 AIServiceHub 경유로 ClassLog에 제출하는 프록시.
 // STUDIO_API_KEY는 이 함수(서버) 안에서만 사용되며 클라이언트에는 절대 내려가지 않는다.
 
+const TEXT_MAX = 20000;
 const str = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
 module.exports = async function handler(req, res) {
@@ -18,7 +19,9 @@ module.exports = async function handler(req, res) {
 
   // 같은 사이트에서 보낸 요청인지 확인 (보조 수단)
   const origin = req.headers.origin;
-  if (origin && req.headers.host && new URL(origin).host !== req.headers.host) {
+  let originHost = '';
+  try { originHost = origin ? new URL(origin).host : ''; } catch (e) { originHost = '?'; }
+  if (origin && req.headers.host && originHost !== req.headers.host) {
     res.status(403).json({ error: 'Forbidden' });
     return;
   }
@@ -32,7 +35,7 @@ module.exports = async function handler(req, res) {
     title: str(raw.title, 200),
     resultType: raw.resultType,
     linkUrl: str(raw.linkUrl, 2000) || undefined,
-    textContent: str(raw.textContent, 20000) || undefined,
+    textContent: str(raw.textContent, TEXT_MAX + 1) || undefined,
     fileName: str(raw.fileName, 200) || undefined,
     // base64 파일(최대 3MB → 약 4MB 문자열). 형식·크기 최종 검사는 ClassLog가 한다.
     fileData: typeof raw.fileData === 'string' && raw.fileData.length <= 5000000 ? raw.fileData : undefined,
@@ -43,6 +46,11 @@ module.exports = async function handler(req, res) {
   }
   if (!['link', 'text', 'image', 'file'].includes(body.resultType)) {
     res.status(400).json({ error: 'resultType은 link, text, image, file 중 하나여야 해요' });
+    return;
+  }
+  // 말없이 잘라서 보내면 학생 글이 사라지므로, 넘치면 알려 준다
+  if (body.textContent && body.textContent.length > TEXT_MAX) {
+    res.status(413).json({ error: `글이 너무 길어요(${TEXT_MAX.toLocaleString('ko-KR')}자 초과). 내용을 나누어 제출해 주세요.` });
     return;
   }
   if ((body.resultType === 'image' || body.resultType === 'file') && (!body.fileName || !body.fileData)) {

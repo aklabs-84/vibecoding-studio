@@ -91,13 +91,19 @@
   <p class="sub">지금까지 만든 기획 내용을 확인하고, AI 코딩 프롬프트를 생성해 코드캔버스에서 바로 구현을 시작하세요.</p>
 
   <div class="card">
-    <h2>기획 시뮬레이션 결과</h2>
+    <h2>기획 시뮬레이션 결과 <span style="font-size:13px;font-weight:600;color:#64748b">· 연습용이라 코딩 프롬프트에는 들어가지 않아요</span></h2>
     <pre id="sim-prd"></pre>
+    <div class="btn-row" id="sim-copy-row">
+      <button class="btn-secondary" onclick="copyBlock('sim-prd', this)">📋 시뮬레이션 복사하기</button>
+    </div>
   </div>
 
   <div class="card">
     <h2>상세 기획서</h2>
     <pre id="planner-text"></pre>
+    <div class="btn-row" id="plan-copy-row">
+      <button class="btn-secondary" onclick="copyBlock('planner-text', this)">📋 상세 기획서 복사하기</button>
+    </div>
   </div>
 
   <div class="card">
@@ -115,7 +121,7 @@
 
   <div class="card" id="submit-card" style="display:none;">
     <h2>📮 클래스에 제출하기</h2>
-    <p class="empty" id="submit-desc">이 PRD를 우리 반 ClassLog 교실에 제출합니다.</p>
+    <p class="empty" id="submit-desc">내 상세 기획서와 기획 시뮬레이션을 따로따로 우리 반 클래스로그 교실에 제출해요.</p>
     <div class="btn-row">
       <button class="btn-primary" id="submit-btn" onclick="submitToClassLog()">제출하기</button>
     </div>
@@ -138,6 +144,8 @@
   const promptEl = document.getElementById('ai-prompt');
 
   simEl.textContent = data.simulationPRD || '';
+  document.getElementById('sim-copy-row').style.display = data.simulationPRD ? 'flex' : 'none';
+  document.getElementById('plan-copy-row').style.display = data.plannerText ? 'flex' : 'none';
   if (!data.simulationPRD) simEl.innerHTML = '<span class="empty">기획 시뮬레이션을 진행하지 않았습니다. (선택 단계)</span>';
 
   planEl.textContent = data.plannerText || '';
@@ -152,24 +160,45 @@
   // 입장 정보가 없으면 카드를 숨기는 대신 이유를 알려 준다.
   StudioBridge.submitGate(submitCard, { needName: false });
 
+  // 연습(시뮬레이션)과 진짜 기획서는 내용이 달라서, 제목을 붙여 각각 따로 제출한다. (보드에서 구분·확인이 쉬움)
+  // 하나만 실패해 다시 보낼 때 이미 간 것은 건너뛴다.
+  const sent = { plan: false, sim: false };
   async function submitToClassLog() {
-    const title = data.appName || (data.plannerData && data.plannerData.app_name1) || StudioBridge.defaultTitle(data);
+    const appName = (data.plannerData && data.plannerData.app_name1) || data.appName || StudioBridge.defaultTitle(data);
+    const base = { entryCode: data.classlogEntryCode, studentName: StudioBridge.rosterName(), resultType: 'text' };
     const ok = await SubmitAnim.run({
       statusEl: submitStatus,
       btnEl: document.getElementById('submit-btn'),
       doneLabel: '✅ 제출 완료 · 다시 제출하기',
-      task: () => StudioBridge.submitResult({
-        entryCode: data.classlogEntryCode,
-        studentName: StudioBridge.rosterName(),
-        title: title,
-        resultType: 'text',
-        textContent: data.plannerText || data.simulationPRD || '',
-      }),
+      task: async () => {
+        if (!data.plannerText && !data.simulationPRD) throw new Error('제출할 내용이 없어요. 4단계(기획하기)를 먼저 완료해 주세요.');
+        if (data.plannerText && !sent.plan) {
+          await StudioBridge.submitResult(Object.assign({}, base, { title: `[내 앱] 상세 기획서 · ${appName}`, textContent: data.plannerText }));
+          sent.plan = true;
+        }
+        if (data.simulationPRD && !sent.sim) {
+          await StudioBridge.submitResult(Object.assign({}, base, { title: `[연습] 기획 시뮬레이션 · ${appName}`, textContent: data.simulationPRD }));
+          sent.sim = true;
+        }
+        sent.plan = sent.sim = false; // 모두 끝났으니, 나중에 "다시 제출"하면 처음부터 다시 보낸다
+      },
     });
     if (ok) {
       StudioBridge.guard.markClean();
       if (window.StudioProgress) StudioProgress.submitted(4);
     }
+  }
+
+  // 칸마다 있는 복사 버튼
+  function copyBlock(id, btn) {
+    const el = document.getElementById(id);
+    const text = el && !el.querySelector('.empty') ? el.textContent : '';
+    if (!text.trim()) { btn.textContent = '복사할 내용이 없어요'; return; }
+    const label = btn.dataset.label || (btn.dataset.label = btn.textContent);
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✅ 복사됐어요';
+      setTimeout(() => { btn.textContent = label; }, 1500);
+    }, () => { btn.textContent = '복사하지 못했어요'; });
   }
 
   function copyPrompt() {

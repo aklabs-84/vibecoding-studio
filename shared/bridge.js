@@ -4,6 +4,7 @@
  */
 (function (global) {
   const STORAGE_KEY = 'vcs_studio_data';
+  const OWNER_KEY = 'vcs_studio_owner'; // 이 브라우저에서 마지막으로 작업한 학생 이름
   const CODECANVAS_URL = 'https://code-canvas-fawn.vercel.app';
 
   // 입장 코드는 이 창(탭)에서만 기억한다 (sessionStorage).
@@ -52,6 +53,14 @@
     if (!entryCode) { syncURL(); return load(); }
     // 진행 보고용: 입장할 때의 이름(반 명단과 같은 이름)을 따로 기억한다.
     try { if (studentName) sessionStorage.setItem('vcs_progress_name', studentName); } catch (e) {}
+    // 같은 컴퓨터를 쓰는 다른 학생의 작업이 이어지지 않게 한다.
+    // 저장소에 "마지막 주인 이름"을 적어 두고, 이름이 다른 학생이 들어오면 앞 학생의 작업을 비운다.
+    // (이름이 같으면 입장 코드가 바뀌어도 그대로 이어 쓴다 — 며칠에 걸친 작업을 지키기 위해)
+    try {
+      const owner = localStorage.getItem(OWNER_KEY);
+      if (studentName && owner && owner !== studentName) localStorage.removeItem(STORAGE_KEY);
+      if (studentName) localStorage.setItem(OWNER_KEY, studentName);
+    } catch (e) {}
     const before = load();
     // 이름이 주소에 없을 때: 같은 입장 코드로 이미 이 탭에 있던 이름만 이어 쓴다.
     // (같은 컴퓨터를 쓴 앞 학생의 이름이 따라오지 않게 한다)
@@ -117,11 +126,7 @@
     const lines = [];
     lines.push('아래 기획서(PRD)를 바탕으로 실행 가능한 단일 HTML 파일(HTML/CSS/JS 포함)을 만들어줘.');
     lines.push('');
-    if (data.simulationPRD) {
-      lines.push('[기획 시뮬레이션 결과]');
-      lines.push(data.simulationPRD);
-      lines.push('');
-    }
+    // 기획 시뮬레이션은 가상의 연습이라 코딩 프롬프트에 넣지 않는다. 내 앱의 상세 기획서만 쓴다.
     if (data.plannerText) {
       lines.push('[상세 기획서]');
       lines.push(data.plannerText);
